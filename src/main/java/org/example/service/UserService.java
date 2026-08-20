@@ -1,7 +1,6 @@
 package org.example.service;
 
 import org.example.dto.user.CreateUserRequest;
-import org.example.dto.user.DeleteRequest;
 import org.example.dto.user.LoginRequest;
 import org.example.exception.user.UsersValidator;
 import org.example.exception.user.UserException;
@@ -21,7 +20,6 @@ public class UserService {
         this.usersValidator = new UsersValidator();
     }
 
-    // Método para criar o usuário.
     public UserModel createUser (CreateUserRequest request) throws UserException {
 
         try {
@@ -36,21 +34,18 @@ public class UserService {
 
     }
 
-    // Método para deletar um usuário
-        public void deleteUser (DeleteRequest deleteRequest) throws UserException {
+    public void deleteUser (long id) throws UserException {
 
-        userRepository.deleteUser(deleteRequest);
+        userRepository.deleteUser(id);
 
     }
 
-    public void findUser(long id) {
-
-        userRepository.findUser(id);
+    public UserModel findUser(long id) {
+        return userRepository.findUser(id);
     }
 
-    public void listUsers() {
-
-        userRepository.listAllUsers();
+    public java.util.List<UserModel> listUsers() {
+        return userRepository.listAllUsers();
     }
 
     public void loginUser(LoginRequest loginRequest) throws UserException {

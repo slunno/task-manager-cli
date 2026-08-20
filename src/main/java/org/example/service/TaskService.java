@@ -39,29 +39,15 @@ public class TaskService {
         TaskModel task = new TaskModel(request.getTaskId());
         taskRepository.deleteTask(task.getTaskId());
         return task;
-
     }
 
-    /*public List findTask () {
-        System.out.println("Selecione uma opção abaixo. ");
-        System.out.println("1- Listar todas as tarefas:");
-        System.out.println("2- Localizar tarefa por ID:");
-
-        switch ((int) id) {
-            case 1 -> {
-                return taskRepository.listAllTasks();
-            }
-            case 2 -> {
-                System.out.println("Digite o ID da tarefa que deseja localizar: ");
-
-                return java.util.Collections.singletonList(taskRepository.findTask(id));
-            }
-            default -> {
-                System.out.println("Opção inválida.");
-                return java.util.Collections.emptyList();
-            }
-        }*/
-
+    public TaskModel findTask(long id) {
+        return taskRepository.findTask(id);
     }
+
+    public List<TaskModel> listAllTasks() {
+        return taskRepository.listAllTasks();
+    }
+}
 
 

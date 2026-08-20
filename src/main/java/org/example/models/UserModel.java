@@ -7,10 +7,28 @@ public class UserModel {
     private String email;
     private String password;
 
+    public UserModel() {
+    }
+
     public UserModel(String name, String email, String password) {
         this.name = name;
         this.email = email;
         this.password = password;
+    }
+
+    public UserModel(Long idUser, String name, String email, String password) {
+        this.idUser = idUser;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    public Long getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(Long idUser) {
+        this.idUser = idUser;
     }
 
     public String getName() {

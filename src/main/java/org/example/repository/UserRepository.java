@@ -1,7 +1,6 @@
 package org.example.repository;
 
 import org.example.config.DatabaseConfig;
-import org.example.dto.user.DeleteRequest;
 import org.example.models.UserModel;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Repository;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class UserRepository {
@@ -41,7 +41,7 @@ public class UserRepository {
 
     }
 
-    public void deleteUser (DeleteRequest deleteRequest) {
+    public void deleteUser (long id) {
 
         String sql = """
                 DELETE FROM users WHERE id_user = ?
@@ -50,9 +50,7 @@ public class UserRepository {
         try (Connection connection = DatabaseConfig.getConnection();
              var statement = connection.prepareStatement(sql)) {
 
-            statement.setLong(1, deleteRequest.getId()); // Substitua "id" pelo valor real do ID do usuário que deseja excluir
-
-            statement.executeUpdate();
+            statement.setLong(1, id);
 
             int rowsAffected = statement.executeUpdate();
 
@@ -67,14 +65,12 @@ public class UserRepository {
             System.out.println(e.getMessage());
         }
 
-
-
     }
 
-    public void findUser (long idUser) {
+    public UserModel findUser (long idUser) {
 
         String sql = """
-                 SELECT * FROM users WHERE id_User = ?
+                 SELECT * FROM users WHERE id_user = ?
                 """;
 
         try (Connection connection = DatabaseConfig.getConnection();
@@ -85,22 +81,24 @@ public class UserRepository {
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                System.out.println("Usuário encontrado:");
-                System.out.println("Nome: " + resultSet.getString("name"));
-                System.out.println("Email: " + resultSet.getString("email"));
-            } else {
-                System.out.println("Usuário não encontrado.");
+                return new UserModel(
+                        resultSet.getLong("id_user"),
+                        resultSet.getString("name"),
+                        resultSet.getString("email"),
+                        resultSet.getString("password")
+                );
             }
 
         } catch (Exception e) {
             System.out.println("Erro ao buscar usuário:");
             System.out.println(e.getMessage());
         }
-
+        return null;
     }
 
-    public void listAllUsers () {
+    public List<UserModel> listAllUsers () {
 
+        List<UserModel> users = new java.util.ArrayList<>();
         String sql = """
                 SELECT * FROM users
                 """;
@@ -110,19 +108,20 @@ public class UserRepository {
 
             var resultSet = statement.executeQuery();
 
-            System.out.println("Lista de usuários:");
             while (resultSet.next()) {
-                System.out.println("ID: " + resultSet.getString("id_user"));
-                System.out.println("Nome: " + resultSet.getString("name"));
-                System.out.println("Email: " + resultSet.getString("email"));
-                System.out.println("--------------------");
+                users.add(new UserModel(
+                        resultSet.getLong("id_user"),
+                        resultSet.getString("name"),
+                        resultSet.getString("email"),
+                        resultSet.getString("password")
+                ));
             }
 
         } catch (Exception e) {
             System.out.println("Erro ao listar usuários:");
             System.out.println(e.getMessage());
         }
-
+        return users;
     }
 
     public UserModel verifyLoginUsers(String email, String password) {

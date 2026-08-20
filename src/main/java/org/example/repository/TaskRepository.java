@@ -50,12 +50,10 @@ public class TaskRepository {
             try (Connection connection = DatabaseConfig.getConnection();
                  PreparedStatement statement = connection.prepareStatement(sql)) {
 
-
+                statement.setLong(1, id);
                 int rowsAffected = statement.executeUpdate();
 
                 if (rowsAffected > 0) {
-                    statement.setLong(1, id);
-                    statement.executeUpdate();
                     System.out.println("Tarefa excluída com sucesso!");
                 } else {
                     System.out.println("Tarefa não encontrada!");

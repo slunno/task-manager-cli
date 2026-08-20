@@ -1,7 +1,6 @@
 package org.example.controller;
 
 import org.example.dto.user.CreateUserRequest;
-import org.example.dto.user.DeleteRequest;
 import org.example.dto.user.LoginRequest;
 import org.example.models.UserModel;
 import org.example.service.UserService;
@@ -38,10 +37,10 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(
-            @RequestBody DeleteRequest delete
+            @PathVariable long id
             ) {
 
-        userService.deleteUser(delete);
+        userService.deleteUser(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -49,24 +48,27 @@ public class UserController {
     // Recebe o ID do usuário pelo protocolo HTTP e retorna as informações do usuário
 
     @GetMapping("/{id}")
-    public ResponseEntity<Void> findUser(
+    public ResponseEntity<UserModel> findUser(
             @PathVariable long id
     ) {
 
-        userService.findUser(id);
+        UserModel user = userService.findUser(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(user);
     }
 
 
     // Retorna uma lista de usuários.
 
     @GetMapping
-    public ResponseEntity<Void> listUsers() {
+    public ResponseEntity<java.util.List<UserModel>> listUsers() {
 
-        userService.listUsers();
+        java.util.List<UserModel> users = userService.listUsers();
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(users);
     }
 
     // Faz o login do usuário.

@@ -42,15 +42,19 @@ public class TaskController {
         return ResponseEntity.ok(deletedTask);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskModel> findTask(@PathVariable long id) {
+        TaskModel task = taskService.findTask(id);
+        if (task == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(task);
+    }
 
-//   @GetMapping
-//    public ResponseEntity findTasks(long id, long id2) {
-//        List tasks = taskService.findTask(id, id2);
-//        return ResponseEntity.ok(tasks);
-//    }
-
-
-
-
+    @GetMapping
+    public ResponseEntity<List<TaskModel>> listTasks() {
+        List<TaskModel> tasks = taskService.listAllTasks();
+        return ResponseEntity.ok(tasks);
+    }
 
 }
