@@ -1,27 +1,14 @@
 package org.example;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 
-import org.example.menu.login.MenuLogin;
-import org.example.repository.UserRepository;
-import org.example.service.UserService;
-
-import java.util.Scanner;
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class Main {
+
     public static void main(String[] args) {
-        Scanner vs = new Scanner(System.in);
-        UserRepository userRepository = new UserRepository();
-        UserService userService = new UserService(userRepository);
-
-
-        MenuLogin login = new MenuLogin();
-        login.login(vs, userService);
-
-
-
-
-
+        SpringApplication.run(Main.class, args);
     }
 }

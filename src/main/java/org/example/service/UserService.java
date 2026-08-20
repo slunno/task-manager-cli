@@ -1,102 +1,64 @@
 package org.example.service;
 
+import org.example.dto.user.CreateUserRequest;
+import org.example.dto.user.DeleteRequest;
+import org.example.dto.user.LoginRequest;
 import org.example.exception.user.UsersValidator;
 import org.example.exception.user.UserException;
 import org.example.models.UserModel;
 import org.example.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Service;
 
-import java.util.Scanner;
-
+@Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UsersValidator usersValidator;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.usersValidator = new UsersValidator();
     }
 
     // Método para criar o usuário.
-    public UserModel createUser (Scanner vs) {
-        UsersValidator userExceptions = new UsersValidator();
-
-        System.out.println("Digite o nome do usuário: ");
-        String name = vs.nextLine();
-        System.out.println("Digite o e-mail do usuário: ");
-        String email = vs.nextLine();
-        String passwordHash = BCrypt.hashpw(password(vs), BCrypt.gensalt());
-
-
+    public UserModel createUser (CreateUserRequest request) throws UserException {
 
         try {
-            userExceptions.userValidator(name, email);
-            UserModel user = new UserModel(name, email, passwordHash); // 0 como ID temporário
+            usersValidator.userValidator(request.getName(), request.getEmail());
+            String passwordHash = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
+            UserModel user = new UserModel(request.getName(), request.getEmail(), passwordHash);
             userRepository.createUser(user);
             return user;
-        } catch (UserException e) {
-            System.out.println(e.getMessage());
+        }catch (UserException e){
+            throw new UserException(e.getMessage());
         }
 
-
-        return null;
     }
 
     // Método para deletar um usuário
-    public void deleteUser (Scanner vs) {
-        System.out.println("Digite o id do usuário: ");
-        long id = vs.nextInt();
-        vs.nextLine();
+        public void deleteUser (DeleteRequest deleteRequest) throws UserException {
 
-        UserRepository userRepository = new UserRepository();
-        userRepository.deleteUser(id);
-    }
-
-    // Método para localizar usuários.
-    public void listUsers (Scanner vs) {
-        System.out.println("Escolha uma das opções abaixo: ");
-        System.out.println("1 - Localizar usuário: ");
-        System.out.println("2 - Listar todos os usuários: ");
-        int resp = vs.nextInt();
-        vs.nextLine();
-
-        switch (resp) {
-            case 1:
-                System.out.println("Digite o id do usuário: ");
-                long id = vs.nextLong();
-                vs.nextLine();
-                userRepository.findUser(id);
-                break;
-            case 2:
-                userRepository.listAllUsers();
-                break;
-            default:
-                System.out.println("Opção inválida!");
-        }
-
+        userRepository.deleteUser(deleteRequest);
 
     }
 
-    // Método para validar e criar a senha do usuário.
-    public String password (Scanner vs) {
-        boolean repeat = true;
-        String password = "";
+    public void findUser(long id) {
 
-         while (repeat) {
-            System.out.println("Digite a senha do usuário: ");
-            password = vs.nextLine();
+        userRepository.findUser(id);
+    }
 
-            System.out.println("Confirme a senha criada: ");
-            String confirmPassword = vs.nextLine();
+    public void listUsers() {
 
-            if (password.equals(confirmPassword)) {
-                System.out.println("Senha criada com sucesso!");
-                repeat = false;
-                return password;
-            } else {
-                System.out.println("As senhas não coincidem. Tente novamente.");
-            }
+        userRepository.listAllUsers();
+    }
+
+    public void loginUser(LoginRequest loginRequest) throws UserException {
+        UserModel user = userRepository.findUserByEmail(loginRequest.getUsername());
+        if (user == null || !BCrypt.checkpw(loginRequest.getPassword(), user.getPassword())) {
+            throw new UserException("");
         }
-         return password;
+        // Aqui você pode implementar a lógica de sessão ou token para o usuário logado.
     }
 
 

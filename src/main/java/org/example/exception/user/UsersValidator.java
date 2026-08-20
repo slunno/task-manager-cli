@@ -1,5 +1,8 @@
 package org.example.exception.user;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class UsersValidator {
 
 
@@ -23,7 +26,9 @@ public class UsersValidator {
                 throw new UserException("O e-mail do usuário deve conter '@' e '.'");
             }
 
+        }
 
+        public void userDeleteValidator (long id) {
 
         }
 

@@ -1,14 +1,16 @@
 package org.example.repository;
 
 import org.example.config.DatabaseConfig;
+import org.example.dto.user.DeleteRequest;
 import org.example.models.UserModel;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Repository;
 
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+@Repository
 public class UserRepository {
 
     public void createUser (UserModel userModel) {
@@ -39,7 +41,7 @@ public class UserRepository {
 
     }
 
-    public void deleteUser (long id) {
+    public void deleteUser (DeleteRequest deleteRequest) {
 
         String sql = """
                 DELETE FROM users WHERE id_user = ?
@@ -48,7 +50,7 @@ public class UserRepository {
         try (Connection connection = DatabaseConfig.getConnection();
              var statement = connection.prepareStatement(sql)) {
 
-            statement.setLong(1, id); // Substitua "id" pelo valor real do ID do usuário que deseja excluir
+            statement.setLong(1, deleteRequest.getId()); // Substitua "id" pelo valor real do ID do usuário que deseja excluir
 
             statement.executeUpdate();
 
@@ -72,7 +74,7 @@ public class UserRepository {
     public void findUser (long idUser) {
 
         String sql = """
-                 SELECT * FROM users WHERE idUser = ?
+                 SELECT * FROM users WHERE id_User = ?
                 """;
 
         try (Connection connection = DatabaseConfig.getConnection();
@@ -164,4 +166,7 @@ public class UserRepository {
     }
 
 
+    public UserModel findUserByEmail(String email) {
+        return null;
+    }
 }

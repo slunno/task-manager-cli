@@ -2,7 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.kotlin
+*.kotlin
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -12,7 +12,7 @@ target/
 *.iws
 *.iml
 *.ipr
-.env
+*.env
 
 ### Eclipse ###
 .apt_generated
@@ -38,3 +38,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Node / NPM
+node_modules/
+package-lock.json
+package.json
