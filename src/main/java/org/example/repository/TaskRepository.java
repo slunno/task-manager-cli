@@ -38,9 +38,7 @@ public class TaskRepository {
                 return taskModel;
 
             } catch (SQLException e) {
-                System.out.println("Erro ao criar tarefa:");
-                System.out.println(e.getMessage());
-                return null;
+                throw new RuntimeException("Erro ao criar tarefa: " + e.getMessage(), e);
             }
         }
 
@@ -59,8 +57,7 @@ public class TaskRepository {
                     System.out.println("Tarefa não encontrada!");
                 }
             } catch (SQLException e) {
-                System.out.println("Erro ao excluir tarefa:");
-                System.out.println(e.getMessage());
+                throw new RuntimeException("Erro ao excluir tarefa: " + e.getMessage(), e);
             }
         }
 
@@ -97,8 +94,7 @@ public class TaskRepository {
                 }
 
             } catch (SQLException e) {
-                System.out.println("Erro ao localizar tarefa:");
-                System.out.println(e.getMessage());
+                throw new RuntimeException("Erro ao localizar tarefa: " + e.getMessage(), e);
             }
 
             return null; // Retornar null se não encontrar a tarefa
@@ -132,7 +128,7 @@ public class TaskRepository {
                 }
 
             } catch (SQLException e) {
-                System.out.println("Erro ao listar tarefas:" + e.getMessage());
+                throw new RuntimeException("Erro ao listar tarefas: " + e.getMessage(), e);
             }
 
 

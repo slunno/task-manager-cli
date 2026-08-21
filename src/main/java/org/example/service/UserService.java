@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.dto.user.CreateUserRequest;
 import org.example.dto.user.LoginRequest;
+import org.example.dto.user.UserResponse;
 import org.example.exception.user.UsersValidator;
 import org.example.exception.user.UserException;
 import org.example.models.UserModel;
@@ -9,61 +10,51 @@ import org.example.repository.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final UsersValidator usersValidator;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UsersValidator usersValidator) {
         this.userRepository = userRepository;
-        this.usersValidator = new UsersValidator();
+        this.usersValidator = usersValidator;
     }
 
-    public UserModel createUser (CreateUserRequest request) throws UserException {
-
-        try {
-            usersValidator.userValidator(request.getName(), request.getEmail());
-            String passwordHash = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
-            UserModel user = new UserModel(request.getName(), request.getEmail(), passwordHash);
-            userRepository.createUser(user);
-            return user;
-        }catch (UserException e){
-            throw new UserException(e.getMessage());
-        }
-
+    public UserResponse createUser(CreateUserRequest request) {
+        usersValidator.userValidator(request.getName(), request.getEmail(), request.getPassword());
+        String passwordHash = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
+        UserModel user = new UserModel(request.getName(), request.getEmail(), passwordHash);
+        userRepository.createUser(user);
+        return UserResponse.fromModel(user);
     }
 
-    public void deleteUser (long id) throws UserException {
-
+    public void deleteUser(long id) {
         userRepository.deleteUser(id);
-
     }
 
-    public UserModel findUser(long id) {
-        return userRepository.findUser(id);
-    }
-
-    public java.util.List<UserModel> listUsers() {
-        return userRepository.listAllUsers();
-    }
-
-    public void loginUser(LoginRequest loginRequest) throws UserException {
-        UserModel user = userRepository.findUserByEmail(loginRequest.getUsername());
-        if (user == null || !BCrypt.checkpw(loginRequest.getPassword(), user.getPassword())) {
-            throw new UserException("");
+    public UserResponse findUser(long id) {
+        UserModel user = userRepository.findUser(id);
+        if (user == null) {
+            return null;
         }
-        // Aqui você pode implementar a lógica de sessão ou token para o usuário logado.
+        return UserResponse.fromModel(user);
     }
 
+    public List<UserResponse> listUsers() {
+        return userRepository.listAllUsers().stream()
+                .map(UserResponse::fromModel)
+                .collect(Collectors.toList());
+    }
 
-
-
-
-
-
-
-
-
-
+    public UserModel loginUser(LoginRequest loginRequest) {
+        UserModel user = userRepository.verifyLoginUsers(loginRequest.getUsername(), loginRequest.getPassword());
+        if (user == null) {
+            throw new UserException("E-mail ou senha inválidos.");
+        }
+        return user;
+    }
 }

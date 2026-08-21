@@ -12,8 +12,6 @@ public class TaskValidator {
             throw new TaskException("Title cannot be blank");
         if (description.isBlank())
             throw new TaskException("Description cannot be blank");
-
-
         // Validando se o titulo e a descrição estão dentro do limite de caracteres.
         if (title.length() > 40)
             throw new TaskException("Title cannot be longer than 40 characters");
@@ -21,16 +19,4 @@ public class TaskValidator {
             throw new TaskException("Description cannot be longer than 200 characters");
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }

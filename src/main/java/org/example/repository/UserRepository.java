@@ -31,9 +31,8 @@ public class UserRepository {
 
             System.out.println("Usuário criado com sucesso!");
 
-        } catch (Exception e) {
-            System.out.println("Erro ao criar usuário:");
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao criar usuário: " + e.getMessage(), e);
         }
 
 
@@ -60,9 +59,8 @@ public class UserRepository {
                 System.out.println("Usuário não encontrado!");
             }
 
-        } catch (Exception e) {
-            System.out.println("Erro ao excluir usuário:");
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir usuário: " + e.getMessage(), e);
         }
 
     }
@@ -89,20 +87,17 @@ public class UserRepository {
                 );
             }
 
-        } catch (Exception e) {
-            System.out.println("Erro ao buscar usuário:");
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar usuário: " + e.getMessage(), e);
         }
         return null;
     }
 
     public List<UserModel> listAllUsers () {
-
         List<UserModel> users = new java.util.ArrayList<>();
         String sql = """
                 SELECT * FROM users
                 """;
-
         try (Connection connection = DatabaseConfig.getConnection();
              var statement = connection.prepareStatement(sql)) {
 
@@ -117,9 +112,8 @@ public class UserRepository {
                 ));
             }
 
-        } catch (Exception e) {
-            System.out.println("Erro ao listar usuários:");
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar usuários: " + e.getMessage(), e);
         }
         return users;
     }
@@ -144,7 +138,6 @@ public class UserRepository {
                 String passwordHash = resultSet.getString("password");
 
                 if (BCrypt.checkpw(password, passwordHash)) {
-
                     return new UserModel(
                             resultSet.getString("name"),
                             resultSet.getString("email"),
@@ -156,7 +149,6 @@ public class UserRepository {
             return null;
 
         } catch (SQLException e) {
-
             System.out.println("Erro ao verificar login:");
             System.out.println(e.getMessage());
 
@@ -165,7 +157,7 @@ public class UserRepository {
     }
 
 
-    public UserModel findUserByEmail(String email) {
-        return null;
-    }
+//    public UserModel findUserByEmail(String email) {
+//        return null;
+//    }
 }

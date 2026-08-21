@@ -24,29 +24,27 @@ public class TaskService {
     }
 
     public TaskModel createTask(CreateTaskRequest request)   {
-        try {
-            taskValidator.titleValidator(request.getTitle(), request.getDescription());
-            TaskModel task = new TaskModel(request.getTitle(), request.getDescription(), request.getPriority());
-            return taskRepository.createTask(task);
-        } catch (TaskException e) {
-            throw new TaskException(e.getMessage());
-        }
-
+        taskValidator.titleValidator(request.getTitle(), request.getDescription());
+        TaskModel task = new TaskModel(request.getTitle(), request.getDescription(), request.getPriority());
+        return taskRepository.createTask(task);
     }
 
-    public TaskModel deleteTask (CreateTaskRequest request)   {
+    public TaskModel deleteTask (long id)   {
 
-        TaskModel task = new TaskModel(request.getTaskId());
+        TaskModel task = new TaskModel(id);
         taskRepository.deleteTask(task.getTaskId());
         return task;
     }
 
     public TaskModel findTask(long id) {
+
         return taskRepository.findTask(id);
     }
 
     public List<TaskModel> listAllTasks() {
+
         return taskRepository.listAllTasks();
+
     }
 }
 

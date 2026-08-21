@@ -61,10 +61,7 @@ class TaskServiceTest {
 
     @Test
     void deveDeletarTarefa() {
-        CreateTaskRequest request = new CreateTaskRequest();
-        request.setTaskId(5L);
-
-        taskService.deleteTask(request);
+        taskService.deleteTask(5L);
 
         verify(taskRepository, times(1)).deleteTask(5L);
     }

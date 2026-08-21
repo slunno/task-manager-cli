@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Scanner;
 
 
 @RestController
@@ -34,11 +33,7 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<TaskModel> deleteTask(@PathVariable long id) {
-
-        TaskModel deletedTask = taskService.deleteTask(new CreateTaskRequest() {{
-            setTaskId(id);
-        }});
-
+        TaskModel deletedTask = taskService.deleteTask(id);
         return ResponseEntity.ok(deletedTask);
     }
 

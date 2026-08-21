@@ -44,18 +44,16 @@ public class DatabaseConfig {
         }
     }
 
-    private static String getEnv(String key) {
+    public static String getEnv(String key) {
         if (env.containsKey(key)) {
             return env.get(key);
         }
         return System.getenv(key);
     }
 
-    private static final String URL =
-            "jdbc:postgresql://aws-0-us-east-2.pooler.supabase.com:5432/postgres";
+    private static final String URL = getEnv("DATABASE_URL");
 
-    private static final String USER =
-            "postgres.ktxrljtprwtsjtjhiduu";
+    private static final String USER = getEnv("DATABASE_USER");
 
     private static final String PASSWORD = getEnv("DATABASE_PASSWORD");
 
