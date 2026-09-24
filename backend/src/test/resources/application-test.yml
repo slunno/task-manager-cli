@@ -8,5 +8,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema-test.sql
   mail:
     host: localhost

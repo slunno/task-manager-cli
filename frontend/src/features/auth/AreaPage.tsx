@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router'
 import { logout } from '../../api/auth'
@@ -7,9 +8,11 @@ import { ME_QUERY_KEY, useMe } from './useAuth'
 export function AreaPage({
   titulo,
   descricao,
+  children,
 }: {
   titulo: string
   descricao: string
+  children?: ReactNode
 }) {
   const sessao = useMe()
   const cliente = useQueryClient()
@@ -58,6 +61,31 @@ export function AreaPage({
         </div>
       </header>
       <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+        <nav
+          aria-label="Navegação principal"
+          className="mb-8 flex flex-wrap gap-3 text-sm font-semibold"
+        >
+          <Link
+            className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+            to="/meus-chamados"
+          >
+            Meus chamados
+          </Link>
+          <Link
+            className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+            to="/chamados/novo"
+          >
+            Novo chamado
+          </Link>
+          {usuario.perfil !== 'FUNCIONARIO' && (
+            <Link
+              className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+              to="/ti/fila"
+            >
+              Fila da TI
+            </Link>
+          )}
+        </nav>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-ocean">
           {usuario.perfil.replace('_', ' ')}
         </p>
@@ -71,25 +99,27 @@ export function AreaPage({
             Não foi possível encerrar a sessão. Tente novamente.
           </p>
         )}
-        <div className="mt-9 rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold">Seu acesso está ativo</h2>
-          <p className="mt-2 text-sm text-slate-600">
-            As funcionalidades desta área serão entregues nas próximas etapas do
-            portal.
-          </p>
-          {usuario.perfil !== 'FUNCIONARIO' && (
-            <nav
-              aria-label="Áreas de TI"
-              className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-ocean"
-            >
-              <Link to="/ti/fila">Fila da TI</Link>
-              <Link to="/ti/dashboard">Dashboard</Link>
-              {usuario.perfil === 'TI_ADMIN' && (
-                <Link to="/ti/admin/usuarios">Administração</Link>
-              )}
-            </nav>
-          )}
-        </div>
+        {children ?? (
+          <div className="mt-9 rounded-2xl border border-slate-200 bg-white p-6">
+            <h2 className="font-semibold">Seu acesso está ativo</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              As funcionalidades desta área serão entregues nas próximas etapas
+              do portal.
+            </p>
+            {usuario.perfil !== 'FUNCIONARIO' && (
+              <nav
+                aria-label="Áreas de TI"
+                className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-ocean"
+              >
+                <Link to="/ti/fila">Fila da TI</Link>
+                <Link to="/ti/dashboard">Dashboard</Link>
+                {usuario.perfil === 'TI_ADMIN' && (
+                  <Link to="/ti/admin/usuarios">Administração</Link>
+                )}
+              </nav>
+            )}
+          </div>
+        )}
       </main>
     </div>
   )

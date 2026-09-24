@@ -41,6 +41,11 @@ public class UsuarioService {
     return repository.findByEmailIgnoreCase(normalizarEmail(email)).filter(Usuario::isAtivo);
   }
 
+  @Transactional(readOnly = true)
+  public Optional<Usuario> buscarAtivoPorId(Long id) {
+    return repository.findById(id).filter(Usuario::isAtivo);
+  }
+
   private String normalizarEmail(String email) {
     if (email == null || email.isBlank() || !email.contains("@")) {
       throw new IllegalArgumentException("Identidade sem e-mail válido");

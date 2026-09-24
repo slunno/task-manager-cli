@@ -10,6 +10,23 @@
 
 As portas do Compose ficam ligadas a `127.0.0.1`, pois o perfil `dev` permite simular qualquer e-mail. **Não use esse perfil em um ambiente acessível por outras pessoas.** A migration V1 cria o esquema PostgreSQL; o backend valida o mapeamento JPA na inicialização.
 
+### Prévia visual sem Docker
+
+Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui dois chamados fictícios. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
+
+Em dois terminais PowerShell, dentro de `frontend/`:
+
+```powershell
+node scripts/preview-api.mjs
+```
+
+```powershell
+$env:HELPDESK_DEV_API_TARGET = 'http://127.0.0.1:8188'
+node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Abra `http://localhost:5173` e use nome e e-mail fictícios. Os chamados criados nessa prévia desaparecem ao reiniciar a API simulada. Para validar o sistema real, use o Compose descrito acima.
+
 ## SSO em produção
 
 1. Registre um cliente OIDC no Microsoft Entra ID ou Google Workspace. Configure a URL de retorno pública `https://SEU_DOMINIO/login/oauth2/code/corporativo` no provedor.

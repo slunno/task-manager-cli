@@ -18,6 +18,8 @@ jobs:
       - name: Testes, pacote e formatação
         working-directory: backend
         run: ./mvnw -B verify
+      - name: Contrato OpenAPI sincronizado
+        run: node .github/scripts/check-openapi.mjs
       - name: Dependências declaradas
         working-directory: backend
         run: ./mvnw -B dependency:analyze
@@ -35,6 +37,8 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - run: npm run api:generate
+      - run: git diff --exit-code -- src/api/generated.ts
       - run: npm run lint
       - run: npm test
       - run: npm run build

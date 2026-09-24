@@ -2,6 +2,9 @@ import { Link, Route, Routes } from 'react-router'
 import { AreaPage } from '../features/auth/AreaPage'
 import { Entrada, ExigirPerfil } from '../features/auth/Guardas'
 import { LoginPage } from '../features/auth/LoginPage'
+import { DetalheChamadoPage } from '../features/chamados/DetalheChamadoPage'
+import { MeusChamadosPage } from '../features/chamados/MeusChamadosPage'
+import { NovoChamadoPage } from '../features/chamados/NovoChamadoPage'
 
 const TODOS = ['FUNCIONARIO', 'TI_AGENTE', 'TI_ADMIN'] as const
 const TI = ['TI_AGENTE', 'TI_ADMIN'] as const
@@ -43,31 +46,25 @@ export function App() {
       <Route
         path="/meus-chamados"
         element={
-          <Protegida
-            perfis={[...TODOS]}
-            titulo="Meus chamados"
-            descricao="Aqui você acompanhará seus pedidos de ajuda à TI."
-          />
+          <ExigirPerfil permitido={[...TODOS]}>
+            <MeusChamadosPage />
+          </ExigirPerfil>
         }
       />
       <Route
         path="/chamados/novo"
         element={
-          <Protegida
-            perfis={[...TODOS]}
-            titulo="Novo chamado"
-            descricao="A abertura de chamados será disponibilizada na próxima etapa."
-          />
+          <ExigirPerfil permitido={[...TODOS]}>
+            <NovoChamadoPage />
+          </ExigirPerfil>
         }
       />
       <Route
         path="/chamados/:id"
         element={
-          <Protegida
-            perfis={[...TODOS]}
-            titulo="Detalhe do chamado"
-            descricao="O acompanhamento detalhado será disponibilizado na próxima etapa."
-          />
+          <ExigirPerfil permitido={[...TODOS]}>
+            <DetalheChamadoPage />
+          </ExigirPerfil>
         }
       />
       <Route

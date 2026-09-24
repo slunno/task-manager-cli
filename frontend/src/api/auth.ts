@@ -21,7 +21,10 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+export async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
   const response = await fetch(path, {
     ...options,
     credentials: 'same-origin',
@@ -54,7 +57,7 @@ export function getAuthConfig(): Promise<AuthConfig> {
   return request<AuthConfig>('/api/v1/auth/config')
 }
 
-async function getCsrfToken(): Promise<string> {
+export async function getCsrfToken(): Promise<string> {
   const response = await request<{ token: string }>('/api/v1/auth/csrf')
   return response.token
 }

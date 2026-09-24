@@ -7,24 +7,25 @@
   color: #10212d;
   background: #f7f9f8;
   font-synthesis: none;
+  --background: 150 20% 98%;
+  --foreground: 203 47% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 203 47% 12%;
+  --primary: 190 80% 27%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 187 28% 92%;
+  --secondary-foreground: 203 47% 12%;
+  --muted: 210 20% 96%;
+  --muted-foreground: 215 16% 38%;
+  --accent: 187 28% 92%;
+  --accent-foreground: 203 47% 12%;
+  --destructive: 0 72% 41%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 214 22% 87%;
+  --input: 214 22% 87%;
+  --ring: 190 80% 27%;
 }
-*:focus-visible {
+:focus-visible {
   outline: 3px solid #0e6f84;
   outline-offset: 3px;
-}
-.step {
-  display: grid;
-  height: 2rem;
-  width: 2rem;
-  flex: none;
-  place-items: center;
-  border-radius: 9999px;
-  background: #e9f1f2;
-  color: #0e6f84;
-  font-size: 0.875rem;
-  font-weight: 700;
-}
-.step.current {
-  background: #0e6f84;
-  color: white;
 }
