@@ -1,11 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
-import { Link, useSearchParams } from 'react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import { destinoInicial, getAuthConfig, loginDev } from '../../api/auth'
 import { getCategorias, getMeusChamados } from '../../api/chamados'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { Card, CardContent } from '../../components/ui/card'
 import { dataHora } from '../../lib/dataHora'
 import { AreaPage } from '../auth/AreaPage'
+import { ME_QUERY_KEY, useMe } from '../auth/useAuth'
 import { statusTexto } from './formatacao'
 
 function numeroPagina(valor: string | null): number {
@@ -14,6 +16,23 @@ function numeroPagina(valor: string | null): number {
 }
 
 export function MeusChamadosPage() {
+  const sessao = useMe()
+  const configuracao = useQuery({
+    queryKey: ['auth-config'],
+    queryFn: getAuthConfig,
+    staleTime: 60_000,
+    retry: false,
+  })
+  const cliente = useQueryClient()
+  const navegar = useNavigate()
+  const abrirPreviewTi = useMutation({
+    mutationFn: () =>
+      loginDev({ nome: 'Agente de TI', email: 'agente@exemplo.local' }),
+    onSuccess: (usuario) => {
+      cliente.setQueryData(ME_QUERY_KEY, usuario)
+      navegar(destinoInicial(usuario.perfil), { replace: true })
+    },
+  })
   const [parametros, setParametros] = useSearchParams()
   const pagina = numeroPagina(parametros.get('page'))
   const lista = useQuery({
@@ -37,6 +56,30 @@ export function MeusChamadosPage() {
       titulo="Meus chamados"
       descricao="Acompanhe seus pedidos de ajuda em um só lugar."
     >
+      {configuracao.data?.previewDemo &&
+        sessao.data?.perfil === 'FUNCIONARIO' && (
+          <div className="mt-8 rounded-xl border border-cyan-200 bg-cyan-50 p-5">
+            <h2 className="font-semibold">Você está na visão de funcionário</h2>
+            <p className="mt-2 text-sm text-slate-700">
+              Para explorar a fila e as funções da etapa E3 nesta prévia local,
+              entre como agente de TI.
+            </p>
+            <Button
+              className="mt-4"
+              disabled={abrirPreviewTi.isPending}
+              onClick={() => abrirPreviewTi.mutate()}
+            >
+              {abrirPreviewTi.isPending
+                ? 'Entrando…'
+                : 'Acessar prévia como agente de TI'}
+            </Button>
+            {abrirPreviewTi.isError && (
+              <p role="alert" className="mt-3 text-sm text-red-800">
+                {abrirPreviewTi.error.message}
+              </p>
+            )}
+          </div>
+        )}
       <div className="mt-8 flex justify-end">
         <Button asChild size="lg">
           <Link to="/chamados/novo">Abrir chamado</Link>

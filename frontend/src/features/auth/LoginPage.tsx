@@ -88,6 +88,27 @@ export function LoginPage() {
               <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
                 Acesso simulado para desenvolvimento local.
               </p>
+              {config.data.previewDemo && (
+                <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-4 text-sm text-slate-800">
+                  <p className="font-semibold">Explorar a etapa E3</p>
+                  <p className="mt-1">
+                    Entre como agente para acessar a fila e operar chamados.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={entrar.isPending}
+                    onClick={() =>
+                      entrar.mutate({
+                        nome: 'Agente de TI',
+                        email: 'agente@exemplo.local',
+                      })
+                    }
+                    className="mt-3 rounded-lg bg-ocean px-4 py-2 font-semibold text-white disabled:opacity-60"
+                  >
+                    Acessar prévia como agente de TI
+                  </button>
+                </div>
+              )}
               <div>
                 <label
                   className="mb-2 block text-sm font-medium"

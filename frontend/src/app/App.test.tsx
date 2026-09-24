@@ -98,6 +98,11 @@ describe('identidade e acesso', () => {
     expect(
       await screen.findByRole('heading', { name: 'Nenhum chamado por aqui' }),
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', {
+        name: 'Acessar prévia como agente de TI',
+      }),
+    ).not.toBeInTheDocument()
     expect(fetch).toHaveBeenCalledWith(
       '/api/v1/auth/dev/login',
       expect.objectContaining({
@@ -106,6 +111,55 @@ describe('identidade e acesso', () => {
         headers: expect.objectContaining({ 'X-CSRF-TOKEN': 'csrf-teste' }),
       }),
     )
+  })
+
+  it('permite sair da visão de funcionário na prévia e abrir a fila da TI', async () => {
+    let usuario = funcionario
+    const fetch = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const path = caminho(input)
+        if (path === '/api/v1/me') return resposta(usuario)
+        if (path === '/api/v1/auth/config')
+          return resposta({ modo: 'dev', urlLogin: null, previewDemo: true })
+        if (path === '/api/v1/auth/csrf')
+          return resposta({ token: 'csrf-teste' })
+        if (
+          path === '/api/v1/auth/dev/login' &&
+          metodo(input, init) === 'POST'
+        ) {
+          usuario = { ...agente, id: 2 }
+          return resposta(usuario)
+        }
+        if (path.startsWith('/api/v1/chamados/meus?'))
+          return resposta(paginaVazia)
+        if (path.startsWith('/api/v1/chamados?')) return resposta(paginaVazia)
+        if (path === '/api/v1/categorias') return resposta([])
+        throw new Error(`Rota inesperada: ${path}`)
+      },
+    )
+    vi.stubGlobal('fetch', fetch)
+    montar('/meus-chamados')
+    fireEvent.click(
+      await screen.findByRole('button', {
+        name: 'Acessar prévia como agente de TI',
+      }),
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Fila da TI' }),
+    ).toBeInTheDocument()
+    const pedido = fetch.mock.calls.find(
+      ([input, init]) =>
+        caminho(input) === '/api/v1/auth/dev/login' &&
+        metodo(input, init) === 'POST',
+    )
+    const corpo =
+      pedido?.[0] instanceof Request
+        ? await pedido[0].clone().json()
+        : JSON.parse(String(pedido?.[1]?.body))
+    expect(corpo).toEqual({
+      nome: 'Agente de TI',
+      email: 'agente@exemplo.local',
+    })
   })
 
   it('redireciona funcionário para sua área e bloqueia rota de TI', async () => {

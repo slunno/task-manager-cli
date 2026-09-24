@@ -131,7 +131,11 @@ const server = createServer(async (request, response) => {
   const autenticado = usuario && request.headers.cookie?.includes('preview=1')
   try {
     if (request.method === 'GET' && caminho === '/api/v1/auth/config')
-      return responder(response, 200, { modo: 'dev', urlLogin: null })
+      return responder(response, 200, {
+        modo: 'dev',
+        urlLogin: null,
+        previewDemo: true,
+      })
     if (request.method === 'GET' && caminho === '/api/v1/auth/csrf')
       return responder(response, 200, { token: csrfToken })
     if (request.method === 'POST' && caminho === '/api/v1/auth/dev/login') {

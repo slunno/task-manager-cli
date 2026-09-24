@@ -10,6 +10,7 @@ export interface Usuario {
 export interface AuthConfig {
   modo: 'dev' | 'oidc' | 'disabled'
   urlLogin: string | null
+  previewDemo?: boolean
 }
 
 export class ApiError extends Error {

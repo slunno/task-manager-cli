@@ -9,5 +9,6 @@ export function useMe() {
     queryFn: getMe,
     retry: false,
     staleTime: 30_000,
+    refetchOnWindowFocus: 'always',
   })
 }
