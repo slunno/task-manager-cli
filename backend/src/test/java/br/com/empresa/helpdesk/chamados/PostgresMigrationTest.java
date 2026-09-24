@@ -18,6 +18,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = {
       "spring.flyway.enabled=true",
       "spring.jpa.hibernate.ddl-auto=validate",
+      "spring.jpa.defer-datasource-initialization=false",
       "spring.sql.init.mode=never"
     })
 @ActiveProfiles("test")
