@@ -25,7 +25,7 @@ $env:HELPDESK_DEV_API_TARGET = 'http://127.0.0.1:8188'
 node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Abra `http://localhost:5173` e use nome e e-mail fictícios. Os chamados criados nessa prévia desaparecem ao reiniciar a API simulada. Para validar o sistema real, use o Compose descrito acima.
+Abra `http://localhost:5173`. Para ver a fila e operar chamados na prévia, entre com `agente@exemplo.local` ou `admin@exemplo.local` e qualquer nome. Para a visão de funcionário, use `maria@exemplo.local`. Esses perfis são exclusivos da API simulada; o backend real continua provisionando FUNCIONARIO no primeiro acesso. Os chamados e o histórico criados nessa prévia desaparecem ao reiniciar a API simulada. Para validar o sistema real, use o Compose descrito acima.
 
 ## SSO em produção
 

@@ -3,6 +3,7 @@ import { AreaPage } from '../features/auth/AreaPage'
 import { Entrada, ExigirPerfil } from '../features/auth/Guardas'
 import { LoginPage } from '../features/auth/LoginPage'
 import { DetalheChamadoPage } from '../features/chamados/DetalheChamadoPage'
+import { FilaTiPage } from '../features/chamados/FilaTiPage'
 import { MeusChamadosPage } from '../features/chamados/MeusChamadosPage'
 import { NovoChamadoPage } from '../features/chamados/NovoChamadoPage'
 
@@ -70,11 +71,9 @@ export function App() {
       <Route
         path="/ti/fila"
         element={
-          <Protegida
-            perfis={[...TI]}
-            titulo="Fila da TI"
-            descricao="A fila de atendimento será disponibilizada na etapa de operação."
-          />
+          <ExigirPerfil permitido={[...TI]}>
+            <FilaTiPage />
+          </ExigirPerfil>
         }
       />
       <Route

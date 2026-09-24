@@ -31,7 +31,7 @@ public class HistoricoService {
             .findByChamadoId(
                 chamadoId,
                 PageRequest.of(
-                    page, size, Sort.by("criadoEm").ascending().and(Sort.by("id").ascending())))
+                    page, size, Sort.by("criadoEm").descending().and(Sort.by("id").descending())))
             .map(HistoricoResponse::de));
   }
 }

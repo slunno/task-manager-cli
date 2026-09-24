@@ -16,11 +16,11 @@ Testes adicionais cobrem categoria ativa, validação do formulário, limite de 
 
 ## E3 — fila e operação
 
-| Perfil | GET fila | POST assumir | PATCH chamado | GET histórico |
-| --- | --- | --- | --- | --- |
-| Sem sessão | 401 | 401 com CSRF válido | 401 com CSRF válido | 401 |
-| FUNCIONARIO | 403 | 403 | 403 | 403 |
-| TI_AGENTE | 200 | 200 | 200 | 200 |
-| TI_ADMIN | 200 | 200 | 200 | 200 |
+| Perfil | GET fila | POST assumir | PATCH chamado | GET histórico | GET busca de pessoas |
+| --- | --- | --- | --- | --- | --- |
+| Sem sessão | 401 | 401 com CSRF válido | 401 com CSRF válido | 401 | 401 |
+| FUNCIONARIO | 403 | 403 | 403 | 403 | 403 |
+| TI_AGENTE | 200 | 200 | 200 | 200 | 200 |
+| TI_ADMIN | 200 | 200 | 200 | 200 | 200 |
 
-`OperacaoTiIntegrationTest` verifica filtros, paginação, isolamento da fila, CSRF, promoção de perfil durante a sessão, conflito de versão, impossibilidade de assumir chamado já atribuído, transições inválidas, solução obrigatória e o histórico gravado. `ChamadoTransicoesTest` exercita as regras do domínio. A versão do JPA é testada com duas cópias da mesma entidade.
+`OperacaoTiIntegrationTest` verifica filtros, paginação, isolamento da fila, busca restrita à TI, CSRF, promoção de perfil durante a sessão, conflito de versão, impossibilidade de assumir chamado já atribuído, transições inválidas, solução obrigatória e o histórico gravado. `ChamadoTransicoesTest` exercita as regras do domínio. A versão do JPA é testada com duas cópias da mesma entidade.

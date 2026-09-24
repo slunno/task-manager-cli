@@ -178,7 +178,8 @@ public class ChamadoService {
       chamado.alterarCategoria(dados.categoriaId(), agora);
     }
     if (dados.prioridade() != null) chamado.alterarPrioridade(dados.prioridade(), agora);
-    if (dados.status() != null) chamado.alterarStatus(dados.status(), dados.solucao(), agora);
+    if (dados.status() != null && dados.status() != chamado.getStatus())
+      chamado.alterarStatus(dados.status(), dados.solucao(), agora);
     if (anterior.equals(Estado.de(chamado))) {
       throw new RequisicaoInvalidaException("Nenhuma alteração informada");
     }
@@ -190,7 +191,7 @@ public class ChamadoService {
   @Transactional(readOnly = true)
   public PaginaResponse<HistoricoResponse> historico(Long id, int page, int size) {
     exigir(id);
-    paginar(page, size, "criadoEm,asc", Set.of("criadoEm"));
+    paginar(page, size, "criadoEm,desc", Set.of("criadoEm"));
     return historico.listar(id, page, size);
   }
 

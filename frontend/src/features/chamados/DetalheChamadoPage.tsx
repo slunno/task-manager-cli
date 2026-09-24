@@ -6,9 +6,15 @@ import { Badge } from '../../components/ui/badge'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { dataHora } from '../../lib/dataHora'
 import { AreaPage } from '../auth/AreaPage'
+import { useMe } from '../auth/useAuth'
 import { prioridadeTexto, statusTexto } from './formatacao'
+import { GestaoChamado } from './GestaoChamado'
+import { HistoricoChamadoPanel } from './HistoricoChamadoPanel'
 
 export function DetalheChamadoPage() {
+  const sessao = useMe()
+  const ehTi =
+    sessao.data?.perfil === 'TI_AGENTE' || sessao.data?.perfil === 'TI_ADMIN'
   const { id } = useParams()
   const chamadoId = Number(id)
   const idValido = Number.isSafeInteger(chamadoId) && chamadoId > 0
@@ -31,10 +37,10 @@ export function DetalheChamadoPage() {
       descricao="Veja as informações e acompanhe o atendimento."
     >
       <Link
-        to="/meus-chamados"
+        to={ehTi ? '/ti/fila' : '/meus-chamados'}
         className="mt-8 inline-block text-sm font-semibold text-ocean hover:underline"
       >
-        ← Voltar aos meus chamados
+        ← Voltar {ehTi ? 'à fila da TI' : 'aos meus chamados'}
       </Link>
       {idValido && chamado.isPending && (
         <p role="status" className="mt-8">
@@ -119,6 +125,18 @@ export function DetalheChamadoPage() {
                   {prioridadeTexto[chamado.data.prioridade]}
                 </p>
               </div>
+              {ehTi && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Responsável
+                  </p>
+                  <p className="mt-1">
+                    {chamado.data.responsavelId
+                      ? `Usuário #${chamado.data.responsavelId}`
+                      : 'Sem responsável'}
+                  </p>
+                </div>
+              )}
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Aberto em
@@ -127,7 +145,38 @@ export function DetalheChamadoPage() {
               </div>
             </CardContent>
           </Card>
+          {chamado.data.solucao && (
+            <Card className="lg:col-span-2">
+              <CardContent className="p-6">
+                <h3 className="font-semibold">Solução</h3>
+                <p className="mt-3 whitespace-pre-wrap leading-7">
+                  {chamado.data.solucao}
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
+      )}
+      {ehTi && chamado.data && categorias.data && (
+        <GestaoChamado
+          key={chamado.data.version}
+          chamado={chamado.data}
+          categorias={categorias.data}
+        />
+      )}
+      {ehTi && chamado.data && categorias.isError && (
+        <p role="alert" className="mt-6 text-red-800">
+          Não foi possível carregar as opções de gestão.{' '}
+          <button
+            className="underline"
+            onClick={() => void categorias.refetch()}
+          >
+            Tentar novamente
+          </button>
+        </p>
+      )}
+      {ehTi && chamado.data && (
+        <HistoricoChamadoPanel chamadoId={chamado.data.id} />
       )}
     </AreaPage>
   )

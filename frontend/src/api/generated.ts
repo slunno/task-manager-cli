@@ -68,6 +68,22 @@ export interface paths {
     patch: operations['atualizar']
     trace?: never
   }
+  '/api/v1/usuarios/busca': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['buscar']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/me': {
     parameters: {
       query?: never
@@ -250,6 +266,14 @@ export interface components {
       responsavelId?: number
       removerResponsavel?: boolean
       solucao?: string
+    }
+    UsuarioBuscaResponse: {
+      /** Format: int64 */
+      id?: number
+      nome?: string
+      email?: string
+      /** @enum {string} */
+      perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
     }
     PaginaResponseChamadoResponse: {
       content: components['schemas']['ChamadoResponse'][]
@@ -463,6 +487,29 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
+  buscar: {
+    parameters: {
+      query: {
+        texto: string
+        somenteTi?: boolean
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['UsuarioBuscaResponse'][]
         }
       }
     }

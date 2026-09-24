@@ -60,3 +60,68 @@ export async function criarChamado(dados: CriarChamado): Promise<Chamado> {
     }),
   )
 }
+
+export type FiltrosFila = NonNullable<
+  paths['/api/v1/chamados']['get']['parameters']['query']
+>
+export type AtualizarChamado = components['schemas']['AtualizarChamadoRequest']
+export type HistoricoChamado = components['schemas']['HistoricoResponse']
+export type PaginaHistorico =
+  components['schemas']['PaginaResponseHistoricoResponse']
+export type PessoaBusca = components['schemas']['UsuarioBuscaResponse']
+
+export async function buscarPessoas(
+  texto: string,
+  somenteTi: boolean,
+): Promise<PessoaBusca[]> {
+  return exigir(
+    await client.GET('/api/v1/usuarios/busca', {
+      params: { query: { texto, somenteTi } },
+    }),
+  )
+}
+
+export async function getFila(filtros: FiltrosFila): Promise<PaginaChamados> {
+  return exigir(
+    await client.GET('/api/v1/chamados', { params: { query: filtros } }),
+  )
+}
+
+export async function assumirChamado(
+  id: number,
+  version: number,
+): Promise<Chamado> {
+  const token = await getCsrfToken()
+  return exigir(
+    await client.POST('/api/v1/chamados/{id}/assumir', {
+      params: { path: { id } },
+      body: { version },
+      headers: { 'X-CSRF-TOKEN': token },
+    }),
+  )
+}
+
+export async function atualizarChamado(
+  id: number,
+  dados: AtualizarChamado,
+): Promise<Chamado> {
+  const token = await getCsrfToken()
+  return exigir(
+    await client.PATCH('/api/v1/chamados/{id}', {
+      params: { path: { id } },
+      body: dados,
+      headers: { 'X-CSRF-TOKEN': token },
+    }),
+  )
+}
+
+export async function getHistorico(
+  id: number,
+  page = 0,
+): Promise<PaginaHistorico> {
+  return exigir(
+    await client.GET('/api/v1/chamados/{id}/historico', {
+      params: { path: { id }, query: { page, size: 20 } },
+    }),
+  )
+}

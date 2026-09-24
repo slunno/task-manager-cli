@@ -13,6 +13,8 @@ import { Card, CardContent } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
 import { Textarea } from '../../components/ui/textarea'
 import { AreaPage } from '../auth/AreaPage'
+import { useMe } from '../auth/useAuth'
+import { PessoaPicker } from './PessoaPicker'
 
 const esquema = z.object({
   titulo: z
@@ -29,11 +31,15 @@ const esquema = z.object({
   prioridadeSugerida: z
     .enum(['BAIXA', 'MEDIA', 'ALTA', 'CRITICA'])
     .or(z.literal('')),
+  solicitanteId: z.string(),
 })
 
 type Campos = z.infer<typeof esquema>
 
 export function NovoChamadoPage() {
+  const sessao = useMe()
+  const ehTi =
+    sessao.data?.perfil === 'TI_AGENTE' || sessao.data?.perfil === 'TI_ADMIN'
   const categorias = useQuery({
     queryKey: ['categorias'],
     queryFn: getCategorias,
@@ -48,12 +54,14 @@ export function NovoChamadoPage() {
       categoriaId: '',
       descricao: '',
       prioridadeSugerida: '',
+      solicitanteId: '',
     },
   })
   const criar = useMutation({
     mutationFn: criarChamado,
     onSuccess: (chamado) => {
       void cliente.invalidateQueries({ queryKey: ['meus-chamados'] })
+      void cliente.invalidateQueries({ queryKey: ['fila-ti'] })
       navegar(`/chamados/${chamado.id}`, { replace: true })
     },
   })
@@ -66,6 +74,8 @@ export function NovoChamadoPage() {
     }
     if (campos.prioridadeSugerida)
       dados.prioridadeSugerida = campos.prioridadeSugerida
+    if (ehTi && campos.solicitanteId)
+      dados.solicitanteId = Number(campos.solicitanteId)
     criar.mutate(dados)
   }
 
@@ -81,6 +91,13 @@ export function NovoChamadoPage() {
             className="space-y-6"
             noValidate
           >
+            {ehTi && (
+              <PessoaPicker
+                titulo="Abrir em nome de (opcional)"
+                selecionadoId={formulario.watch('solicitanteId')}
+                onSelect={(id) => formulario.setValue('solicitanteId', id)}
+              />
+            )}
             <div>
               <label
                 className="mb-2 block text-sm font-semibold"
@@ -207,7 +224,7 @@ export function NovoChamadoPage() {
                 {criar.isPending ? 'Enviando…' : 'Abrir chamado'}
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/meus-chamados">Cancelar</Link>
+                <Link to={ehTi ? '/ti/fila' : '/meus-chamados'}>Cancelar</Link>
               </Button>
             </div>
           </form>

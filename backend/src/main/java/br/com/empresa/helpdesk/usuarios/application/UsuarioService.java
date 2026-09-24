@@ -1,5 +1,6 @@
 package br.com.empresa.helpdesk.usuarios.application;
 
+import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
 import br.com.empresa.helpdesk.usuarios.infra.UsuarioRepository;
 import java.time.Clock;
@@ -7,6 +8,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +53,26 @@ public class UsuarioService {
   @Transactional(readOnly = true)
   public List<Long> idsPorSetor(Long setorId) {
     return repository.idsPorSetor(setorId);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Usuario> buscarAtivos(String texto, boolean somenteTi) {
+    if (texto == null || texto.trim().length() < 2 || texto.trim().length() > 100) {
+      throw new RequisicaoInvalidaException("Informe entre 2 e 100 caracteres para buscar pessoas");
+    }
+    String termo =
+        texto
+            .trim()
+            .toLowerCase(Locale.ROOT)
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_");
+    return repository
+        .buscarAtivos(
+            "%" + termo + "%",
+            somenteTi,
+            PageRequest.of(0, 20, Sort.by("nome").ascending().and(Sort.by("id"))))
+        .getContent();
   }
 
   private String normalizarEmail(String email) {

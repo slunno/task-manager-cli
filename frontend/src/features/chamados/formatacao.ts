@@ -3,7 +3,7 @@ import type { Prioridade, StatusChamado } from '../../api/chamados'
 export const statusTexto: Record<StatusChamado, string> = {
   ABERTO: 'Aberto',
   EM_ATENDIMENTO: 'Em atendimento',
-  AGUARDANDO_USUARIO: 'Aguardando você',
+  AGUARDANDO_USUARIO: 'Aguardando usuário',
   RESOLVIDO: 'Resolvido',
   FECHADO: 'Fechado',
 }

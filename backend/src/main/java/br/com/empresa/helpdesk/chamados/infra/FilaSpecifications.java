@@ -2,6 +2,7 @@ package br.com.empresa.helpdesk.chamados.infra;
 
 import br.com.empresa.helpdesk.chamados.application.FiltroFila;
 import br.com.empresa.helpdesk.chamados.domain.Chamado;
+import br.com.empresa.helpdesk.chamados.domain.StatusChamado;
 import jakarta.persistence.criteria.Predicate;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,6 +35,12 @@ public final class FilaSpecifications {
       if (filtro.semResponsavel()) partes.add(cb.isNull(root.get("responsavelId")));
       if (filtro.meus()) partes.add(cb.equal(root.get("responsavelId"), agenteId));
       if (filtro.slaVencendo()) {
+        partes.add(
+            root.get("status")
+                .in(
+                    StatusChamado.ABERTO,
+                    StatusChamado.EM_ATENDIMENTO,
+                    StatusChamado.AGUARDANDO_USUARIO));
         partes.add(cb.greaterThan(root.get("prazoResolucao"), agora));
         partes.add(cb.lessThanOrEqualTo(root.get("prazoResolucao"), agora.plusSeconds(86400)));
       }

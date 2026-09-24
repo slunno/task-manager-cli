@@ -79,6 +79,27 @@ class OperacaoTiIntegrationTest {
   }
 
   @Test
+  void buscaPessoasEExclusivaDaTiEFiltraResponsaveisAtivos() throws Exception {
+    MockHttpSession maria = entrar("maria@empresa.com", "Maria");
+    MockHttpSession agente = entrar("agente@empresa.com", "Agente");
+    promover("agente@empresa.com", Perfil.TI_AGENTE);
+    mvc.perform(get("/api/v1/usuarios/busca").session(maria).param("texto", "ma"))
+        .andExpect(status().isForbidden());
+    mvc.perform(get("/api/v1/usuarios/busca").session(agente).param("texto", "ma"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].nome").value("Maria"));
+    mvc.perform(
+            get("/api/v1/usuarios/busca")
+                .session(agente)
+                .param("texto", "ma")
+                .param("somenteTi", "true"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0));
+    mvc.perform(get("/api/v1/usuarios/busca").session(agente).param("texto", "m"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void filaAplicaFiltrosPaginacaoESetorSemVazarParaFuncionario() throws Exception {
     MockHttpSession maria = entrar("maria@empresa.com", "Maria");
     MockHttpSession joao = entrar("joao@empresa.com", "João");
@@ -178,7 +199,8 @@ class OperacaoTiIntegrationTest {
     assertThat(atualizado.path("resolvidoEm").asText()).isNotBlank();
     mvc.perform(get("/api/v1/chamados/" + id + "/historico").session(admin))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.totalElements").value(7));
+        .andExpect(jsonPath("$.totalElements").value(7))
+        .andExpect(jsonPath("$.content[0].valorNovo").value("RESOLVIDO"));
   }
 
   @Test
