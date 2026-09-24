@@ -11,9 +11,25 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get?: never
+    get: operations['fila']
     put?: never
     post: operations['criar']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/chamados/{id}/assumir': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['assumir']
     delete?: never
     options?: never
     head?: never
@@ -36,6 +52,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/chamados/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['detalhe']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['atualizar']
+    trace?: never
+  }
   '/api/v1/me': {
     parameters: {
       query?: never
@@ -52,14 +84,14 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/v1/chamados/{id}': {
+  '/api/v1/chamados/{id}/historico': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    get: operations['detalhe']
+    get: operations['historico']
     put?: never
     post?: never
     delete?: never
@@ -158,6 +190,8 @@ export interface components {
       abertoPorId: number | null
       /** Format: int64 */
       categoriaId: number
+      /** Format: int64 */
+      responsavelId: number | null
       /** @enum {string} */
       prioridade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
       /** @enum {string|null} */
@@ -173,6 +207,15 @@ export interface components {
       criadoEm: string
       /** Format: date-time */
       atualizadoEm: string
+      /** Format: date-time */
+      resolvidoEm: string | null
+      solucao: string | null
+      /** Format: date-time */
+      prazoResolucao: string | null
+      /** Format: int64 */
+      version: number
+    }
+    AssumirChamadoRequest: {
       /** Format: int64 */
       version: number
     }
@@ -189,8 +232,49 @@ export interface components {
       /** @enum {string} */
       perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
     }
+    AtualizarChamadoRequest: {
+      /** Format: int64 */
+      version: number
+      /** @enum {string} */
+      status?:
+        | 'ABERTO'
+        | 'EM_ATENDIMENTO'
+        | 'AGUARDANDO_USUARIO'
+        | 'RESOLVIDO'
+        | 'FECHADO'
+      /** @enum {string} */
+      prioridade?: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
+      /** Format: int64 */
+      categoriaId?: number
+      /** Format: int64 */
+      responsavelId?: number
+      removerResponsavel?: boolean
+      solucao?: string
+    }
     PaginaResponseChamadoResponse: {
       content: components['schemas']['ChamadoResponse'][]
+      /** Format: int32 */
+      page: number
+      /** Format: int32 */
+      size: number
+      /** Format: int64 */
+      totalElements: number
+      /** Format: int32 */
+      totalPages: number
+    }
+    HistoricoResponse: {
+      /** Format: int64 */
+      id?: number
+      /** Format: int64 */
+      usuarioId?: number
+      campo?: string
+      valorAnterior?: string
+      valorNovo?: string
+      /** Format: date-time */
+      criadoEm?: string
+    }
+    PaginaResponseHistoricoResponse: {
+      content: components['schemas']['HistoricoResponse'][]
       /** Format: int32 */
       page: number
       /** Format: int32 */
@@ -221,6 +305,46 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  fila: {
+    parameters: {
+      query?: {
+        status?:
+          | 'ABERTO'
+          | 'EM_ATENDIMENTO'
+          | 'AGUARDANDO_USUARIO'
+          | 'RESOLVIDO'
+          | 'FECHADO'
+        prioridade?: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
+        responsavelId?: number
+        categoriaId?: number
+        setorId?: number
+        desde?: string
+        ate?: string
+        texto?: string
+        semResponsavel?: boolean
+        meus?: boolean
+        slaVencendo?: boolean
+        page?: number
+        size?: number
+        sort?: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PaginaResponseChamadoResponse']
+        }
+      }
+    }
+  }
   criar: {
     parameters: {
       query?: never
@@ -236,6 +360,32 @@ export interface operations {
     responses: {
       /** @description Chamado criado */
       201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
+  assumir: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AssumirChamadoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
         headers: {
           [name: string]: unknown
         }
@@ -269,6 +419,54 @@ export interface operations {
       }
     }
   }
+  detalhe: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
+  atualizar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AtualizarChamadoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
   me: {
     parameters: {
       query?: never
@@ -289,9 +487,12 @@ export interface operations {
       }
     }
   }
-  detalhe: {
+  historico: {
     parameters: {
-      query?: never
+      query?: {
+        page?: number
+        size?: number
+      }
       header?: never
       path: {
         id: number
@@ -306,7 +507,7 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          '*/*': components['schemas']['ChamadoResponse']
+          '*/*': components['schemas']['PaginaResponseHistoricoResponse']
         }
       }
     }

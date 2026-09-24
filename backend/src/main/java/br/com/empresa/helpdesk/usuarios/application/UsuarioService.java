@@ -4,6 +4,7 @@ import br.com.empresa.helpdesk.usuarios.domain.Usuario;
 import br.com.empresa.helpdesk.usuarios.infra.UsuarioRepository;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class UsuarioService {
   @Transactional(readOnly = true)
   public Optional<Usuario> buscarAtivoPorId(Long id) {
     return repository.findById(id).filter(Usuario::isAtivo);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Long> idsPorSetor(Long setorId) {
+    return repository.idsPorSetor(setorId);
   }
 
   private String normalizarEmail(String email) {

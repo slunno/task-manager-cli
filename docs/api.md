@@ -34,3 +34,16 @@ As consultas de funcionário aplicam solicitante_id no repositório, inclusive n
 ## Evolução
 
 E3 adicionará fila da TI, filtros, atribuição, transições de status e histórico. E4 adicionará comentários, notas internas e anexos. O contrato e o cliente gerado serão atualizados em cada etapa.
+
+## Operação da TI — E3
+
+| Método | Caminho | Acesso | Resultado |
+| --- | --- | --- | --- |
+| GET | /api/v1/chamados | TI_AGENTE, TI_ADMIN | Fila paginada com filtros |
+| POST | /api/v1/chamados/{id}/assumir | TI_AGENTE, TI_ADMIN + CSRF | Atribui ao agente logado; 409 se já atribuído, concluído ou versão divergente |
+| PATCH | /api/v1/chamados/{id} | TI_AGENTE, TI_ADMIN + CSRF | Altera responsável, prioridade, categoria ou status |
+| GET | /api/v1/chamados/{id}/historico | TI_AGENTE, TI_ADMIN | Histórico paginado, do mais antigo para o mais novo |
+
+A fila aceita `status`, `prioridade`, `responsavelId`, `categoriaId`, `setorId`, `desde`, `ate`, `texto`, `semResponsavel`, `meus` e `slaVencendo`. As datas são dias locais de São Paulo, com limite final exclusivo. O último filtro só produzirá resultados quando E6 calcular `prazoResolucao`. A ordenação tem whitelist: `criadoEm`, `numero`, `atualizadoEm`, `prioridade`, `status` e `prazoResolucao`.
+
+Assumir recebe `{ "version": N }`. PATCH recebe `version` e ao menos uma mudança: `status`, `prioridade`, `categoriaId`, `responsavelId`, `removerResponsavel` ou `solucao` ao resolver. A versão é verificada antes da alteração e o campo JPA `@Version` protege conflitos simultâneos. Cada mudança relevante grava histórico e publica `ChamadoAlteradoEvent` na transação. A resolução exige texto de solução; reabertura e fechamento ficam para E8.

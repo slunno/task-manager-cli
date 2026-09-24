@@ -1,5 +1,7 @@
 package br.com.empresa.helpdesk.chamados.domain;
 
+import br.com.empresa.helpdesk.compartilhado.erros.ConflitoChamadoException;
+import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.Instant;
+import java.util.Objects;
 
 @Entity
 @Table(name = "chamados")
@@ -36,6 +39,9 @@ public class Chamado {
   @Column(name = "categoria_id", nullable = false)
   private Long categoriaId;
 
+  @Column(name = "responsavel_id")
+  private Long responsavelId;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 10)
   private Prioridade prioridade;
@@ -56,6 +62,15 @@ public class Chamado {
 
   @Column(name = "atualizado_em", nullable = false)
   private Instant atualizadoEm;
+
+  @Column(name = "resolvido_em")
+  private Instant resolvidoEm;
+
+  @Column(columnDefinition = "text")
+  private String solucao;
+
+  @Column(name = "prazo_resolucao")
+  private Instant prazoResolucao;
 
   @Version private Long version;
 
@@ -132,6 +147,10 @@ public class Chamado {
     return categoriaId;
   }
 
+  public Long getResponsavelId() {
+    return responsavelId;
+  }
+
   public Prioridade getPrioridade() {
     return prioridade;
   }
@@ -156,7 +175,80 @@ public class Chamado {
     return atualizadoEm;
   }
 
+  public Instant getResolvidoEm() {
+    return resolvidoEm;
+  }
+
+  public String getSolucao() {
+    return solucao;
+  }
+
+  public Instant getPrazoResolucao() {
+    return prazoResolucao;
+  }
+
   public Long getVersion() {
     return version;
+  }
+
+  public void assumir(Long agenteId, Instant agora) {
+    if (responsavelId != null
+        || status == StatusChamado.RESOLVIDO
+        || status == StatusChamado.FECHADO) {
+      throw new ConflitoChamadoException("Este chamado já foi assumido ou está concluído");
+    }
+    responsavelId = agenteId;
+    if (status == StatusChamado.ABERTO) status = StatusChamado.EM_ATENDIMENTO;
+    atualizadoEm = agora;
+  }
+
+  public void atribuir(Long novoResponsavelId, Instant agora) {
+    if (status == StatusChamado.RESOLVIDO || status == StatusChamado.FECHADO) {
+      throw new ConflitoChamadoException("Chamado concluído não pode ser atribuído");
+    }
+    if (Objects.equals(responsavelId, novoResponsavelId)) return;
+    responsavelId = novoResponsavelId;
+    if (status == StatusChamado.ABERTO && novoResponsavelId != null) {
+      status = StatusChamado.EM_ATENDIMENTO;
+    }
+    atualizadoEm = agora;
+  }
+
+  public void alterarStatus(StatusChamado novoStatus, String textoSolucao, Instant agora) {
+    boolean permitido =
+        (status == StatusChamado.ABERTO
+                && novoStatus == StatusChamado.EM_ATENDIMENTO
+                && responsavelId != null)
+            || (status == StatusChamado.EM_ATENDIMENTO
+                && (novoStatus == StatusChamado.AGUARDANDO_USUARIO
+                    || novoStatus == StatusChamado.RESOLVIDO))
+            || (status == StatusChamado.AGUARDANDO_USUARIO
+                && novoStatus == StatusChamado.EM_ATENDIMENTO);
+    if (!permitido) {
+      throw new ConflitoChamadoException("Transição de status inválida");
+    }
+    if (novoStatus == StatusChamado.RESOLVIDO) {
+      if (textoSolucao == null || textoSolucao.isBlank()) {
+        throw new RequisicaoInvalidaException("Informe a solução antes de resolver o chamado");
+      }
+      solucao = textoSolucao.trim();
+      resolvidoEm = agora;
+    }
+    status = novoStatus;
+    atualizadoEm = agora;
+  }
+
+  public void alterarPrioridade(Prioridade novaPrioridade, Instant agora) {
+    if (prioridade != novaPrioridade) {
+      prioridade = novaPrioridade;
+      atualizadoEm = agora;
+    }
+  }
+
+  public void alterarCategoria(Long novaCategoriaId, Instant agora) {
+    if (!categoriaId.equals(novaCategoriaId)) {
+      categoriaId = novaCategoriaId;
+      atualizadoEm = agora;
+    }
   }
 }

@@ -13,3 +13,14 @@ Os testes de integração em ChamadoAutorizacaoIntegrationTest exercitam a API r
 Os métodos públicos do controller exigem FUNCIONARIO, TI_AGENTE ou TI_ADMIN por @PreAuthorize. A aplicação filtra a lista por solicitante_id na consulta findBySolicitanteId e o detalhe por findByIdAndSolicitanteId quando o perfil é FUNCIONARIO. Não há consulta ampla seguida de filtro em memória.
 
 Testes adicionais cobrem categoria ativa, validação do formulário, limite de página, whitelist de ordenação, prioridade final MEDIA, número legível único, perfil alterado durante a sessão, usuário inativo e CSRF. As fronteiras entre módulos são verificadas por FronteirasModularesTest (ArchUnit). PostgresMigrationTest valida as migrations e o mapeamento JPA em PostgreSQL 16 quando Docker está disponível; é ignorado na máquina local sem Docker e executado na CI com Docker.
+
+## E3 — fila e operação
+
+| Perfil | GET fila | POST assumir | PATCH chamado | GET histórico |
+| --- | --- | --- | --- | --- |
+| Sem sessão | 401 | 401 com CSRF válido | 401 com CSRF válido | 401 |
+| FUNCIONARIO | 403 | 403 | 403 | 403 |
+| TI_AGENTE | 200 | 200 | 200 | 200 |
+| TI_ADMIN | 200 | 200 | 200 | 200 |
+
+`OperacaoTiIntegrationTest` verifica filtros, paginação, isolamento da fila, CSRF, promoção de perfil durante a sessão, conflito de versão, impossibilidade de assumir chamado já atribuído, transições inválidas, solução obrigatória e o histórico gravado. `ChamadoTransicoesTest` exercita as regras do domínio. A versão do JPA é testada com duas cópias da mesma entidade.

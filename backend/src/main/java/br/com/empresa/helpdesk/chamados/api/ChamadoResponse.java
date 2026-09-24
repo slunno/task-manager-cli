@@ -13,10 +13,14 @@ public record ChamadoResponse(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long solicitanteId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long abertoPorId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long categoriaId,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Long responsavelId,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Prioridade prioridade,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true)
         Prioridade prioridadeSugerida,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) StatusChamado status,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant criadoEm,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant atualizadoEm,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant resolvidoEm,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String solucao,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant prazoResolucao,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long version) {}

@@ -25,6 +25,9 @@ public class Usuario {
   @Column(nullable = false, length = 254)
   private String email;
 
+  @Column(name = "setor_id", insertable = false, updatable = false)
+  private Long setorId;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private Perfil perfil;
@@ -88,6 +91,10 @@ public class Usuario {
 
   public String getEmail() {
     return email;
+  }
+
+  public Long getSetorId() {
+    return setorId;
   }
 
   public Perfil getPerfil() {
