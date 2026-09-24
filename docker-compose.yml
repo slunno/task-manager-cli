@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${HELPDESK_DB_USER:?Defina HELPDESK_DB_USER}
       POSTGRES_PASSWORD: ${HELPDESK_DB_PASSWORD:?Defina HELPDESK_DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,16 +22,16 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Defina MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Defina MINIO_ROOT_PASSWORD}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - minio_data:/data
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
 
   backend:
     build:
@@ -50,7 +50,7 @@ services:
       mailhog:
         condition: service_started
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
 
   frontend:
     build:
@@ -60,7 +60,7 @@ services:
       backend:
         condition: service_started
     ports:
-      - "3000:80"
+      - "127.0.0.1:3000:80"
 
 volumes:
   postgres_data:

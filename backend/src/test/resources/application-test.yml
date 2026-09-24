@@ -7,6 +7,6 @@ spring:
     enabled: false
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
   mail:
     host: localhost

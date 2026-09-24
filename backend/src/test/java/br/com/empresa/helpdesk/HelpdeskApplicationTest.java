@@ -23,6 +23,6 @@ class HelpdeskApplicationTest {
 
   @Test
   void apiPermaneceFechadaAntesDaIdentidade() throws Exception {
-    mockMvc.perform(get("/api/v1/me")).andExpect(status().isForbidden());
+    mockMvc.perform(get("/api/v1/me")).andExpect(status().isUnauthorized());
   }
 }

@@ -7,3 +7,6 @@ server:
     session:
       cookie:
         secure: false
+helpdesk:
+  auth:
+    mode: dev

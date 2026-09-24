@@ -2,6 +2,20 @@ spring:
   config:
     activate:
       on-profile: prod
+  security:
+    oauth2:
+      client:
+        provider:
+          corporativo:
+            issuer-uri: ${OIDC_ISSUER_URI}
+        registration:
+          corporativo:
+            provider: corporativo
+            client-id: ${OIDC_CLIENT_ID}
+            client-secret: ${OIDC_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: ${OIDC_REDIRECT_URI}
+            scope: openid,profile,email
 server:
   servlet:
     session:
@@ -12,3 +26,7 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+helpdesk:
+  auth:
+    mode: oidc
+    allowed-email-domain: ${OIDC_ALLOWED_EMAIL_DOMAIN}
