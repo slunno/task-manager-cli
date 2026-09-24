@@ -14,5 +14,4 @@ Eventos que pedem e-mail serão persistidos em `notificacoes_outbox` na mesma tr
 
 - Entrega será eventual; a UI não deve depender do envio imediato.
 - Operação precisa de métricas para pendências, falhas e idade da fila.
-- O envio de e-mail não ocorre dentro da requisição HTTP.
-
+- O envio de e-mail não ocorre dentro da requisição HTTP. Falhas de SMTP não derrubam a saúde HTTP; a fila pendente terá alerta próprio.

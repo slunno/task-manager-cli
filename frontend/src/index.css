@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #10212d;
+  background: #f7f9f8;
+  font-synthesis: none;
+}
+*:focus-visible {
+  outline: 3px solid #0e6f84;
+  outline-offset: 3px;
+}
+.step {
+  display: grid;
+  height: 2rem;
+  width: 2rem;
+  flex: none;
+  place-items: center;
+  border-radius: 9999px;
+  background: #e9f1f2;
+  color: #0e6f84;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.step.current {
+  background: #0e6f84;
+  color: white;
+}
