@@ -44,6 +44,7 @@ services:
       DATABASE_PASSWORD: ${HELPDESK_DB_PASSWORD}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
+      HELPDESK_PORTAL_URL: http://localhost:3000
       HELPDESK_STORAGE_MODE: local
       HELPDESK_STORAGE_LOCAL_DIRECTORY: /app/data/anexos
     volumes:

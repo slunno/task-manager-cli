@@ -7,6 +7,7 @@ import br.com.empresa.helpdesk.chamados.api.ChamadoResponse;
 import br.com.empresa.helpdesk.chamados.api.CriarChamadoRequest;
 import br.com.empresa.helpdesk.chamados.domain.Chamado;
 import br.com.empresa.helpdesk.chamados.domain.ChamadoAlteradoEvent;
+import br.com.empresa.helpdesk.chamados.domain.ChamadoReabertoEvent;
 import br.com.empresa.helpdesk.chamados.domain.Prioridade;
 import br.com.empresa.helpdesk.chamados.domain.StatusChamado;
 import br.com.empresa.helpdesk.chamados.infra.ChamadoRepository;
@@ -23,13 +24,16 @@ import br.com.empresa.helpdesk.usuarios.application.UsuarioService;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +51,8 @@ public class ChamadoService {
   private final ApplicationEventPublisher eventos;
   private final Clock clock;
   private final SlaService sla;
+  private final int diasReabertura;
+  private final int diasFechamento;
 
   public ChamadoService(
       ChamadoRepository repository,
@@ -57,7 +63,9 @@ public class ChamadoService {
       HistoricoService historico,
       ApplicationEventPublisher eventos,
       Clock clock,
-      SlaService sla) {
+      SlaService sla,
+      @Value("${helpdesk.conclusao.dias-reabertura:7}") int diasReabertura,
+      @Value("${helpdesk.conclusao.dias-fechamento:3}") int diasFechamento) {
     this.repository = repository;
     this.categorias = categorias;
     this.usuarios = usuarios;
@@ -67,6 +75,8 @@ public class ChamadoService {
     this.eventos = eventos;
     this.clock = clock;
     this.sla = sla;
+    this.diasReabertura = diasReabertura;
+    this.diasFechamento = diasFechamento;
   }
 
   @Transactional
@@ -247,8 +257,10 @@ public class ChamadoService {
     StatusChamado statusAnterior = chamado.getStatus();
     if (dados.status() != null && dados.status() != chamado.getStatus())
       chamado.alterarStatus(dados.status(), dados.solucao(), agora);
-    if (dados.prioridade() != null && anterior.prioridade() != chamado.getPrioridade())
+    if (dados.prioridade() != null && anterior.prioridade() != chamado.getPrioridade()) {
       sla.iniciar(chamado, agora);
+      if (chamado.getSlaPausadoEm() != null) chamado.pausarSla(agora);
+    }
     if (statusAnterior != chamado.getStatus()) {
       if (chamado.getStatus() == StatusChamado.AGUARDANDO_USUARIO) chamado.pausarSla(agora);
       else if (statusAnterior == StatusChamado.AGUARDANDO_USUARIO) sla.retomar(chamado, agora);
@@ -259,6 +271,42 @@ public class ChamadoService {
     repository.saveAndFlush(chamado);
     registrarAlteracoes(anterior, chamado, ator.getId(), agora);
     return mapper.paraResponse(chamado);
+  }
+
+  @Transactional
+  public ChamadoResponse reabrir(Long id, Long version, Usuario ator) {
+    Chamado chamado = exigirAcesso(id, ator);
+    if (!chamado.getSolicitanteId().equals(ator.getId()))
+      throw new AccessDeniedException("Somente o solicitante pode reabrir o chamado");
+    verificarVersion(chamado, version);
+    Instant agora = Instant.now(clock);
+    if (chamado.getStatus() != StatusChamado.RESOLVIDO
+        || chamado.getResolvidoEm() == null
+        || agora.isAfter(chamado.getResolvidoEm().plus(Duration.ofDays(diasReabertura))))
+      throw new ConflitoChamadoException("Prazo de reabertura encerrado ou status inválido");
+    Estado anterior = Estado.de(chamado);
+    chamado.reabrir(agora);
+    sla.iniciar(chamado, agora);
+    repository.saveAndFlush(chamado);
+    registrarAlteracoes(anterior, chamado, ator.getId(), agora);
+    eventos.publishEvent(new ChamadoReabertoEvent(id));
+    return mapper.paraResponse(chamado);
+  }
+
+  @Transactional
+  public int fecharAntigos() {
+    Instant agora = Instant.now(clock);
+    Instant limite = agora.minus(Duration.ofDays(diasFechamento));
+    var pendentes =
+        repository.findTop100ByStatusAndResolvidoEmBeforeOrderByResolvidoEmAsc(
+            StatusChamado.RESOLVIDO, limite);
+    for (Chamado chamado : pendentes) {
+      Estado anterior = Estado.de(chamado);
+      chamado.fechar(agora);
+      repository.saveAndFlush(chamado);
+      registrarAlteracoes(anterior, chamado, null, agora);
+    }
+    return pendentes.size();
   }
 
   @Transactional(readOnly = true)

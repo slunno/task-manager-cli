@@ -294,6 +294,38 @@
         }
       }
     },
+    "/api/v1/chamados/{id}/reabertura": {
+      "post": {
+        "tags": ["chamado-controller"],
+        "operationId": "reabrir",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReabrirChamadoRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/ChamadoResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/chamados/{id}/assumir": {
       "post": {
         "tags": ["chamado-controller"],
@@ -390,6 +422,60 @@
             "content": {
               "*/*": {
                 "schema": { "$ref": "#/components/schemas/ComentarioResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chamados/{chamadoId}/avaliacao": {
+      "get": {
+        "tags": ["avaliacao-controller"],
+        "operationId": "buscar",
+        "parameters": [
+          {
+            "name": "chamadoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/AvaliacaoResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["avaliacao-controller"],
+        "operationId": "avaliar",
+        "parameters": [
+          {
+            "name": "chamadoId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AvaliarRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/AvaliacaoResponse" }
               }
             }
           }
@@ -636,7 +722,7 @@
     "/api/v1/usuarios/busca": {
       "get": {
         "tags": ["usuario-controller"],
-        "operationId": "buscar",
+        "operationId": "buscar_1",
         "parameters": [
           {
             "name": "texto",
@@ -1112,6 +1198,7 @@
           "criadoEm": { "type": "string", "format": "date-time" },
           "atualizadoEm": { "type": "string", "format": "date-time" },
           "resolvidoEm": { "type": ["string", "null"], "format": "date-time" },
+          "fechadoEm": { "type": ["string", "null"], "format": "date-time" },
           "primeiraRespostaEm": {
             "type": ["string", "null"],
             "format": "date-time"
@@ -1134,6 +1221,7 @@
           "categoriaId",
           "criadoEm",
           "descricao",
+          "fechadoEm",
           "id",
           "numero",
           "prazoPrimeiraResposta",
@@ -1150,6 +1238,11 @@
           "titulo",
           "version"
         ]
+      },
+      "ReabrirChamadoRequest": {
+        "type": "object",
+        "properties": { "version": { "type": "integer", "format": "int64" } },
+        "required": ["version"]
       },
       "AssumirChamadoRequest": {
         "type": "object",
@@ -1172,6 +1265,27 @@
           "autorId": { "type": "integer", "format": "int64" },
           "texto": { "type": "string" },
           "interno": { "type": "boolean" },
+          "criadoEm": { "type": "string", "format": "date-time" }
+        }
+      },
+      "AvaliarRequest": {
+        "type": "object",
+        "properties": {
+          "nota": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1
+          },
+          "comentario": { "type": "string", "maxLength": 1000, "minLength": 0 }
+        }
+      },
+      "AvaliacaoResponse": {
+        "type": "object",
+        "properties": {
+          "chamadoId": { "type": "integer", "format": "int64" },
+          "nota": { "type": "integer", "format": "int32" },
+          "comentario": { "type": "string" },
           "criadoEm": { "type": "string", "format": "date-time" }
         }
       },

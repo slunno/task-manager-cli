@@ -1,6 +1,6 @@
 # Portal de chamados internos de TI
 
-Monorepo do helpdesk em português para uma organização de 200 a 500 pessoas. A entrega é incremental conforme o plano E0–E11 do prompt de produto. **Estado atual: E4, comentários e anexos.**
+Monorepo do helpdesk em português para uma organização de 200 a 500 pessoas. A entrega é incremental conforme o plano E0–E11 do prompt de produto. **Estado atual: E8, com notificações, SLA, administração e conclusão dos chamados.**
 
 ## Estrutura
 
@@ -20,6 +20,9 @@ Consulte [o runbook](docs/runbook.md) para variáveis de ambiente, Compose, SSO 
 - **E2:** categorias iniciais, criação, listagem paginada e detalhe de chamados. O backend restringe o acesso do funcionário aos próprios chamados, valida as entradas e fornece o contrato OpenAPI usado pelo cliente tipado. Testes cobrem a matriz de autorização e as fronteiras modulares.
 - **E3:** fila da TI com filtros e paginação, busca de pessoas, atribuição, ação de assumir, transições de status, solução obrigatória, histórico e controle de versão para conflitos. O frontend oferece a fila e a gestão no detalhe do chamado.
 - **E4:** mensagens públicas, notas internas exclusivas da TI, linha do tempo pública, anexos com validação de conteúdo, armazenamento privado e download autorizado.
-- **Próxima:** E5, notificações e outbox.
+- **E5:** outbox transacional, envio SMTP com tentativas e coordenação dos jobs por ShedLock.
+- **E6:** prazos em horas úteis, pausa do SLA, alertas e dashboard da TI.
+- **E7:** gestão de usuários e importação CSV, categorias, políticas de SLA e calendário.
+- **E8:** reabertura pelo solicitante, fechamento automático e avaliação do atendimento.
 
 A segurança é aplicada no backend. Os guardas de rota do frontend organizam a navegação, mas não substituem a autorização da API.

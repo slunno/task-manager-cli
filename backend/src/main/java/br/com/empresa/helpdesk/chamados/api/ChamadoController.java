@@ -128,6 +128,17 @@ public class ChamadoController {
         .body(chamados.atualizar(id, dados, usuario(request)));
   }
 
+  @PostMapping("/{id}/reabertura")
+  @PreAuthorize("hasAnyRole('FUNCIONARIO', 'TI_AGENTE', 'TI_ADMIN')")
+  public ResponseEntity<ChamadoResponse> reabrir(
+      @PathVariable Long id,
+      @Valid @RequestBody ReabrirChamadoRequest dados,
+      HttpServletRequest request) {
+    return ResponseEntity.ok()
+        .cacheControl(CacheControl.noStore())
+        .body(chamados.reabrir(id, dados.version(), usuario(request)));
+  }
+
   @GetMapping("/{id}/historico")
   @PreAuthorize("hasAnyRole('TI_AGENTE', 'TI_ADMIN')")
   public ResponseEntity<PaginaResponse<HistoricoResponse>> historico(

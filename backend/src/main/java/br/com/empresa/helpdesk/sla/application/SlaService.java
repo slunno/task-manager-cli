@@ -45,8 +45,12 @@ public class SlaService {
     chamado.retomarSla(
         chamado.getPrazoPrimeiraResposta() == null
             ? null
-            : calendario.adicionarMinutosUteis(agora, respostaRestante),
-        calendario.adicionarMinutosUteis(agora, resolucaoRestante));
+            : chamado.getPrazoPrimeiraResposta().isAfter(chamado.getSlaPausadoEm())
+                ? calendario.adicionarMinutosUteis(agora, respostaRestante)
+                : agora.minusNanos(1),
+        chamado.getPrazoResolucao().isAfter(chamado.getSlaPausadoEm())
+            ? calendario.adicionarMinutosUteis(agora, resolucaoRestante)
+            : agora.minusNanos(1));
   }
 
   public CalendarioUtil calendario() {

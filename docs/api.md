@@ -41,9 +41,9 @@ As consultas de funcionário aplicam solicitante_id no repositório, inclusive n
 | GET | /api/v1/chamados/{id}/historico | TI_AGENTE, TI_ADMIN | Histórico paginado, com alterações recentes primeiro |
 | GET | /api/v1/usuarios/busca?texto=...&somenteTi=true | TI_AGENTE, TI_ADMIN | Até 20 usuários ativos com nome/e-mail correspondentes; somenteTi filtra agentes e administradores |
 
-A fila aceita `status`, `prioridade`, `responsavelId`, `categoriaId`, `setorId`, `desde`, `ate`, `texto`, `semResponsavel`, `meus` e `slaVencendo`. As datas são dias locais de São Paulo, com limite final exclusivo. O último filtro só produzirá resultados quando E6 calcular `prazoResolucao`. A ordenação tem whitelist: `criadoEm`, `numero`, `atualizadoEm`, `prioridade`, `status` e `prazoResolucao`.
+A fila aceita `status`, `prioridade`, `responsavelId`, `categoriaId`, `setorId`, `desde`, `ate`, `texto`, `semResponsavel`, `meus` e `slaVencendo`. As datas são dias locais de São Paulo, com limite final exclusivo. A ordenação tem whitelist: `criadoEm`, `numero`, `atualizadoEm`, `prioridade`, `status` e `prazoResolucao`.
 
-Assumir recebe `{ "version": N }`. PATCH recebe `version` e ao menos uma mudança: `status`, `prioridade`, `categoriaId`, `responsavelId`, `removerResponsavel` ou `solucao` ao resolver. A versão é verificada antes da alteração e o campo JPA `@Version` protege conflitos simultâneos. Cada mudança relevante grava histórico e publica `ChamadoAlteradoEvent` na transação. A resolução exige texto de solução; reabertura e fechamento ficam para E8.
+Assumir recebe `{ "version": N }`. PATCH recebe `version` e ao menos uma mudança: `status`, `prioridade`, `categoriaId`, `responsavelId`, `removerResponsavel` ou `solucao` ao resolver. A versão é verificada antes da alteração e o campo JPA `@Version` protege conflitos simultâneos. Cada mudança relevante grava histórico e publica `ChamadoAlteradoEvent` na transação. A resolução exige texto de solução; reabertura e fechamento seguem as regras de conclusão da E8.
 
 A busca de pessoas exige termo de 2 a 100 caracteres, limita a 20 resultados e não é acessível ao funcionário. O cliente usa a busca para atribuir chamados e para abrir um chamado em nome de outro usuário.
 
@@ -63,3 +63,21 @@ O solicitante só acessa os próprios chamados, inclusive nos endpoints de conve
 A primeira mensagem pública da TI marca primeira_resposta_em uma única vez. Mensagem pública do solicitante em AGUARDANDO_USUARIO muda o chamado para EM_ATENDIMENTO e registra a transição no histórico. A paginação aceita page >= 0 e size de 1 a 100.
 
 Arquivos aceitos: PDF, PNG, JPG/JPEG e TXT em UTF-8, até 10 MB. Extensão, MIME declarado e assinatura/conteúdo precisam concordar. A chave de armazenamento é um UUID; o nome original não entra no caminho. Erros de upload acima do limite retornam 413. O servidor não divulga chave nem URL pública.
+
+## Notificações e operação — E5 a E8
+
+| Método | Caminho | Acesso | Resultado |
+| --- | --- | --- | --- |
+| GET | /api/v1/ti/dashboard | TI_AGENTE, TI_ADMIN | Contagens por status/prioridade, vencidos, vencendo em 1 hora e tempo médio de resolução |
+| GET | /api/v1/ti/admin/usuarios | TI_ADMIN | Usuários paginados, inclusive inativos |
+| PATCH | /api/v1/ti/admin/usuarios/{id} | TI_ADMIN + CSRF | Altera nome, e-mail, perfil e acesso |
+| POST | /api/v1/ti/admin/usuarios/importacao | TI_ADMIN + CSRF | multipart `arquivo` CSV; relatório por linha |
+| GET/POST/PATCH | /api/v1/ti/admin/categorias | TI_ADMIN | Lista, cria e edita categorias (PATCH em /{id}) |
+| GET/PUT | /api/v1/ti/admin/slas | TI_ADMIN | Lista políticas e atualiza /{prioridade} |
+| GET | /api/v1/ti/admin/calendario | TI_ADMIN | Expediente e feriados |
+| PUT | /api/v1/ti/admin/calendario/expediente | TI_ADMIN + CSRF | Substitui janelas semanais validadas |
+| POST/DELETE | /api/v1/ti/admin/calendario/feriados | TI_ADMIN + CSRF | Adiciona ou remove feriado (DELETE em /{id}) |
+| POST | /api/v1/chamados/{id}/reabertura | solicitante + CSRF | Reabre RESOLVIDO com `{ "version": N }` dentro do prazo configurado |
+| GET/POST | /api/v1/chamados/{id}/avaliacao | dono ou TI para leitura; solicitante + CSRF para criação | Nota 1–5 e comentário opcional de até 1.000 caracteres |
+
+O SLA usa o fuso America/Sao_Paulo, expediente e feriados cadastrados; pausa em AGUARDANDO_USUARIO e retoma após resposta. A alteração de política/calendário afeta novos prazos calculados. Alertas de resolução próxima entram na outbox com chave de deduplicação. A outbox e o fechamento automático usam jobs com ShedLock. O fechamento de RESOLVIDO ocorre após 3 dias por padrão; o limite para reabrir é de 7 dias por padrão, porém um chamado FECHADO não pode ser reaberto. As duas durações são configuráveis por ambiente. Ao reabrir, a avaliação anterior é removida para permitir uma nova avaliação após a próxima resolução.

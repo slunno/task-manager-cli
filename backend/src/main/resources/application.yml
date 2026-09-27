@@ -53,9 +53,10 @@ springdoc:
 helpdesk:
   auth:
     mode: disabled
-
-
   mail:
     from: ${HELPDESK_MAIL_FROM:helpdesk@localhost}
   portal:
     url: ${HELPDESK_PORTAL_URL:http://127.0.0.1:5173}
+  conclusao:
+    dias-reabertura: ${HELPDESK_REOPEN_DAYS:7}
+    dias-fechamento: ${HELPDESK_AUTOCLOSE_DAYS:3}

@@ -100,6 +100,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/chamados/{id}/reabertura': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['reabrir']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/chamados/{id}/assumir': {
     parameters: {
       query?: never
@@ -126,6 +142,22 @@ export interface paths {
     get: operations['listar_1']
     put?: never
     post: operations['criar_2']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/chamados/{chamadoId}/avaliacao': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['buscar']
+    put?: never
+    post: operations['avaliar']
     delete?: never
     options?: never
     head?: never
@@ -219,7 +251,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['buscar']
+    get: operations['buscar_1']
     put?: never
     post?: never
     delete?: never
@@ -539,6 +571,8 @@ export interface components {
       /** Format: date-time */
       resolvidoEm: string | null
       /** Format: date-time */
+      fechadoEm: string | null
+      /** Format: date-time */
       primeiraRespostaEm: string | null
       solucao: string | null
       /** Format: date-time */
@@ -547,6 +581,10 @@ export interface components {
       prazoPrimeiraResposta: string | null
       /** Format: date-time */
       slaPausadoEm: string | null
+      /** Format: int64 */
+      version: number
+    }
+    ReabrirChamadoRequest: {
       /** Format: int64 */
       version: number
     }
@@ -567,6 +605,20 @@ export interface components {
       autorId?: number
       texto?: string
       interno?: boolean
+      /** Format: date-time */
+      criadoEm?: string
+    }
+    AvaliarRequest: {
+      /** Format: int32 */
+      nota?: number
+      comentario?: string
+    }
+    AvaliacaoResponse: {
+      /** Format: int64 */
+      chamadoId?: number
+      /** Format: int32 */
+      nota?: number
+      comentario?: string
       /** Format: date-time */
       criadoEm?: string
     }
@@ -984,6 +1036,32 @@ export interface operations {
       }
     }
   }
+  reabrir: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReabrirChamadoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
   assumir: {
     parameters: {
       query?: never
@@ -1057,6 +1135,54 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['ComentarioResponse']
+        }
+      }
+    }
+  }
+  buscar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvaliacaoResponse']
+        }
+      }
+    }
+  }
+  avaliar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AvaliarRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvaliacaoResponse']
         }
       }
     }
@@ -1242,7 +1368,7 @@ export interface operations {
       }
     }
   }
-  buscar: {
+  buscar_1: {
     parameters: {
       query: {
         texto: string

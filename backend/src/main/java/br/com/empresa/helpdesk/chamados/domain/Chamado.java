@@ -66,6 +66,9 @@ public class Chamado {
   @Column(name = "resolvido_em")
   private Instant resolvidoEm;
 
+  @Column(name = "fechado_em")
+  private Instant fechadoEm;
+
   @Column(name = "primeira_resposta_em")
   private Instant primeiraRespostaEm;
 
@@ -188,6 +191,10 @@ public class Chamado {
     return resolvidoEm;
   }
 
+  public Instant getFechadoEm() {
+    return fechadoEm;
+  }
+
   public Instant getPrimeiraRespostaEm() {
     return primeiraRespostaEm;
   }
@@ -275,6 +282,27 @@ public class Chamado {
       resolvidoEm = agora;
     }
     status = novoStatus;
+    atualizadoEm = agora;
+  }
+
+  public void reabrir(Instant agora) {
+    if (status != StatusChamado.RESOLVIDO)
+      throw new ConflitoChamadoException("Apenas chamados resolvidos podem ser reabertos");
+    status = StatusChamado.ABERTO;
+    responsavelId = null;
+    resolvidoEm = null;
+    fechadoEm = null;
+    primeiraRespostaEm = null;
+    solucao = null;
+    slaPausadoEm = null;
+    atualizadoEm = agora;
+  }
+
+  public void fechar(Instant agora) {
+    if (status != StatusChamado.RESOLVIDO)
+      throw new ConflitoChamadoException("Apenas chamados resolvidos podem ser fechados");
+    status = StatusChamado.FECHADO;
+    fechadoEm = agora;
     atualizadoEm = agora;
   }
 

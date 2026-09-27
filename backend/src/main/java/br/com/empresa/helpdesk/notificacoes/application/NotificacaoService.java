@@ -2,6 +2,7 @@ package br.com.empresa.helpdesk.notificacoes.application;
 
 import br.com.empresa.helpdesk.chamados.application.ChamadoService;
 import br.com.empresa.helpdesk.chamados.domain.ChamadoAlteradoEvent;
+import br.com.empresa.helpdesk.chamados.domain.ChamadoReabertoEvent;
 import br.com.empresa.helpdesk.notificacoes.domain.NotificacaoOutbox;
 import br.com.empresa.helpdesk.notificacoes.infra.NotificacaoOutboxRepository;
 import br.com.empresa.helpdesk.usuarios.application.UsuarioService;
@@ -41,11 +42,18 @@ public class NotificacaoService {
     var chamado = chamados.resumoParaNotificacao(evento.chamadoId());
     if ("responsavel".equals(evento.campo()) && evento.valorNovo() != null)
       destinatarioAtivo(Long.valueOf(evento.valorNovo()), "ATRIBUICAO", chamado);
-    if ("status".equals(evento.campo()) && !evento.usuarioId().equals(chamado.solicitanteId()))
+    if ("status".equals(evento.campo())
+        && !java.util.Objects.equals(evento.usuarioId(), chamado.solicitanteId()))
       destinatarioAtivo(
           chamado.solicitanteId(),
           "RESOLVIDO".equals(evento.valorNovo()) ? "RESOLUCAO" : "STATUS",
           chamado);
+  }
+
+  @EventListener
+  public void reaberto(ChamadoReabertoEvent evento) {
+    var chamado = chamados.resumoParaNotificacao(evento.chamadoId());
+    usuarios.emailsTiAtivos().forEach(email -> enfileirar("REABERTURA", email, chamado));
   }
 
   @EventListener

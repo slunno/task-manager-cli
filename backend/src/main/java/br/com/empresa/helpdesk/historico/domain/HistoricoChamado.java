@@ -18,7 +18,7 @@ public class HistoricoChamado {
   @Column(name = "chamado_id", nullable = false, updatable = false)
   private Long chamadoId;
 
-  @Column(name = "usuario_id", nullable = false, updatable = false)
+  @Column(name = "usuario_id", updatable = false)
   private Long usuarioId;
 
   @Column(nullable = false, length = 60, updatable = false)

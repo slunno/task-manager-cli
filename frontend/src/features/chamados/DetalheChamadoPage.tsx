@@ -9,6 +9,7 @@ import { AreaPage } from '../auth/AreaPage'
 import { useMe } from '../auth/useAuth'
 import { prioridadeTexto, statusTexto } from './formatacao'
 import { GestaoChamado } from './GestaoChamado'
+import { ConclusaoPanel } from './ConclusaoPanel'
 import { HistoricoChamadoPanel } from './HistoricoChamadoPanel'
 import { InteracoesChamadoPanel } from './InteracoesChamadoPanel'
 
@@ -158,6 +159,12 @@ export function DetalheChamadoPage() {
           )}
         </div>
       )}
+      {chamado.data &&
+        sessao.data?.id === chamado.data.solicitanteId &&
+        (chamado.data.status === 'RESOLVIDO' ||
+          chamado.data.status === 'FECHADO') && (
+          <ConclusaoPanel chamado={chamado.data} />
+        )}
       {ehTi && chamado.data && categorias.data && (
         <GestaoChamado
           key={chamado.data.version}

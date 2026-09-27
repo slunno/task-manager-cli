@@ -12,7 +12,7 @@ As portas do Compose ficam ligadas a `127.0.0.1`, pois o perfil `dev` permite si
 
 ### Prévia visual sem Docker
 
-Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui dois chamados fictícios. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
+Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui dois chamados fictícios. A prévia simula os fluxos iniciais; administração, envio SMTP, SLA e conclusão precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
 
 Em dois terminais PowerShell, dentro de `frontend/`:
 
@@ -48,7 +48,7 @@ WHERE lower(email) = lower('admin@empresa.com') AND ativo = true;
 COMMIT;
 ```
 
-Substitua o e-mail de exemplo pelo usuário aprovado. Na E7, a administração de perfis será feita pelo `TI_ADMIN` via interface/API. Alterações de perfil ou desativação no banco passam a valer na próxima requisição da sessão existente.
+Substitua o e-mail de exemplo pelo usuário aprovado. Após a primeira promoção, o `TI_ADMIN` administra perfis, usuários, categorias, SLA e calendário pela interface/API. Alterações de perfil ou desativação no banco passam a valer na próxima requisição da sessão existente.
 
 ## Builds independentes
 
@@ -70,3 +70,11 @@ Em dev, o backend grava em `./data/anexos` dentro do contêiner (ou em `HELPDESK
 Em produção, `application-prod.yml` exige S3 compatível. Crie um bucket privado antes de iniciar e configure `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_SECRET_KEY` e `HELPDESK_S3_BUCKET` no gerenciador de segredos. Não conceda leitura pública ou URLs permanentes. Valide upload e download com contas de funcionário, agente e chamado alheio antes de liberar o ambiente.
 
 Na prévia sem Docker, comentários e metadados de anexos ficam em memória e o download devolve um arquivo demonstrativo; a validação real de conteúdo e a persistência são feitas pelo backend Java.
+
+## Notificações, SLA e conclusão
+
+No Compose, o MailHog recebe mensagens em `http://localhost:8025`. Configure `HELPDESK_MAIL_FROM` e `HELPDESK_PORTAL_URL` para o remetente e o endereço que aparecerá no e-mail; para o Compose local, o portal é `http://localhost:3000`. A outbox persiste tentativas e aplica espera crescente nas falhas. Se o envio já chegou ao SMTP e o processo caiu antes de confirmar a transação, o e-mail pode ser repetido; monitore a outbox e o MailHog ao testar o fluxo.
+
+O SLA considera America/Sao_Paulo, janelas de expediente e feriados administrados na área da TI. O cálculo para um chamado novo usa a política vigente. Revise horário/feriados antes de colocar o sistema em operação; alterações não recalculam chamados já abertos. O job de alerta consulta prazos de resolução que vencem na próxima hora.
+
+`HELPDESK_REOPEN_DAYS` (padrão 7) controla o limite de reabertura de um RESOLVIDO; `HELPDESK_AUTOCLOSE_DAYS` (padrão 3) controla o fechamento automático. O job roda a cada hora e processa até 100 chamados por execução. Para validar localmente, resolva um chamado, avalie com o solicitante e reabra; a avaliação anterior é apagada. Um chamado FECHADO permanece fechado.

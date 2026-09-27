@@ -67,6 +67,7 @@ public class EnvioNotificacaoService {
       case "ATRIBUICAO" -> "Chamado atribuído";
       case "COMENTARIO" -> "Novo comentário";
       case "RESOLUCAO" -> "Chamado resolvido";
+      case "REABERTURA" -> "Chamado reaberto";
       case "SLA_VENCENDO" -> "SLA próximo do vencimento";
       default -> "Atualização do chamado";
     };
