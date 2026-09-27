@@ -93,3 +93,15 @@ O SLA usa o fuso America/Sao_Paulo, expediente e feriados cadastrados; pausa em 
 | GET/POST/DELETE | /api/v1/ti/filtros-salvos[/{id}] | TI; escrita com CSRF | Filtros da fila pertencem ao usuário logado |
 
 Artigos têm título, conteúdo, categoria opcional e estado de publicação. A busca é limitada a 120 caracteres, 50 itens por página e não expõe rascunhos em consulta ou detalhe para funcionários. Filtros aceitam somente as chaves conhecidas da fila, têm limite de 20 por usuário e não podem ser removidos por outro agente. Respostas prontas preenchem o campo da conversa; o agente revisa o texto antes de enviar.
+
+## Gestão — E10
+
+| Método | Caminho | Acesso | Resultado |
+| --- | --- | --- | --- |
+| GET | /api/v1/avisos | autenticado | Avisos ativos dentro do período de publicação |
+| GET/POST/PUT | /api/v1/ti/admin/avisos[/{id}] | TI_ADMIN; escrita com CSRF | Gestão de comunicados de incidente |
+| GET/PUT | /api/v1/ti/chamados/{id}/duplicidade | TI; escrita com CSRF | Principal e até 50 duplicados; alteração exige `version` |
+| GET | /api/v1/ti/relatorios?desde=&ate=&setorId=&categoriaId= | TI | Totais e resoluções agregados por setor e categoria no período |
+| GET | /api/v1/ti/relatorios/exportacao.csv | TI | Mesmo agregado em CSV para download |
+
+O intervalo do relatório é inclusivo nas datas informadas, usa America/Sao_Paulo e aceita até 366 dias. O CSV não contém nomes de solicitantes nem texto de chamados; valores textuais são escapados contra injeção de fórmulas. O vínculo de duplicados não aparece nas respostas de funcionário e rejeita autorreferência, cadeia de duplicados e conflito de versão.

@@ -12,6 +12,8 @@ import { DashboardTiPage } from '../features/chamados/DashboardTiPage'
 import { MeusChamadosPage } from '../features/chamados/MeusChamadosPage'
 import { NovoChamadoPage } from '../features/chamados/NovoChamadoPage'
 import { ConhecimentoPage } from '../features/conhecimento/ConhecimentoPage'
+import { RelatoriosPage } from '../features/gestao/RelatoriosPage'
+import { AvisosAdminPage } from '../features/gestao/AvisosAdminPage'
 
 const TODOS = ['FUNCIONARIO', 'TI_AGENTE', 'TI_ADMIN'] as const
 const TI = ['TI_AGENTE', 'TI_ADMIN'] as const
@@ -83,6 +85,14 @@ export function App() {
         }
       />
       <Route
+        path="/ti/relatorios"
+        element={
+          <ExigirPerfil permitido={[...TI]}>
+            <RelatoriosPage />
+          </ExigirPerfil>
+        }
+      />
+      <Route
         path="/ti/admin"
         element={
           <ExigirPerfil permitido={['TI_ADMIN']}>
@@ -94,6 +104,7 @@ export function App() {
         <Route path="categorias" element={<CategoriasAdminPage />} />
         <Route path="slas" element={<SlasAdminPage />} />
         <Route path="calendario" element={<CalendarioAdminPage />} />
+        <Route path="avisos" element={<AvisosAdminPage />} />
       </Route>
       <Route path="*" element={<NaoEncontrado />} />
     </Routes>

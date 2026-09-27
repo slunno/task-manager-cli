@@ -1,6 +1,6 @@
 # Portal de chamados internos de TI
 
-Monorepo do helpdesk em português para uma organização de 200 a 500 pessoas. A entrega é incremental conforme o plano E0–E11 do prompt de produto. **Estado atual: E9, com base de conhecimento, respostas prontas e filtros salvos.**
+Monorepo do helpdesk em português para uma organização de 200 a 500 pessoas. A entrega é incremental conforme o plano E0–E11 do prompt de produto. **Estado atual: E10, com conhecimento, gestão de incidentes, duplicados e relatórios.**
 
 ## Estrutura
 
@@ -25,5 +25,6 @@ Consulte [o runbook](docs/runbook.md) para variáveis de ambiente, Compose, SSO 
 - **E7:** gestão de usuários e importação CSV, categorias, políticas de SLA e calendário.
 - **E8:** reabertura pelo solicitante, fechamento automático e avaliação do atendimento.
 - **E9:** artigos pesquisáveis, rascunhos da TI, sugestões ao abrir chamado, respostas prontas e filtros pessoais na fila.
+- **E10:** avisos de incidente, vínculo interno de duplicados e relatórios agregados com exportação CSV.
 
 A segurança é aplicada no backend. Os guardas de rota do frontend organizam a navegação, mas não substituem a autorização da API.

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router'
 import { logout } from '../../api/auth'
 import { Carregando } from './Guardas'
 import { ME_QUERY_KEY, useMe } from './useAuth'
+import { avisosVigentes } from '../../api/gestao'
 
 export function AreaPage({
   titulo,
@@ -15,6 +16,12 @@ export function AreaPage({
   children?: ReactNode
 }) {
   const sessao = useMe()
+  const avisos = useQuery({
+    queryKey: ['avisos'],
+    queryFn: avisosVigentes,
+    enabled: !!sessao.data,
+    staleTime: 60_000,
+  })
   const cliente = useQueryClient()
   const navegar = useNavigate()
   const sair = useMutation({
@@ -99,6 +106,14 @@ export function AreaPage({
               Dashboard
             </Link>
           )}
+          {usuario.perfil !== 'FUNCIONARIO' && (
+            <Link
+              className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+              to="/ti/relatorios"
+            >
+              Relatórios
+            </Link>
+          )}
           {usuario.perfil === 'TI_ADMIN' && (
             <Link
               className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
@@ -108,6 +123,16 @@ export function AreaPage({
             </Link>
           )}
         </nav>
+        {avisos.data?.map((aviso) => (
+          <section
+            key={aviso.id}
+            role="status"
+            className="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950"
+          >
+            <strong>{aviso.titulo}</strong>
+            <p className="mt-1 whitespace-pre-wrap text-sm">{aviso.mensagem}</p>
+          </section>
+        ))}
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-ocean">
           {usuario.perfil.replace('_', ' ')}
         </p>

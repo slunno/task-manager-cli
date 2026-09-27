@@ -34,6 +34,60 @@
         }
       }
     },
+    "/api/v1/ti/chamados/{id}/duplicidade": {
+      "get": {
+        "tags": ["duplicidade-controller"],
+        "operationId": "obter",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/Duplicidade" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["duplicidade-controller"],
+        "operationId": "vincular",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VincularRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/Duplicidade" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ti/artigos/{id}": {
       "put": {
         "tags": ["conhecimento-controller"],
@@ -119,6 +173,38 @@
             "description": "OK",
             "content": {
               "*/*": { "schema": { "$ref": "#/components/schemas/Calendario" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/avisos/{id}": {
+      "put": {
+        "tags": ["aviso-incidente-controller"],
+        "operationId": "editar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AvisoRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/AvisoResponse" }
+              }
             }
           }
         }
@@ -326,6 +412,47 @@
         }
       }
     },
+    "/api/v1/ti/admin/avisos": {
+      "get": {
+        "tags": ["aviso-incidente-controller"],
+        "operationId": "todos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AvisoResponse" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["aviso-incidente-controller"],
+        "operationId": "criar_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AvisoRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/AvisoResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/chamados": {
       "get": {
         "tags": ["chamado-controller"],
@@ -443,7 +570,7 @@
       },
       "post": {
         "tags": ["chamado-controller"],
-        "operationId": "criar_1",
+        "operationId": "criar_2",
         "requestBody": {
           "content": {
             "application/json": {
@@ -567,7 +694,7 @@
       },
       "post": {
         "tags": ["comentario-controller"],
-        "operationId": "criar_2",
+        "operationId": "criar_3",
         "parameters": [
           {
             "name": "chamadoId",
@@ -924,10 +1051,90 @@
         }
       }
     },
+    "/api/v1/ti/relatorios": {
+      "get": {
+        "tags": ["relatorio-controller"],
+        "operationId": "consultar",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "setorId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "categoriaId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/Relatorio" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/relatorios/exportacao.csv": {
+      "get": {
+        "tags": ["relatorio-controller"],
+        "operationId": "exportar",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "setorId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "categoriaId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": { "schema": { "type": "string", "format": "byte" } }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ti/dashboard": {
       "get": {
         "tags": ["dashboard-controller"],
-        "operationId": "consultar",
+        "operationId": "consultar_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -1154,6 +1361,25 @@
         }
       }
     },
+    "/api/v1/avisos": {
+      "get": {
+        "tags": ["aviso-incidente-controller"],
+        "operationId": "vigentes",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/AvisoResponse" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/csrf": {
       "get": {
         "tags": ["auth-controller"],
@@ -1327,6 +1553,25 @@
           "ativo": { "type": "boolean" }
         }
       },
+      "VincularRequest": {
+        "type": "object",
+        "properties": {
+          "principalId": { "type": "integer", "format": "int64" },
+          "version": { "type": "integer", "format": "int64" }
+        },
+        "required": ["version"]
+      },
+      "Duplicidade": {
+        "type": "object",
+        "properties": {
+          "chamadoId": { "type": "integer", "format": "int64" },
+          "principalId": { "type": "integer", "format": "int64" },
+          "duplicados": {
+            "type": "array",
+            "items": { "type": "integer", "format": "int64" }
+          }
+        }
+      },
       "ArtigoRequest": {
         "type": "object",
         "properties": {
@@ -1401,6 +1646,28 @@
           "id": { "type": "integer", "format": "int64" },
           "data": { "type": "string", "format": "date" },
           "descricao": { "type": "string" }
+        }
+      },
+      "AvisoRequest": {
+        "type": "object",
+        "properties": {
+          "titulo": { "type": "string", "maxLength": 160, "minLength": 0 },
+          "mensagem": { "type": "string", "maxLength": 1000, "minLength": 0 },
+          "inicioEm": { "type": "string", "format": "date-time" },
+          "fimEm": { "type": "string", "format": "date-time" },
+          "ativo": { "type": "boolean" }
+        },
+        "required": ["inicioEm", "mensagem", "titulo"]
+      },
+      "AvisoResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "titulo": { "type": "string" },
+          "mensagem": { "type": "string" },
+          "ativo": { "type": "boolean" },
+          "inicioEm": { "type": "string", "format": "date-time" },
+          "fimEm": { "type": "string", "format": "date-time" }
         }
       },
       "FiltroRequest": {
@@ -1704,6 +1971,29 @@
           "perfil": {
             "type": "string",
             "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
+          }
+        }
+      },
+      "Linha": {
+        "type": "object",
+        "properties": {
+          "setorId": { "type": "integer", "format": "int64" },
+          "setor": { "type": "string" },
+          "categoriaId": { "type": "integer", "format": "int64" },
+          "categoria": { "type": "string" },
+          "total": { "type": "integer", "format": "int64" },
+          "resolvidos": { "type": "integer", "format": "int64" },
+          "mediaResolucaoHoras": { "type": "number", "format": "double" }
+        }
+      },
+      "Relatorio": {
+        "type": "object",
+        "properties": {
+          "desde": { "type": "string", "format": "date" },
+          "ate": { "type": "string", "format": "date" },
+          "linhas": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Linha" }
           }
         }
       },

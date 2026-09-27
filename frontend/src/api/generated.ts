@@ -20,6 +20,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/chamados/{id}/duplicidade': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['obter']
+    put: operations['vincular']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/ti/artigos/{id}': {
     parameters: {
       query?: never
@@ -61,6 +77,22 @@ export interface paths {
     }
     get?: never
     put: operations['expediente']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/avisos/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['editar']
     post?: never
     delete?: never
     options?: never
@@ -164,6 +196,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/admin/avisos': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['todos']
+    put?: never
+    post: operations['criar_1']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/chamados': {
     parameters: {
       query?: never
@@ -173,7 +221,7 @@ export interface paths {
     }
     get: operations['fila']
     put?: never
-    post: operations['criar_1']
+    post: operations['criar_2']
     delete?: never
     options?: never
     head?: never
@@ -221,7 +269,7 @@ export interface paths {
     }
     get: operations['listar_1']
     put?: never
-    post: operations['criar_2']
+    post: operations['criar_3']
     delete?: never
     options?: never
     head?: never
@@ -340,7 +388,7 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/api/v1/ti/dashboard': {
+  '/api/v1/ti/relatorios': {
     parameters: {
       query?: never
       header?: never
@@ -348,6 +396,38 @@ export interface paths {
       cookie?: never
     }
     get: operations['consultar']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/relatorios/exportacao.csv': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['exportar']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/dashboard': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['consultar_1']
     put?: never
     post?: never
     delete?: never
@@ -484,6 +564,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/avisos': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['vigentes']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/auth/csrf': {
     parameters: {
       query?: never
@@ -612,6 +708,19 @@ export interface components {
       texto?: string
       ativo?: boolean
     }
+    VincularRequest: {
+      /** Format: int64 */
+      principalId?: number
+      /** Format: int64 */
+      version: number
+    }
+    Duplicidade: {
+      /** Format: int64 */
+      chamadoId?: number
+      /** Format: int64 */
+      principalId?: number
+      duplicados?: number[]
+    }
     ArtigoRequest: {
       titulo: string
       conteudo: string
@@ -660,6 +769,26 @@ export interface components {
       /** Format: date */
       data?: string
       descricao?: string
+    }
+    AvisoRequest: {
+      titulo: string
+      mensagem: string
+      /** Format: date-time */
+      inicioEm: string
+      /** Format: date-time */
+      fimEm?: string
+      ativo?: boolean
+    }
+    AvisoResponse: {
+      /** Format: int64 */
+      id?: number
+      titulo?: string
+      mensagem?: string
+      ativo?: boolean
+      /** Format: date-time */
+      inicioEm?: string
+      /** Format: date-time */
+      fimEm?: string
     }
     FiltroRequest: {
       nome: string
@@ -868,6 +997,27 @@ export interface components {
       /** @enum {string} */
       perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
     }
+    Linha: {
+      /** Format: int64 */
+      setorId?: number
+      setor?: string
+      /** Format: int64 */
+      categoriaId?: number
+      categoria?: string
+      /** Format: int64 */
+      total?: number
+      /** Format: int64 */
+      resolvidos?: number
+      /** Format: double */
+      mediaResolucaoHoras?: number
+    }
+    Relatorio: {
+      /** Format: date */
+      desde?: string
+      /** Format: date */
+      ate?: string
+      linhas?: components['schemas']['Linha'][]
+    }
     DashboardResponse: {
       /** Format: int64 */
       totalChamados?: number
@@ -1032,6 +1182,54 @@ export interface operations {
       }
     }
   }
+  obter: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Duplicidade']
+        }
+      }
+    }
+  }
+  vincular: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VincularRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Duplicidade']
+        }
+      }
+    }
+  }
   editarArtigo: {
     parameters: {
       query?: never
@@ -1104,6 +1302,32 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['Calendario']
+        }
+      }
+    }
+  }
+  editar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AvisoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvisoResponse']
         }
       }
     }
@@ -1315,6 +1539,50 @@ export interface operations {
       }
     }
   }
+  todos: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvisoResponse'][]
+        }
+      }
+    }
+  }
+  criar_1: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AvisoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvisoResponse']
+        }
+      }
+    }
+  }
   fila: {
     parameters: {
       query?: {
@@ -1355,7 +1623,7 @@ export interface operations {
       }
     }
   }
-  criar_1: {
+  criar_2: {
     parameters: {
       query?: never
       header?: never
@@ -1456,7 +1724,7 @@ export interface operations {
       }
     }
   }
-  criar_2: {
+  criar_3: {
     parameters: {
       query?: never
       header?: never
@@ -1736,6 +2004,56 @@ export interface operations {
   }
   consultar: {
     parameters: {
+      query: {
+        desde: string
+        ate: string
+        setorId?: number
+        categoriaId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Relatorio']
+        }
+      }
+    }
+  }
+  exportar: {
+    parameters: {
+      query: {
+        desde: string
+        ate: string
+        setorId?: number
+        categoriaId?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/csv': string
+        }
+      }
+    }
+  }
+  consultar_1: {
+    parameters: {
       query?: never
       header?: never
       path?: never
@@ -1927,6 +2245,26 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['CategoriaResponse'][]
+        }
+      }
+    }
+  }
+  vigentes: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AvisoResponse'][]
         }
       }
     }

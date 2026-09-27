@@ -6,6 +6,7 @@ const paginas = [
   ['Categorias', '/ti/admin/categorias'],
   ['Políticas de SLA', '/ti/admin/slas'],
   ['Calendário', '/ti/admin/calendario'],
+  ['Avisos de incidente', '/ti/admin/avisos'],
 ]
 
 export function AdminLayout() {

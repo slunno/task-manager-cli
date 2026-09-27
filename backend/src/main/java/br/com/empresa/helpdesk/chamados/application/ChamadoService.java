@@ -184,6 +184,42 @@ public class ChamadoService {
     return mapper.paraResponse(exigirAcesso(id, ator));
   }
 
+  public record Duplicidade(Long chamadoId, Long principalId, List<Long> duplicados) {}
+
+  @Transactional(readOnly = true)
+  public Duplicidade duplicidade(Long id) {
+    Chamado chamado = exigir(id);
+    return new Duplicidade(
+        id,
+        chamado.getChamadoPrincipalId(),
+        repository.findTop50ByChamadoPrincipalIdOrderByCriadoEmDesc(id).stream()
+            .map(Chamado::getId)
+            .toList());
+  }
+
+  @Transactional
+  public Duplicidade vincularDuplicado(Long id, Long principalId, Long version, Usuario ator) {
+    Chamado chamado = exigir(id);
+    verificarVersion(chamado, version);
+    if (Objects.equals(id, principalId))
+      throw new RequisicaoInvalidaException("Um chamado não pode ser duplicado de si mesmo");
+    if (principalId != null) {
+      Chamado principal = exigir(principalId);
+      if (principal.getChamadoPrincipalId() != null)
+        throw new RequisicaoInvalidaException("O principal não pode ser um chamado duplicado");
+      if (!repository.findTop50ByChamadoPrincipalIdOrderByCriadoEmDesc(id).isEmpty())
+        throw new RequisicaoInvalidaException("Um chamado com duplicados não pode virar duplicado");
+    }
+    Long anterior = chamado.getChamadoPrincipalId();
+    if (Objects.equals(anterior, principalId))
+      throw new RequisicaoInvalidaException("Nenhuma alteração informada");
+    Instant agora = Instant.now(clock);
+    chamado.vincularPrincipal(principalId, agora);
+    repository.saveAndFlush(chamado);
+    registrar(chamado, ator.getId(), "chamadoPrincipal", anterior, principalId, agora);
+    return duplicidade(id);
+  }
+
   @Transactional(readOnly = true)
   public Chamado exigirAcesso(Long id, Usuario ator) {
     return (ator.getPerfil() == Perfil.FUNCIONARIO

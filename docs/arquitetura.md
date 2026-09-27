@@ -2,7 +2,7 @@
 
 ## Módulos
 
-O backend é um monólito modular com os módulos `usuarios`, `chamados`, `comentarios`, `anexos`, `historico`, `notificacoes`, `sla`, `avaliacoes`, `conhecimento`, `admin` e `compartilhado`. O frontend React usa rotas por perfil e consome somente `/api/v1`. PostgreSQL armazena dados e outbox; MinIO ou storage S3 compatível armazena anexos; SMTP entrega notificações.
+O backend é um monólito modular com os módulos `usuarios`, `chamados`, `comentarios`, `anexos`, `historico`, `notificacoes`, `sla`, `avaliacoes`, `conhecimento`, `gestao`, `admin` e `compartilhado`. O frontend React usa rotas por perfil e consome somente `/api/v1`. PostgreSQL armazena dados e outbox; MinIO ou storage S3 compatível armazena anexos; SMTP entrega notificações.
 
 ```mermaid
 flowchart LR

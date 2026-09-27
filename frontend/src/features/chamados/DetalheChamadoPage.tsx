@@ -12,6 +12,7 @@ import { GestaoChamado } from './GestaoChamado'
 import { ConclusaoPanel } from './ConclusaoPanel'
 import { HistoricoChamadoPanel } from './HistoricoChamadoPanel'
 import { InteracoesChamadoPanel } from './InteracoesChamadoPanel'
+import { DuplicidadePanel } from '../gestao/DuplicidadePanel'
 
 export function DetalheChamadoPage() {
   const sessao = useMe()
@@ -196,6 +197,12 @@ export function DetalheChamadoPage() {
       )}{' '}
       {ehTi && chamado.data && (
         <HistoricoChamadoPanel chamadoId={chamado.data.id} />
+      )}
+      {ehTi && chamado.data && (
+        <DuplicidadePanel
+          chamadoId={chamado.data.id}
+          version={chamado.data.version}
+        />
       )}
     </AreaPage>
   )

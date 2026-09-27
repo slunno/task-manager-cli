@@ -21,4 +21,6 @@ public interface ChamadoRepository
   List<Chamado> vencendoSla(Instant inicio, Instant fim);
 
   Optional<Chamado> findByIdAndSolicitanteId(Long id, Long solicitanteId);
+
+  List<Chamado> findTop50ByChamadoPrincipalIdOrderByCriadoEmDesc(Long chamadoPrincipalId);
 }

@@ -84,6 +84,9 @@ public class Chamado {
   @Column(name = "sla_pausado_em")
   private Instant slaPausadoEm;
 
+  @Column(name = "chamado_principal_id")
+  private Long chamadoPrincipalId;
+
   @Version private Long version;
 
   protected Chamado() {}
@@ -133,6 +136,15 @@ public class Chamado {
 
   public Long getId() {
     return id;
+  }
+
+  public Long getChamadoPrincipalId() {
+    return chamadoPrincipalId;
+  }
+
+  public void vincularPrincipal(Long principalId, Instant agora) {
+    this.chamadoPrincipalId = principalId;
+    this.atualizadoEm = agora;
   }
 
   public String getNumero() {
