@@ -126,11 +126,12 @@ export function FilaTiPage() {
     setParametros(novos)
   }
 
-  function atalho(tipo: 'semResponsavel' | 'meus' | 'todos') {
+  function atalho(tipo: 'semResponsavel' | 'meus' | 'slaVencendo' | 'todos') {
     const novos = new URLSearchParams(parametros)
     novos.delete('page')
     novos.delete('semResponsavel')
     novos.delete('meus')
+    novos.delete('slaVencendo')
     novos.delete('responsavelId')
     if (tipo !== 'todos') novos.set(tipo, 'true')
     setParametros(novos)
@@ -157,12 +158,8 @@ export function FilaTiPage() {
         <Button variant="outline" onClick={() => atalho('meus')}>
           Meus
         </Button>
-        <Button
-          variant="outline"
-          disabled
-          title="Disponível após a configuração do SLA"
-        >
-          Vencendo SLA (em breve)
+        <Button variant="outline" onClick={() => atalho('slaVencendo')}>
+          Vencendo SLA
         </Button>
       </div>
 

@@ -90,7 +90,7 @@ export function LoginPage() {
               </p>
               {config.data.previewDemo && (
                 <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-4 text-sm text-slate-800">
-                  <p className="font-semibold">Explorar a etapa E4</p>
+                  <p className="font-semibold">Explorar a prévia local</p>
                   <p className="mt-1">
                     Entre como agente para acessar a fila, conversar e anexar
                     arquivos.

@@ -1,15 +1,16 @@
+import { createPreviewExtras } from './preview-extra.mjs'
 import { createServer } from 'node:http'
 
 // Prévia local em memória para navegar pelas telas; a API Java segue como implementação real.
 const host = '127.0.0.1'
-const port = 8188
+const port = Number(process.env.HELPDESK_PREVIEW_PORT ?? 8188)
 const csrfToken = 'preview-local-token'
 const categorias = [
-  { id: 1, nome: 'Acessos e contas' },
-  { id: 2, nome: 'Equipamentos' },
-  { id: 3, nome: 'Sistemas e aplicativos' },
-  { id: 4, nome: 'Rede e internet' },
-  { id: 5, nome: 'Outros' },
+  { id: 1, ativa: true, nome: 'Acessos e contas' },
+  { id: 2, ativa: true, nome: 'Equipamentos' },
+  { id: 3, ativa: true, nome: 'Sistemas e aplicativos' },
+  { id: 4, ativa: true, nome: 'Rede e internet' },
+  { id: 5, ativa: true, nome: 'Outros' },
 ]
 const pessoas = [
   {
@@ -17,18 +18,21 @@ const pessoas = [
     nome: 'Maria Oliveira',
     email: 'maria@exemplo.local',
     perfil: 'FUNCIONARIO',
+    ativo: true,
   },
   {
     id: 2,
     nome: 'Agente de TI',
     email: 'agente@exemplo.local',
     perfil: 'TI_AGENTE',
+    ativo: true,
   },
   {
     id: 3,
     nome: 'Admin de TI',
     email: 'admin@exemplo.local',
     perfil: 'TI_ADMIN',
+    ativo: true,
   },
 ]
 const agora = new Date().toISOString()
@@ -38,9 +42,12 @@ const base = {
   criadoEm: agora,
   atualizadoEm: agora,
   resolvidoEm: null,
+  fechadoEm: null,
   primeiraRespostaEm: null,
   solucao: null,
+  prazoPrimeiraResposta: null,
   prazoResolucao: null,
+  slaPausadoEm: null,
   version: 0,
 }
 const chamados = [
@@ -69,10 +76,26 @@ const chamados = [
     prioridade: 'ALTA',
     status: 'EM_ATENDIMENTO',
   },
+  {
+    ...base,
+    id: 3,
+    numero: 'CH-2026-000003',
+    titulo: 'Acesso à rede restabelecido',
+    descricao: 'O acesso à rede interna falhava no escritório.',
+    solicitanteId: 1,
+    categoriaId: 4,
+    responsavelId: 2,
+    prioridade: 'MEDIA',
+    status: 'RESOLVIDO',
+    solucao: 'Configuração de rede corrigida e acesso validado.',
+    resolvidoEm: agora,
+    version: 2,
+  },
 ]
 const historico = []
 const comentarios = []
 const anexos = []
+const responderExtras = createPreviewExtras()
 let usuario = null
 
 function responder(response, status, body, headers = {}) {
@@ -148,6 +171,8 @@ const server = createServer(async (request, response) => {
         return responder(response, 400, { detail: 'Nome e e-mail inválidos' })
       const email = dados.email.trim().toLowerCase()
       const conhecido = pessoas.find((pessoa) => pessoa.email === email)
+      if (conhecido && !conhecido.ativo)
+        return responder(response, 403, { detail: 'Usuário inativo' })
       usuario = conhecido
         ? { ...conhecido }
         : {
@@ -155,6 +180,7 @@ const server = createServer(async (request, response) => {
             nome: dados.nome.trim(),
             email,
             perfil: 'FUNCIONARIO',
+            ativo: true,
           }
       if (!conhecido) pessoas.push(usuario)
       return responder(response, 200, usuario, {
@@ -171,8 +197,29 @@ const server = createServer(async (request, response) => {
       return responder(response, 401, { detail: 'Sessão não iniciada' })
     if (request.method === 'GET' && caminho === '/api/v1/me')
       return responder(response, 200, usuario)
+    if (
+      await responderExtras({
+        request,
+        response,
+        url,
+        usuario,
+        pessoas,
+        categorias,
+        chamados,
+        responder,
+        corpoJson,
+        validarCsrf,
+        pagina,
+        registrar,
+      })
+    )
+      return
     if (request.method === 'GET' && caminho === '/api/v1/categorias')
-      return responder(response, 200, categorias)
+      return responder(
+        response,
+        200,
+        categorias.filter((item) => item.ativa),
+      )
     if (request.method === 'GET' && caminho === '/api/v1/usuarios/busca') {
       if (!ti())
         return responder(response, 403, { detail: 'Acesso restrito à TI' })
@@ -225,6 +272,14 @@ const server = createServer(async (request, response) => {
       }
       if (url.searchParams.get('semResponsavel') === 'true')
         itens = itens.filter((item) => !item.responsavelId)
+      if (url.searchParams.get('slaVencendo') === 'true')
+        itens = itens.filter(
+          (item) =>
+            item.prazoResolucao &&
+            !item.slaPausadoEm &&
+            Date.parse(item.prazoResolucao) >= Date.now() &&
+            Date.parse(item.prazoResolucao) <= Date.now() + 3600000,
+        )
       if (url.searchParams.get('meus') === 'true')
         itens = itens.filter((item) => item.responsavelId === usuario.id)
       const texto = url.searchParams.get('texto')?.trim().toLowerCase()

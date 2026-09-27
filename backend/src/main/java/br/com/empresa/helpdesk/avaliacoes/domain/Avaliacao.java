@@ -11,7 +11,7 @@ public class Avaliacao {
   private Long chamadoId;
 
   @Column(nullable = false)
-  private int nota;
+  private short nota;
 
   @Column(columnDefinition = "text")
   private String comentario;
@@ -23,7 +23,7 @@ public class Avaliacao {
 
   public Avaliacao(Long chamadoId, int nota, String comentario, Instant criadoEm) {
     this.chamadoId = chamadoId;
-    this.nota = nota;
+    this.nota = (short) nota;
     this.comentario = comentario;
     this.criadoEm = criadoEm;
   }

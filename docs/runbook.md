@@ -12,7 +12,7 @@ As portas do Compose ficam ligadas a `127.0.0.1`, pois o perfil `dev` permite si
 
 ### Prévia visual sem Docker
 
-Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui dois chamados fictícios. A prévia simula os fluxos iniciais; administração, envio SMTP, SLA e conclusão precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
+Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui três chamados fictícios. A prévia simula as telas e interações até E8, incluindo administração, dashboard, reabertura e avaliação. Cálculo real de SLA em horas úteis, envio SMTP, autorização e persistência precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
 
 Em dois terminais PowerShell, dentro de `frontend/`:
 
