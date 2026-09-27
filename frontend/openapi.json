@@ -442,6 +442,22 @@
         }
       }
     },
+    "/api/v1/ti/dashboard": {
+      "get": {
+        "tags": ["dashboard-controller"],
+        "operationId": "consultar",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/DashboardResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/me": {
       "get": {
         "tags": ["usuario-controller"],
@@ -703,6 +719,11 @@
             "type": ["string", "null"],
             "format": "date-time"
           },
+          "prazoPrimeiraResposta": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "slaPausadoEm": { "type": ["string", "null"], "format": "date-time" },
           "version": { "type": "integer", "format": "int64" }
         },
         "required": [
@@ -713,12 +734,14 @@
           "descricao",
           "id",
           "numero",
+          "prazoPrimeiraResposta",
           "prazoResolucao",
           "primeiraRespostaEm",
           "prioridade",
           "prioridadeSugerida",
           "resolvidoEm",
           "responsavelId",
+          "slaPausadoEm",
           "solicitanteId",
           "solucao",
           "status",
@@ -818,6 +841,24 @@
           "perfil": {
             "type": "string",
             "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
+          }
+        }
+      },
+      "DashboardResponse": {
+        "type": "object",
+        "properties": {
+          "totalChamados": { "type": "integer", "format": "int64" },
+          "emAberto": { "type": "integer", "format": "int64" },
+          "vencidos": { "type": "integer", "format": "int64" },
+          "vencendo": { "type": "integer", "format": "int64" },
+          "tempoMedioResolucaoHoras": { "type": "number", "format": "double" },
+          "porStatus": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "format": "int64" }
+          },
+          "porPrioridade": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "format": "int64" }
           }
         }
       },

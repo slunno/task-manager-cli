@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface NotificacaoOutboxRepository extends JpaRepository<NotificacaoOutbox, Long> {
+  boolean existsByDedupKey(String dedupKey);
+
   @Query(
       "select n from NotificacaoOutbox n where n.status in ('PENDENTE', 'FALHA') and n.proximaTentativaEm <= :agora order by n.proximaTentativaEm, n.id")
   List<NotificacaoOutbox> pendentes(Instant agora, Pageable pageable);

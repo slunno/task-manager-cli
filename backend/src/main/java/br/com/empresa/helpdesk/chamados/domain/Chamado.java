@@ -75,6 +75,12 @@ public class Chamado {
   @Column(name = "prazo_resolucao")
   private Instant prazoResolucao;
 
+  @Column(name = "prazo_primeira_resposta")
+  private Instant prazoPrimeiraResposta;
+
+  @Column(name = "sla_pausado_em")
+  private Instant slaPausadoEm;
+
   @Version private Long version;
 
   protected Chamado() {}
@@ -196,6 +202,29 @@ public class Chamado {
 
   public Instant getPrazoResolucao() {
     return prazoResolucao;
+  }
+
+  public Instant getPrazoPrimeiraResposta() {
+    return prazoPrimeiraResposta;
+  }
+
+  public Instant getSlaPausadoEm() {
+    return slaPausadoEm;
+  }
+
+  public void definirPrazos(Instant resposta, Instant resolucao) {
+    prazoPrimeiraResposta = resposta;
+    prazoResolucao = resolucao;
+  }
+
+  public void pausarSla(Instant agora) {
+    slaPausadoEm = agora;
+  }
+
+  public void retomarSla(Instant resposta, Instant resolucao) {
+    prazoPrimeiraResposta = resposta;
+    prazoResolucao = resolucao;
+    slaPausadoEm = null;
   }
 
   public Long getVersion() {

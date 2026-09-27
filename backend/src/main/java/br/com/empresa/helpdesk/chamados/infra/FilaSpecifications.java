@@ -35,14 +35,10 @@ public final class FilaSpecifications {
       if (filtro.semResponsavel()) partes.add(cb.isNull(root.get("responsavelId")));
       if (filtro.meus()) partes.add(cb.equal(root.get("responsavelId"), agenteId));
       if (filtro.slaVencendo()) {
-        partes.add(
-            root.get("status")
-                .in(
-                    StatusChamado.ABERTO,
-                    StatusChamado.EM_ATENDIMENTO,
-                    StatusChamado.AGUARDANDO_USUARIO));
+        partes.add(root.get("status").in(StatusChamado.ABERTO, StatusChamado.EM_ATENDIMENTO));
+        partes.add(cb.isNull(root.get("slaPausadoEm")));
         partes.add(cb.greaterThan(root.get("prazoResolucao"), agora));
-        partes.add(cb.lessThanOrEqualTo(root.get("prazoResolucao"), agora.plusSeconds(86400)));
+        partes.add(cb.lessThanOrEqualTo(root.get("prazoResolucao"), agora.plusSeconds(3600)));
       }
       if (filtro.texto() != null && !filtro.texto().isBlank()) {
         String texto =

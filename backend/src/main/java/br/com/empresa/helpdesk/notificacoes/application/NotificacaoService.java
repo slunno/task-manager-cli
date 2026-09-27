@@ -67,18 +67,30 @@ public class NotificacaoService {
         .ifPresent(email -> enfileirar(tipo, email, chamado));
   }
 
+  public void enfileirarUnica(
+      String tipo, String email, ChamadoService.ResumoNotificacao chamado, String chave) {
+    if (repository.existsByDedupKey(chave)) return;
+    var item = criarItem(tipo, email, chamado);
+    item.definirDedupKey(chave);
+    repository.save(item);
+  }
+
   public void enfileirar(String tipo, String email, ChamadoService.ResumoNotificacao chamado) {
-    repository.save(
-        new NotificacaoOutbox(
-            tipo,
-            email,
-            Map.of(
-                "numero",
-                chamado.numero(),
-                "titulo",
-                chamado.titulo(),
-                "chamadoId",
-                chamado.id().toString()),
-            Instant.now(clock)));
+    repository.save(criarItem(tipo, email, chamado));
+  }
+
+  private NotificacaoOutbox criarItem(
+      String tipo, String email, ChamadoService.ResumoNotificacao chamado) {
+    return new NotificacaoOutbox(
+        tipo,
+        email,
+        Map.of(
+            "numero",
+            chamado.numero(),
+            "titulo",
+            chamado.titulo(),
+            "chamadoId",
+            chamado.id().toString()),
+        Instant.now(clock));
   }
 }

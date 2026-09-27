@@ -85,6 +85,22 @@ export function AreaPage({
               Fila da TI
             </Link>
           )}
+          {usuario.perfil !== 'FUNCIONARIO' && (
+            <Link
+              className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+              to="/ti/dashboard"
+            >
+              Dashboard
+            </Link>
+          )}
+          {usuario.perfil === 'TI_ADMIN' && (
+            <Link
+              className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+              to="/ti/admin/usuarios"
+            >
+              Administração
+            </Link>
+          )}
         </nav>
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-ocean">
           {usuario.perfil.replace('_', ' ')}

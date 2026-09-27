@@ -4,6 +4,7 @@ import { Entrada, ExigirPerfil } from '../features/auth/Guardas'
 import { LoginPage } from '../features/auth/LoginPage'
 import { DetalheChamadoPage } from '../features/chamados/DetalheChamadoPage'
 import { FilaTiPage } from '../features/chamados/FilaTiPage'
+import { DashboardTiPage } from '../features/chamados/DashboardTiPage'
 import { MeusChamadosPage } from '../features/chamados/MeusChamadosPage'
 import { NovoChamadoPage } from '../features/chamados/NovoChamadoPage'
 
@@ -79,11 +80,9 @@ export function App() {
       <Route
         path="/ti/dashboard"
         element={
-          <Protegida
-            perfis={[...TI]}
-            titulo="Dashboard da TI"
-            descricao="Os indicadores serão disponibilizados na etapa de SLA e dashboard."
-          />
+          <ExigirPerfil permitido={[...TI]}>
+            <DashboardTiPage />
+          </ExigirPerfil>
         }
       />
       <Route

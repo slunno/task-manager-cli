@@ -28,6 +28,9 @@ public class NotificacaoOutbox {
   @Column(nullable = false, columnDefinition = "jsonb")
   private Map<String, String> payload;
 
+  @Column(name = "dedup_key", length = 180)
+  private String dedupKey;
+
   @Column(nullable = false, length = 16)
   private String status;
 
@@ -54,6 +57,10 @@ public class NotificacaoOutbox {
     this.proximaTentativaEm = agora;
     this.criadoEm = agora;
     this.atualizadoEm = agora;
+  }
+
+  public void definirDedupKey(String chave) {
+    this.dedupKey = chave;
   }
 
   public Long getId() {

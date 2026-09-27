@@ -299,7 +299,9 @@ describe('operação da TI', () => {
       resolvidoEm: null,
       primeiraRespostaEm: null,
       solucao: null,
+      prazoPrimeiraResposta: null,
       prazoResolucao: null,
+      slaPausadoEm: null,
       version: 0,
     }
     const fetch = vi.fn(
@@ -375,7 +377,9 @@ describe('operação da TI', () => {
       resolvidoEm: null,
       primeiraRespostaEm: null,
       solucao: null,
+      prazoPrimeiraResposta: null,
       prazoResolucao: null,
+      slaPausadoEm: null,
       version: 1,
     }
     const fetch = vi.fn(
@@ -443,7 +447,9 @@ describe('operação da TI', () => {
       resolvidoEm: null,
       primeiraRespostaEm: null,
       solucao: null,
+      prazoPrimeiraResposta: null,
       prazoResolucao: null,
+      slaPausadoEm: null,
       version: 0,
     }
     const fetch = vi.fn(
@@ -532,7 +538,9 @@ describe('conversa E4', () => {
       resolvidoEm: null,
       primeiraRespostaEm: null,
       solucao: null,
+      prazoPrimeiraResposta: null,
       prazoResolucao: null,
+      slaPausadoEm: null,
       version: 1,
     }
     const fetch = vi.fn(

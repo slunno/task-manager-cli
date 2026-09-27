@@ -84,6 +84,7 @@ function filtrosDaUrl(parametros: URLSearchParams): FiltrosFila {
     ...(parametros.get('ate') ? { ate: parametros.get('ate') ?? '' } : {}),
     semResponsavel: parametros.get('semResponsavel') === 'true',
     meus: parametros.get('meus') === 'true',
+    slaVencendo: parametros.get('slaVencendo') === 'true',
   }
 }
 

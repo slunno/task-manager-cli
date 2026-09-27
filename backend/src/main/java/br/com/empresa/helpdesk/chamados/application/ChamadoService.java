@@ -18,6 +18,7 @@ import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
 import br.com.empresa.helpdesk.historico.api.HistoricoResponse;
 import br.com.empresa.helpdesk.historico.application.HistoricoService;
 import br.com.empresa.helpdesk.notificacoes.application.ChamadoCriadoEvent;
+import br.com.empresa.helpdesk.sla.application.SlaService;
 import br.com.empresa.helpdesk.usuarios.application.UsuarioService;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
@@ -45,6 +46,7 @@ public class ChamadoService {
   private final HistoricoService historico;
   private final ApplicationEventPublisher eventos;
   private final Clock clock;
+  private final SlaService sla;
 
   public ChamadoService(
       ChamadoRepository repository,
@@ -54,7 +56,8 @@ public class ChamadoService {
       ChamadoMapper mapper,
       HistoricoService historico,
       ApplicationEventPublisher eventos,
-      Clock clock) {
+      Clock clock,
+      SlaService sla) {
     this.repository = repository;
     this.categorias = categorias;
     this.usuarios = usuarios;
@@ -63,6 +66,7 @@ public class ChamadoService {
     this.historico = historico;
     this.eventos = eventos;
     this.clock = clock;
+    this.sla = sla;
   }
 
   @Transactional
@@ -91,13 +95,19 @@ public class ChamadoService {
             dados.categoriaId(),
             dados.prioridadeSugerida(),
             Instant.now(clock));
+    sla.iniciar(chamado, Instant.now(clock));
     repository.saveAndFlush(chamado);
     eventos.publishEvent(new ChamadoCriadoEvent(chamado.getId()));
     return mapper.paraResponse(chamado);
   }
 
   public record ResumoNotificacao(
-      Long id, String numero, String titulo, Long solicitanteId, Long responsavelId) {}
+      Long id,
+      String numero,
+      String titulo,
+      Long solicitanteId,
+      Long responsavelId,
+      Instant prazoResolucao) {}
 
   @Transactional(readOnly = true)
   public ResumoNotificacao resumoParaNotificacao(Long id) {
@@ -107,7 +117,23 @@ public class ChamadoService {
         chamado.getNumero(),
         chamado.getTitulo(),
         chamado.getSolicitanteId(),
-        chamado.getResponsavelId());
+        chamado.getResponsavelId(),
+        chamado.getPrazoResolucao());
+  }
+
+  @Transactional(readOnly = true)
+  public List<ResumoNotificacao> vencendoSla(Instant inicio, Instant fim) {
+    return repository.vencendoSla(inicio, fim).stream()
+        .map(
+            c ->
+                new ResumoNotificacao(
+                    c.getId(),
+                    c.getNumero(),
+                    c.getTitulo(),
+                    c.getSolicitanteId(),
+                    c.getResponsavelId(),
+                    c.getPrazoResolucao()))
+        .toList();
   }
 
   @Transactional(readOnly = true)
@@ -168,6 +194,7 @@ public class ChamadoService {
         && chamado.getStatus() == StatusChamado.AGUARDANDO_USUARIO) {
       Estado anterior = Estado.de(chamado);
       chamado.alterarStatus(StatusChamado.EM_ATENDIMENTO, null, agora);
+      sla.retomar(chamado, agora);
       repository.saveAndFlush(chamado);
       registrarAlteracoes(anterior, chamado, ator.getId(), agora);
     } else if (ator.getPerfil() != Perfil.FUNCIONARIO && chamado.getPrimeiraRespostaEm() == null) {
@@ -217,8 +244,15 @@ public class ChamadoService {
       chamado.alterarCategoria(dados.categoriaId(), agora);
     }
     if (dados.prioridade() != null) chamado.alterarPrioridade(dados.prioridade(), agora);
+    StatusChamado statusAnterior = chamado.getStatus();
     if (dados.status() != null && dados.status() != chamado.getStatus())
       chamado.alterarStatus(dados.status(), dados.solucao(), agora);
+    if (dados.prioridade() != null && anterior.prioridade() != chamado.getPrioridade())
+      sla.iniciar(chamado, agora);
+    if (statusAnterior != chamado.getStatus()) {
+      if (chamado.getStatus() == StatusChamado.AGUARDANDO_USUARIO) chamado.pausarSla(agora);
+      else if (statusAnterior == StatusChamado.AGUARDANDO_USUARIO) sla.retomar(chamado, agora);
+    }
     if (anterior.equals(Estado.de(chamado))) {
       throw new RequisicaoInvalidaException("Nenhuma alteração informada");
     }

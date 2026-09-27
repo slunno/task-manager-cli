@@ -116,6 +116,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/dashboard': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['consultar']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/me': {
     parameters: {
       query?: never
@@ -294,6 +310,10 @@ export interface components {
       solucao: string | null
       /** Format: date-time */
       prazoResolucao: string | null
+      /** Format: date-time */
+      prazoPrimeiraResposta: string | null
+      /** Format: date-time */
+      slaPausadoEm: string | null
       /** Format: int64 */
       version: number
     }
@@ -373,6 +393,24 @@ export interface components {
       email?: string
       /** @enum {string} */
       perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
+    }
+    DashboardResponse: {
+      /** Format: int64 */
+      totalChamados?: number
+      /** Format: int64 */
+      emAberto?: number
+      /** Format: int64 */
+      vencidos?: number
+      /** Format: int64 */
+      vencendo?: number
+      /** Format: double */
+      tempoMedioResolucaoHoras?: number
+      porStatus?: {
+        [key: string]: number
+      }
+      porPrioridade?: {
+        [key: string]: number
+      }
     }
     PaginaResponseChamadoResponse: {
       content: components['schemas']['ChamadoResponse'][]
@@ -761,6 +799,26 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['UsuarioBuscaResponse'][]
+        }
+      }
+    }
+  }
+  consultar: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['DashboardResponse']
         }
       }
     }
