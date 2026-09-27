@@ -68,6 +68,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/admin/setores/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['editar']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/ti/admin/calendario/expediente': {
     parameters: {
       query?: never
@@ -92,7 +108,7 @@ export interface paths {
       cookie?: never
     }
     get?: never
-    put: operations['editar']
+    put: operations['editar_1']
     post?: never
     delete?: never
     options?: never
@@ -164,6 +180,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/admin/setores': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['todos']
+    put?: never
+    post: operations['criar']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/ti/admin/categorias': {
     parameters: {
       query?: never
@@ -173,7 +205,7 @@ export interface paths {
     }
     get: operations['listar']
     put?: never
-    post: operations['criar']
+    post: operations['criar_1']
     delete?: never
     options?: never
     head?: never
@@ -203,9 +235,9 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['todos']
+    get: operations['todos_1']
     put?: never
-    post: operations['criar_1']
+    post: operations['criar_2']
     delete?: never
     options?: never
     head?: never
@@ -221,7 +253,7 @@ export interface paths {
     }
     get: operations['fila']
     put?: never
-    post: operations['criar_2']
+    post: operations['criar_3']
     delete?: never
     options?: never
     head?: never
@@ -269,7 +301,7 @@ export interface paths {
     }
     get: operations['listar_1']
     put?: never
-    post: operations['criar_3']
+    post: operations['criar_4']
     delete?: never
     options?: never
     head?: never
@@ -380,6 +412,22 @@ export interface paths {
       cookie?: never
     }
     get: operations['buscar_1']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/setores': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['ativos']
     put?: never
     post?: never
     delete?: never
@@ -753,6 +801,16 @@ export interface components {
       /** Format: int32 */
       horasResolucao?: number
     }
+    EditarSetorRequest: {
+      nome: string
+      ativo?: boolean
+    }
+    SetorResponse: {
+      /** Format: int64 */
+      id?: number
+      nome?: string
+      ativo?: boolean
+    }
     Janela: {
       /** Format: int32 */
       diaSemana?: number
@@ -811,6 +869,9 @@ export interface components {
       /** Format: int32 */
       rejeitados?: number
       erros?: components['schemas']['ErroLinha'][]
+    }
+    NovoSetorRequest: {
+      nome: string
     }
     CriarCategoriaRequest: {
       nome: string
@@ -956,6 +1017,8 @@ export interface components {
       /** @enum {string} */
       perfil: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
       ativo?: boolean
+      /** Format: int64 */
+      setorId?: number
     }
     UsuarioAdminResponse: {
       /** Format: int64 */
@@ -965,6 +1028,8 @@ export interface components {
       /** @enum {string} */
       perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
       ativo?: boolean
+      /** Format: int64 */
+      setorId?: number
     }
     AtualizarCategoriaRequest: {
       nome: string
@@ -1282,6 +1347,32 @@ export interface operations {
       }
     }
   }
+  editar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['EditarSetorRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['SetorResponse']
+        }
+      }
+    }
+  }
   expediente: {
     parameters: {
       query?: never
@@ -1306,7 +1397,7 @@ export interface operations {
       }
     }
   }
-  editar: {
+  editar_1: {
     parameters: {
       query?: never
       header?: never
@@ -1471,6 +1562,50 @@ export interface operations {
       }
     }
   }
+  todos: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['SetorResponse'][]
+        }
+      }
+    }
+  }
+  criar: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['NovoSetorRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['SetorResponse']
+        }
+      }
+    }
+  }
   listar: {
     parameters: {
       query?: never
@@ -1491,7 +1626,7 @@ export interface operations {
       }
     }
   }
-  criar: {
+  criar_1: {
     parameters: {
       query?: never
       header?: never
@@ -1539,7 +1674,7 @@ export interface operations {
       }
     }
   }
-  todos: {
+  todos_1: {
     parameters: {
       query?: never
       header?: never
@@ -1559,7 +1694,7 @@ export interface operations {
       }
     }
   }
-  criar_1: {
+  criar_2: {
     parameters: {
       query?: never
       header?: never
@@ -1623,7 +1758,7 @@ export interface operations {
       }
     }
   }
-  criar_2: {
+  criar_3: {
     parameters: {
       query?: never
       header?: never
@@ -1724,7 +1859,7 @@ export interface operations {
       }
     }
   }
-  criar_3: {
+  criar_4: {
     parameters: {
       query?: never
       header?: never
@@ -1998,6 +2133,26 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['UsuarioBuscaResponse'][]
+        }
+      }
+    }
+  }
+  ativos: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['SetorResponse'][]
         }
       }
     }

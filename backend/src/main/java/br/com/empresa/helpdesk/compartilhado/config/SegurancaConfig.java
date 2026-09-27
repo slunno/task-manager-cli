@@ -73,6 +73,8 @@ public class SegurancaConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/dev/login")
                     .permitAll()
+                    .requestMatchers("/actuator/metrics", "/actuator/metrics/**")
+                    .hasRole("TI_ADMIN")
                     .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**")
                     .permitAll()
                     .anyRequest()

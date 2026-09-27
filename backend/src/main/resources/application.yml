@@ -60,3 +60,6 @@ helpdesk:
   conclusao:
     dias-reabertura: ${HELPDESK_REOPEN_DAYS:7}
     dias-fechamento: ${HELPDESK_AUTOCLOSE_DAYS:3}
+  retencao:
+    enabled: ${HELPDESK_RETENTION_ENABLED:true}
+    anos: ${HELPDESK_RETENTION_YEARS:3}

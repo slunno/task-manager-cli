@@ -13,6 +13,10 @@ export function UsuariosAdminPage() {
     queryKey: ['admin-usuarios', page],
     queryFn: () => adminApi.usuarios(page),
   })
+  const setores = useQuery({
+    queryKey: ['admin-setores'],
+    queryFn: adminApi.todosSetores,
+  })
   const salvar = useMutation({
     mutationFn: adminApi.salvarUsuario,
     onSuccess: () => {
@@ -55,6 +59,9 @@ export function UsuariosAdminPage() {
                 <p className="text-sm text-slate-600">
                   {usuario.email} · {usuario.perfil} ·{' '}
                   {usuario.ativo ? 'Ativo' : 'Inativo'}
+                  {usuario.setorId
+                    ? ` · ${setores.data?.find((setor) => setor.id === usuario.setorId)?.nome ?? 'Setor não encontrado'}`
+                    : ''}
                 </p>
               </div>
               <button
@@ -146,6 +153,31 @@ export function UsuariosAdminPage() {
                 }
               />{' '}
               Acesso ativo
+            </label>
+            <label>
+              Setor
+              <select
+                value={edicao.setorId ?? ''}
+                onChange={(e) =>
+                  setEdicao({
+                    ...edicao,
+                    setorId: e.target.value ? Number(e.target.value) : null,
+                  })
+                }
+                className="mt-1 block w-full rounded-lg border p-2"
+              >
+                <option value="">Sem setor</option>
+                {setores.data
+                  ?.filter(
+                    (setor) => setor.ativo || setor.id === edicao.setorId,
+                  )
+                  .map((setor) => (
+                    <option key={setor.id} value={setor.id}>
+                      {setor.nome}
+                      {setor.ativo ? '' : ' (inativo)'}
+                    </option>
+                  ))}
+              </select>
             </label>
           </div>
           {salvar.isError && (

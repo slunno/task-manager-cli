@@ -12,7 +12,7 @@ As portas do Compose ficam ligadas a `127.0.0.1`, pois o perfil `dev` permite si
 
 ### Prévia visual sem Docker
 
-Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas já implementadas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui três chamados fictícios. A prévia simula as telas e interações até E8, incluindo administração, dashboard, reabertura e avaliação. Cálculo real de SLA em horas úteis, envio SMTP, autorização e persistência precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
+Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas básicas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui três chamados fictícios. A prévia cobre até E8; as funções E9–E11 exigem o backend real. Cálculo real de SLA em horas úteis, envio SMTP, autorização e persistência precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
 
 Em dois terminais PowerShell, dentro de `frontend/`:
 
@@ -61,7 +61,21 @@ O volume `postgres_data` guarda dados locais. Para backup em ambiente real, exec
 
 ## Saúde e diagnóstico
 
-`/actuator/health` cobre liveness/readiness do processo. Métricas e logs estruturados de negócio serão adicionados nas etapas com fluxos reais. Não registre conteúdo de chamados, anexos ou dados pessoais em logs.
+`/actuator/health` cobre liveness/readiness do processo. `/actuator/metrics` exige sessão TI_ADMIN e expõe, entre outras, `helpdesk.outbox.pending`, `helpdesk.sla.overdue` e `helpdesk.retention.storage.pending`. Configure alertas para valores persistentes acima de zero, acompanhando a tendência e os logs antes de agir. Em produção os logs saem em JSON ECS; `X-Request-ID` é devolvido ao cliente e registrado como `correlationId` para correlacionar requisições. Não registre conteúdo de chamados, anexos ou dados pessoais em logs. Restrinja o acesso de rede ao Actuator; a autorização da aplicação é uma segunda camada.
+
+### Retenção de dados
+
+`HELPDESK_RETENTION_YEARS` define de 1 a 30 anos (padrão 3) após o fechamento. `HELPDESK_RETENTION_ENABLED=false` suspende o job; use isso durante restauração e investigação. O job diário às 03:00 em America/Sao_Paulo processa até 10 lotes de 100 chamados FECHADOS por execução. Remove mensagens, histórico, avaliação e metadados de anexos; anonimiza título, descrição, solução, pessoas vinculadas e vínculos de duplicidade. O registro mínimo do chamado e seus agregados permanecem para estatística. Uma conta técnica inativa recebe a referência obrigatória de solicitante. A exclusão física dos objetos é registrada em `storage_exclusao_pendente` e repetida até concluir; acompanhe a métrica da fila. Notificações da outbox mais antigas que o prazo também são removidas. Defina o prazo com o encarregado de dados antes do primeiro deploy e ajuste os ciclos de backup para não reintroduzir dados já eliminados.
+
+### Backup, restauração e implantação
+
+1. Antes da atualização, registre a versão do código e do banco e confirme cópias íntegras de PostgreSQL (`pg_dump --format=custom`) e do bucket S3 privado. Faça o backup com criptografia, controle de acesso e janela de retenção própria.
+2. Restaure periodicamente em ambiente isolado com `pg_restore --clean --if-exists --no-owner`, usando um banco vazio de teste. Compare contagem de chamados, anexos e versão Flyway; valide download de anexos e login com identidade de teste. Nunca restaure sobre a produção em operação.
+3. Em uma atualização, habilite página de manutenção, suspenda o job de retenção se necessário, gere backup e publique primeiro a imagem do backend com as variáveis do ambiente. Flyway aplica as migrations versionadas na inicialização. Aguarde `/actuator/health/readiness` saudável e confira os logs com o identificador da implantação.
+4. Publique o frontend da mesma revisão e faça um teste guiado: login, abertura, fila, comentário, anexo, resolução, relatório e logout. Retire a manutenção após confirmar as métricas e reative o job. Não é prometido deploy sem indisponibilidade.
+5. Para voltar atrás, interrompa escrita, restaure conjuntamente banco e objetos do backup anterior e publique as imagens anteriores. Não edite uma migration já aplicada; adicione uma nova migration corretiva. Registre a janela de perda de dados entre backup e falha e comunique os responsáveis.
+
+O pipeline executa testes, lint e build. O teste de PostgreSQL com Testcontainers inclui massa de 100 mil chamados e verifica p95 da fila abaixo de 300 ms no ambiente de CI. Esse valor depende do hardware e da carga; meça novamente no ambiente de destino antes de assumir a mesma latência em produção.
 
 ## Armazenamento de anexos
 

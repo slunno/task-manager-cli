@@ -1,5 +1,6 @@
 import { AdminLayout } from '../features/admin/AdminLayout'
 import { UsuariosAdminPage } from '../features/admin/UsuariosAdminPage'
+import { SetoresAdminPage } from '../features/admin/SetoresAdminPage'
 import { CategoriasAdminPage } from '../features/admin/CategoriasAdminPage'
 import { SlasAdminPage } from '../features/admin/SlasAdminPage'
 import { CalendarioAdminPage } from '../features/admin/CalendarioAdminPage'
@@ -101,6 +102,7 @@ export function App() {
         }
       >
         <Route path="usuarios" element={<UsuariosAdminPage />} />
+        <Route path="setores" element={<SetoresAdminPage />} />
         <Route path="categorias" element={<CategoriasAdminPage />} />
         <Route path="slas" element={<SlasAdminPage />} />
         <Route path="calendario" element={<CalendarioAdminPage />} />

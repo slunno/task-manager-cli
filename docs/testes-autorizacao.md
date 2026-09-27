@@ -14,6 +14,8 @@ Os métodos públicos do controller exigem FUNCIONARIO, TI_AGENTE ou TI_ADMIN po
 
 Testes adicionais cobrem categoria ativa, validação do formulário, limite de página, whitelist de ordenação, prioridade final MEDIA, número legível único, perfil alterado durante a sessão, usuário inativo e CSRF. As fronteiras entre módulos são verificadas por FronteirasModularesTest (ArchUnit). PostgresMigrationTest valida as migrations e o mapeamento JPA em PostgreSQL 16 quando Docker está disponível; é ignorado na máquina local sem Docker e executado na CI com Docker.
 
+Na E11, `GestaoIntegrationTest` cobre acesso administrativo a setores, associação de usuário e filtro de relatório, além de negar métricas ao funcionário. `RetencaoServiceTest` cobre anonimização e repetição da exclusão física de anexos. `CorrelationIdFilterTest` cobre validação e limpeza do identificador de requisição. `PostgresMigrationTest` mede o p95 da fila com 100 mil chamados e limite de 300 ms no runner de CI; a medição local depende de Docker.
+
 ## E3 — fila e operação
 
 | Perfil | GET fila | POST assumir | PATCH chamado | GET histórico | GET busca de pessoas |

@@ -35,6 +35,54 @@ class GestaoIntegrationTest {
     MockHttpSession funcionario = entrar("e10-funcionario@empresa.com");
     MockHttpSession agente = entrarTi("e10-agente@empresa.com", Perfil.TI_AGENTE);
     MockHttpSession admin = entrarTi("e10-admin@empresa.com", Perfil.TI_ADMIN);
+    mvc.perform(get("/actuator/metrics").session(funcionario)).andExpect(status().isForbidden());
+    mvc.perform(get("/actuator/metrics").session(admin)).andExpect(status().isOk());
+    mvc.perform(get("/api/v1/ti/admin/setores").session(agente)).andExpect(status().isForbidden());
+    String setorResposta =
+        mvc.perform(
+                post("/api/v1/ti/admin/setores")
+                    .session(admin)
+                    .header("X-CSRF-TOKEN", csrf(admin))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"nome\":\"Operações E11\"}"))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    long setorId = mapper.readTree(setorResposta).path("id").asLong();
+    mvc.perform(get("/api/v1/ti/setores").session(agente))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.id == " + setorId + ")]", org.hamcrest.Matchers.hasSize(1)));
+    Long funcionarioId =
+        usuarios.findByEmailIgnoreCase("e10-funcionario@empresa.com").orElseThrow().getId();
+    String alteracaoUsuario =
+        mapper.writeValueAsString(
+            Map.of(
+                "nome",
+                "Teste",
+                "email",
+                "e10-funcionario@empresa.com",
+                "perfil",
+                "FUNCIONARIO",
+                "ativo",
+                true,
+                "setorId",
+                setorId));
+    mvc.perform(
+            patch("/api/v1/ti/admin/usuarios/" + funcionarioId)
+                .session(agente)
+                .header("X-CSRF-TOKEN", csrf(agente))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(alteracaoUsuario))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            patch("/api/v1/ti/admin/usuarios/" + funcionarioId)
+                .session(admin)
+                .header("X-CSRF-TOKEN", csrf(admin))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(alteracaoUsuario))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.setorId").value(setorId));
     String aviso =
         mapper.writeValueAsString(
             Map.of(
@@ -99,6 +147,9 @@ class GestaoIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(
             jsonPath("$.linhas[0].total").value(org.hamcrest.Matchers.greaterThanOrEqualTo(2)));
+    mvc.perform(get(caminho + "&setorId=" + setorId).session(agente))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.linhas[0].setor").value("Operações E11"));
     mvc.perform(
             get("/api/v1/ti/relatorios/exportacao.csv?desde=" + hoje.minusDays(1) + "&ate=" + hoje)
                 .session(agente))

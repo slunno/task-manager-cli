@@ -25,7 +25,7 @@ public class Usuario {
   @Column(nullable = false, length = 254)
   private String email;
 
-  @Column(name = "setor_id", insertable = false, updatable = false)
+  @Column(name = "setor_id")
   private Long setorId;
 
   @Enumerated(EnumType.STRING)
@@ -74,6 +74,10 @@ public class Usuario {
     this.email = email;
     this.perfil = perfil;
     this.ativo = ativo;
+  }
+
+  public void atribuirSetor(Long setorId) {
+    this.setorId = setorId;
   }
 
   @PrePersist

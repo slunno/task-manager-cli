@@ -105,3 +105,15 @@ Artigos têm título, conteúdo, categoria opcional e estado de publicação. A 
 | GET | /api/v1/ti/relatorios/exportacao.csv | TI | Mesmo agregado em CSV para download |
 
 O intervalo do relatório é inclusivo nas datas informadas, usa America/Sao_Paulo e aceita até 366 dias. O CSV não contém nomes de solicitantes nem texto de chamados; valores textuais são escapados contra injeção de fórmulas. O vínculo de duplicados não aparece nas respostas de funcionário e rejeita autorreferência, cadeia de duplicados e conflito de versão.
+
+## Setores e operação — E11
+
+| Método | Caminho | Acesso | Resultado |
+| --- | --- | --- | --- |
+| GET | /api/v1/ti/setores | TI | Setores ativos para filtros |
+| GET/POST | /api/v1/ti/admin/setores | TI_ADMIN | Lista todos ou cria setor |
+| PUT | /api/v1/ti/admin/setores/{id} | TI_ADMIN + CSRF | Altera nome e estado ativo |
+| PATCH | /api/v1/ti/admin/usuarios/{id} | TI_ADMIN + CSRF | Altera nome, e-mail, perfil, acesso e setor em uma transação |
+| GET | /actuator/metrics | TI_ADMIN | Métricas Micrometer de outbox, SLA e retenção |
+
+O setor é opcional no usuário. A associação a um setor novo exige setor ativo; um setor inativo pode continuar associado a usuários existentes para preservar o histórico. O backend retorna `X-Request-ID` em todas as respostas, aceitando somente identificadores seguros enviados pelo cliente.

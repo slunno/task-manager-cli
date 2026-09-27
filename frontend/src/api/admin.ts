@@ -7,7 +7,9 @@ export type UsuarioAdmin = {
   email: string
   perfil: Perfil
   ativo: boolean
+  setorId: number | null
 }
+export type Setor = { id: number; nome: string; ativo: boolean }
 export type PaginaUsuarios = {
   content: UsuarioAdmin[]
   totalElements: number
@@ -51,6 +53,12 @@ export const adminApi = {
       'PATCH',
       usuario,
     ),
+  setores: () => request<Setor[]>('/api/v1/ti/setores'),
+  todosSetores: () => request<Setor[]>('/api/v1/ti/admin/setores'),
+  criarSetor: (nome: string) =>
+    alterar<Setor>('/api/v1/ti/admin/setores', 'POST', { nome }),
+  salvarSetor: (setor: Setor) =>
+    alterar<Setor>(`/api/v1/ti/admin/setores/${setor.id}`, 'PUT', setor),
   importarUsuarios: async (arquivo: File) => {
     const token = await getCsrfToken()
     const corpo = new FormData()

@@ -31,3 +31,8 @@ helpdesk:
     mode: oidc
     allowed-email-domain: ${OIDC_ALLOWED_EMAIL_DOMAIN}
 
+logging:
+  structured:
+    format:
+      console: ecs
+

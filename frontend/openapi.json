@@ -153,6 +153,38 @@
         }
       }
     },
+    "/api/v1/ti/admin/setores/{id}": {
+      "put": {
+        "tags": ["setor-controller"],
+        "operationId": "editar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/EditarSetorRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/SetorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ti/admin/calendario/expediente": {
       "put": {
         "tags": ["sla-admin-controller"],
@@ -181,7 +213,7 @@
     "/api/v1/ti/admin/avisos/{id}": {
       "put": {
         "tags": ["aviso-incidente-controller"],
-        "operationId": "editar",
+        "operationId": "editar_1",
         "parameters": [
           {
             "name": "id",
@@ -345,6 +377,47 @@
         }
       }
     },
+    "/api/v1/ti/admin/setores": {
+      "get": {
+        "tags": ["setor-controller"],
+        "operationId": "todos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SetorResponse" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["setor-controller"],
+        "operationId": "criar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NovoSetorRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/SetorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/ti/admin/categorias": {
       "get": {
         "tags": ["categoria-admin-controller"],
@@ -367,7 +440,7 @@
       },
       "post": {
         "tags": ["categoria-admin-controller"],
-        "operationId": "criar",
+        "operationId": "criar_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -415,7 +488,7 @@
     "/api/v1/ti/admin/avisos": {
       "get": {
         "tags": ["aviso-incidente-controller"],
-        "operationId": "todos",
+        "operationId": "todos_1",
         "responses": {
           "200": {
             "description": "OK",
@@ -432,7 +505,7 @@
       },
       "post": {
         "tags": ["aviso-incidente-controller"],
-        "operationId": "criar_1",
+        "operationId": "criar_2",
         "requestBody": {
           "content": {
             "application/json": {
@@ -570,7 +643,7 @@
       },
       "post": {
         "tags": ["chamado-controller"],
-        "operationId": "criar_2",
+        "operationId": "criar_3",
         "requestBody": {
           "content": {
             "application/json": {
@@ -694,7 +767,7 @@
       },
       "post": {
         "tags": ["comentario-controller"],
-        "operationId": "criar_3",
+        "operationId": "criar_4",
         "parameters": [
           {
             "name": "chamadoId",
@@ -1044,6 +1117,25 @@
                   "items": {
                     "$ref": "#/components/schemas/UsuarioBuscaResponse"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/setores": {
+      "get": {
+        "tags": ["setor-controller"],
+        "operationId": "ativos",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/SetorResponse" }
                 }
               }
             }
@@ -1619,6 +1711,22 @@
           "horasResolucao": { "type": "integer", "format": "int32" }
         }
       },
+      "EditarSetorRequest": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string", "maxLength": 120, "minLength": 0 },
+          "ativo": { "type": "boolean" }
+        },
+        "required": ["nome"]
+      },
+      "SetorResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "nome": { "type": "string" },
+          "ativo": { "type": "boolean" }
+        }
+      },
       "Janela": {
         "type": "object",
         "properties": {
@@ -1703,6 +1811,13 @@
             "items": { "$ref": "#/components/schemas/ErroLinha" }
           }
         }
+      },
+      "NovoSetorRequest": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string", "maxLength": 120, "minLength": 0 }
+        },
+        "required": ["nome"]
       },
       "CriarCategoriaRequest": {
         "type": "object",
@@ -1912,7 +2027,8 @@
             "type": "string",
             "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
           },
-          "ativo": { "type": "boolean" }
+          "ativo": { "type": "boolean" },
+          "setorId": { "type": "integer", "format": "int64" }
         },
         "required": ["email", "nome", "perfil"]
       },
@@ -1926,7 +2042,8 @@
             "type": "string",
             "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
           },
-          "ativo": { "type": "boolean" }
+          "ativo": { "type": "boolean" },
+          "setorId": { "type": "integer", "format": "int64" }
         }
       },
       "AtualizarCategoriaRequest": {

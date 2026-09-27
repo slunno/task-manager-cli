@@ -41,7 +41,13 @@ public class UsuarioAdminController {
         .cacheControl(CacheControl.noStore())
         .body(
             UsuarioAdminResponse.de(
-                service.atualizar(id, dados.nome(), dados.email(), dados.perfil(), dados.ativo())));
+                service.atualizar(
+                    id,
+                    dados.nome(),
+                    dados.email(),
+                    dados.perfil(),
+                    dados.ativo(),
+                    dados.setorId())));
   }
 
   @PostMapping(path = "/importacao", consumes = "multipart/form-data")
@@ -56,17 +62,19 @@ public class UsuarioAdminController {
       @NotBlank @Size(max = 180) String nome,
       @NotBlank @Email @Size(max = 254) String email,
       @NotNull Perfil perfil,
-      boolean ativo) {}
+      boolean ativo,
+      Long setorId) {}
 
   public record UsuarioAdminResponse(
-      Long id, String nome, String email, Perfil perfil, boolean ativo) {
+      Long id, String nome, String email, Perfil perfil, boolean ativo, Long setorId) {
     static UsuarioAdminResponse de(Usuario usuario) {
       return new UsuarioAdminResponse(
           usuario.getId(),
           usuario.getNome(),
           usuario.getEmail(),
           usuario.getPerfil(),
-          usuario.isAtivo());
+          usuario.isAtivo(),
+          usuario.getSetorId());
     }
   }
 }

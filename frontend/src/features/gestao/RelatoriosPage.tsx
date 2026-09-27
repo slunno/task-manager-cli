@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { consultarRelatorio, urlCsvRelatorio } from '../../api/gestao'
 import { getCategorias } from '../../api/chamados'
+import { adminApi } from '../../api/admin'
 import { Button } from '../../components/ui/button'
 import { AreaPage } from '../auth/AreaPage'
 
@@ -31,6 +32,7 @@ export function RelatoriosPage() {
     queryKey: ['categorias'],
     queryFn: getCategorias,
   })
+  const setores = useQuery({ queryKey: ['setores'], queryFn: adminApi.setores })
   const relatorio = useQuery({
     queryKey: ['relatorio', aplicado],
     queryFn: () =>
@@ -76,14 +78,19 @@ export function RelatoriosPage() {
           />
         </label>
         <label className="text-sm font-semibold">
-          Setor (ID opcional)
-          <input
-            type="number"
-            min="1"
+          Setor
+          <select
             value={setorId}
             onChange={(e) => setSetorId(e.target.value)}
             className="mt-1 h-10 w-full rounded-md border p-2"
-          />
+          >
+            <option value="">Todos</option>
+            {setores.data?.map((setor) => (
+              <option key={setor.id} value={setor.id}>
+                {setor.nome}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="text-sm font-semibold">
           Categoria

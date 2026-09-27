@@ -3,6 +3,7 @@ import { AreaPage } from '../auth/AreaPage'
 
 const paginas = [
   ['Usuários', '/ti/admin/usuarios'],
+  ['Setores', '/ti/admin/setores'],
   ['Categorias', '/ti/admin/categorias'],
   ['Políticas de SLA', '/ti/admin/slas'],
   ['Calendário', '/ti/admin/calendario'],

@@ -1,5 +1,6 @@
 package br.com.empresa.helpdesk.usuarios.application;
 
+import br.com.empresa.helpdesk.admin.application.SetorService;
 import br.com.empresa.helpdesk.compartilhado.erros.RecursoNaoEncontradoException;
 import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
@@ -19,10 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioAdminService {
+  private static final String EMAIL_ANONIMO = "anonimo@helpdesk.invalid";
   private final UsuarioRepository repository;
+  private final SetorService setores;
 
-  public UsuarioAdminService(UsuarioRepository repository) {
+  public UsuarioAdminService(UsuarioRepository repository, SetorService setores) {
     this.repository = repository;
+    this.setores = setores;
   }
 
   @Transactional(readOnly = true)
@@ -33,11 +37,14 @@ public class UsuarioAdminService {
   }
 
   @Transactional
-  public Usuario atualizar(Long id, String nome, String email, Perfil perfil, boolean ativo) {
+  public Usuario atualizar(
+      Long id, String nome, String email, Perfil perfil, boolean ativo, Long setorId) {
     Usuario usuario =
         repository
             .findById(id)
             .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+    if (EMAIL_ANONIMO.equalsIgnoreCase(usuario.getEmail()))
+      throw new RequisicaoInvalidaException("Conta técnica de retenção não pode ser alterada");
     validar(nome, email, perfil);
     String normalizado = email.trim().toLowerCase(Locale.ROOT);
     repository
@@ -48,7 +55,9 @@ public class UsuarioAdminService {
               throw new RequisicaoInvalidaException("E-mail já cadastrado");
             });
     protegerUltimoAdmin(usuario, perfil, ativo);
+    if (setorId != null && !setorId.equals(usuario.getSetorId())) setores.exigirAtivo(setorId);
     usuario.atualizarCadastro(nome.trim(), normalizado, perfil, ativo);
+    usuario.atribuirSetor(setorId);
     return repository.save(usuario);
   }
 
@@ -79,6 +88,8 @@ public class UsuarioAdminService {
       try {
         String nome = campos[0].trim();
         String email = campos[1].trim().toLowerCase(Locale.ROOT);
+        if (EMAIL_ANONIMO.equals(email))
+          throw new RequisicaoInvalidaException("Conta técnica de retenção não pode ser importada");
         Perfil perfil = Perfil.valueOf(campos[2].trim().toUpperCase(Locale.ROOT));
         String ativoTexto = campos[3].trim().toLowerCase(Locale.ROOT);
         if (!ativoTexto.equals("true") && !ativoTexto.equals("false"))
