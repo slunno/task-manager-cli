@@ -3,6 +3,7 @@ package br.com.empresa.helpdesk.chamados;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.empresa.helpdesk.admin.domain.Categoria;
 import br.com.empresa.helpdesk.admin.infra.CategoriaRepository;
+import br.com.empresa.helpdesk.anexos.infra.AnexoRepository;
 import br.com.empresa.helpdesk.chamados.domain.Chamado;
 import br.com.empresa.helpdesk.chamados.domain.Prioridade;
 import br.com.empresa.helpdesk.chamados.infra.ChamadoRepository;
@@ -30,6 +32,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,6 +45,7 @@ class OperacaoTiIntegrationTest {
   @Autowired private ObjectMapper mapper;
   @Autowired private ChamadoRepository chamados;
   @Autowired private ComentarioRepository comentarios;
+  @Autowired private AnexoRepository anexos;
   @Autowired private HistoricoChamadoRepository historico;
   @Autowired private CategoriaRepository categorias;
   @Autowired private UsuarioRepository usuarios;
@@ -50,6 +54,7 @@ class OperacaoTiIntegrationTest {
 
   @BeforeEach
   void preparar() {
+    anexos.deleteAll();
     comentarios.deleteAll();
     historico.deleteAll();
     chamados.deleteAll();
@@ -243,21 +248,86 @@ class OperacaoTiIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalElements").value(2));
     comentar(maria, id, "Ainda não funciona", false, 201);
-    assertThat(chamados.findById(id).orElseThrow().getStatus().name())
-        .isEqualTo("EM_ATENDIMENTO");
+    assertThat(chamados.findById(id).orElseThrow().getStatus().name()).isEqualTo("EM_ATENDIMENTO");
     mvc.perform(get("/api/v1/chamados/" + id + "/historico").session(agente))
         .andExpect(jsonPath("$.content[0].valorNovo").value("EM_ATENDIMENTO"));
   }
 
-  private void comentar(MockHttpSession sessao, long id, String texto, boolean interno, int esperado)
+  private void comentar(
+      MockHttpSession sessao, long id, String texto, boolean interno, int esperado)
       throws Exception {
-    mvc.perform(post("/api/v1/chamados/" + id + "/comentarios")
-            .session(sessao)
-            .header("X-CSRF-TOKEN", csrf(sessao))
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(mapper.writeValueAsString(Map.of("texto", texto, "interno", interno))))
+    mvc.perform(
+            post("/api/v1/chamados/" + id + "/comentarios")
+                .session(sessao)
+                .header("X-CSRF-TOKEN", csrf(sessao))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(Map.of("texto", texto, "interno", interno))))
         .andExpect(status().is(esperado));
   }
+
+  @Test
+  void anexosValidamConteudoEAutorizamDownload() throws Exception {
+    MockHttpSession maria = entrar("maria@empresa.com", "Maria");
+    MockHttpSession joao = entrar("joao@empresa.com", "João");
+    MockHttpSession agente = entrar("agente@empresa.com", "Agente");
+    promover("agente@empresa.com", Perfil.TI_AGENTE);
+    long id = criar(maria, "Anexos do chamado").path("id").asLong();
+    MockMultipartFile pdf =
+        new MockMultipartFile(
+            "arquivo",
+            "..\\relatorio.pdf",
+            "application/pdf",
+            "%PDF-1.7\nconteudo\n%%EOF".getBytes());
+    MvcResult publico =
+        mvc.perform(
+                multipart("/api/v1/chamados/" + id + "/anexos")
+                    .file(pdf)
+                    .session(maria)
+                    .header("X-CSRF-TOKEN", csrf(maria)))
+            .andExpect(status().isCreated())
+            .andReturn();
+    long anexoId = mapper.readTree(publico.getResponse().getContentAsString()).path("id").asLong();
+    mvc.perform(get("/api/v1/anexos/" + anexoId + "/download").session(maria))
+        .andExpect(status().isOk())
+        .andExpect(
+            result ->
+                assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(pdf.getBytes()));
+    mvc.perform(get("/api/v1/anexos/" + anexoId + "/download").session(joao))
+        .andExpect(status().isNotFound());
+    mvc.perform(
+            multipart("/api/v1/chamados/" + id + "/anexos")
+                .file(
+                    new MockMultipartFile(
+                        "arquivo", "falso.pdf", "application/pdf", "html".getBytes()))
+                .session(maria)
+                .header("X-CSRF-TOKEN", csrf(maria)))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            multipart("/api/v1/chamados/" + id + "/anexos")
+                .file(pdf)
+                .param("interno", "true")
+                .session(maria)
+                .header("X-CSRF-TOKEN", csrf(maria)))
+        .andExpect(status().isForbidden());
+    MvcResult reservado =
+        mvc.perform(
+                multipart("/api/v1/chamados/" + id + "/anexos")
+                    .file(pdf)
+                    .param("interno", "true")
+                    .session(agente)
+                    .header("X-CSRF-TOKEN", csrf(agente)))
+            .andExpect(status().isCreated())
+            .andReturn();
+    long reservadoId =
+        mapper.readTree(reservado.getResponse().getContentAsString()).path("id").asLong();
+    mvc.perform(get("/api/v1/anexos/" + reservadoId + "/download").session(maria))
+        .andExpect(status().isNotFound());
+    mvc.perform(get("/api/v1/chamados/" + id + "/anexos").session(maria))
+        .andExpect(jsonPath("$.totalElements").value(1));
+    mvc.perform(get("/api/v1/chamados/" + id + "/anexos").session(agente))
+        .andExpect(jsonPath("$.totalElements").value(2));
+  }
+
   private JsonNode assumir(MockHttpSession sessao, long id, int version, int esperado)
       throws Exception {
     MvcResult result =
@@ -338,4 +408,3 @@ class OperacaoTiIntegrationTest {
     return mapper.readTree(result.getResponse().getContentAsString()).path("token").asText();
   }
 }
-

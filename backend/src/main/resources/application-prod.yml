@@ -30,3 +30,4 @@ helpdesk:
   auth:
     mode: oidc
     allowed-email-domain: ${OIDC_ALLOWED_EMAIL_DOMAIN}
+

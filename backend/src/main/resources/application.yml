@@ -24,7 +24,7 @@ spring:
   servlet:
     multipart:
       max-file-size: ${HELPDESK_MAX_ATTACHMENT_SIZE:10MB}
-      max-request-size: ${HELPDESK_MAX_ATTACHMENT_SIZE:10MB}
+      max-request-size: 11MB
 server:
   port: ${PORT:8080}
   forward-headers-strategy: framework
@@ -53,3 +53,4 @@ springdoc:
 helpdesk:
   auth:
     mode: disabled
+

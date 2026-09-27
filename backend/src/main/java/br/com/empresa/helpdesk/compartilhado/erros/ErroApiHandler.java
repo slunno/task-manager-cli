@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class ErroApiHandler {
@@ -39,6 +40,12 @@ public class ErroApiHandler {
   ProblemDetail usuarioInativo() {
     return ProblemDetail.forStatusAndDetail(
         HttpStatus.FORBIDDEN, "Usuário inativo. Contate a equipe de TI.");
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  ProblemDetail anexoGrande() {
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.PAYLOAD_TOO_LARGE, "Anexo excede o limite de 10 MB.");
   }
 
   @ExceptionHandler(IllegalArgumentException.class)

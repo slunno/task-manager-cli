@@ -15,3 +15,8 @@ spring:
       schema-locations: classpath:schema-test.sql
   mail:
     host: localhost
+
+helpdesk:
+  storage:
+    local-directory: ./target/test-anexos
+
