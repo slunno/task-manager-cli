@@ -35,4 +35,3 @@ class PostgresMigrationTest {
     assertThat(categorias.findByAtivaTrueOrderByNomeAsc()).hasSize(5);
   }
 }
-
