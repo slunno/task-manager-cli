@@ -1,5 +1,6 @@
 package br.com.empresa.helpdesk.usuarios.infra;
 
+import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
   Optional<Usuario> findByEmailIgnoreCase(String email);
+
+  long countByPerfilAndAtivoTrue(Perfil perfil);
 
   @Query(
       "select u.email from Usuario u where u.ativo = true and u.perfil <> br.com.empresa.helpdesk.usuarios.domain.Perfil.FUNCIONARIO")

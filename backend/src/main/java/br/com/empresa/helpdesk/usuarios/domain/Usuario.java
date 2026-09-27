@@ -69,6 +69,13 @@ public class Usuario {
     this.ativo = false;
   }
 
+  public void atualizarCadastro(String nome, String email, Perfil perfil, boolean ativo) {
+    this.nome = nome;
+    this.email = email;
+    this.perfil = perfil;
+    this.ativo = ativo;
+  }
+
   @PrePersist
   void aoCriar() {
     Instant agora = Instant.now();

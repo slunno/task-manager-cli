@@ -4,6 +4,86 @@
  */
 
 export interface paths {
+  '/api/v1/ti/admin/slas/{prioridade}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['atualizarPolitica']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/calendario/expediente': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['expediente']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/usuarios/importacao': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['importar']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/categorias': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['listar']
+    put?: never
+    post: operations['criar']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/calendario/feriados': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['adicionarFeriado']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/chamados': {
     parameters: {
       query?: never
@@ -13,7 +93,7 @@ export interface paths {
     }
     get: operations['fila']
     put?: never
-    post: operations['criar']
+    post: operations['criar_1']
     delete?: never
     options?: never
     head?: never
@@ -43,9 +123,9 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['listar']
+    get: operations['listar_1']
     put?: never
-    post: operations['criar_1']
+    post: operations['criar_2']
     delete?: never
     options?: never
     head?: never
@@ -59,7 +139,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['listar_1']
+    get: operations['listar_2']
     put?: never
     post: operations['enviar']
     delete?: never
@@ -84,6 +164,38 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/admin/usuarios/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['atualizar']
+    trace?: never
+  }
+  '/api/v1/ti/admin/categorias/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['atualizar_1']
+    trace?: never
+  }
   '/api/v1/chamados/{id}': {
     parameters: {
       query?: never
@@ -97,7 +209,7 @@ export interface paths {
     delete?: never
     options?: never
     head?: never
-    patch: operations['atualizar']
+    patch: operations['atualizar_2']
     trace?: never
   }
   '/api/v1/usuarios/busca': {
@@ -124,6 +236,54 @@ export interface paths {
       cookie?: never
     }
     get: operations['consultar']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/usuarios': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['listar_3']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/slas': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['politicas']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/ti/admin/calendario': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['calendario']
     put?: never
     post?: never
     delete?: never
@@ -171,7 +331,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['listar_2']
+    get: operations['listar_4']
     put?: never
     post?: never
     delete?: never
@@ -203,7 +363,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['listar_3']
+    get: operations['listar_5']
     put?: never
     post?: never
     delete?: never
@@ -260,10 +420,83 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/ti/admin/calendario/feriados/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete: operations['removerFeriado']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
+    PoliticaRequest: {
+      /** Format: int32 */
+      horasPrimeiraResposta?: number
+      /** Format: int32 */
+      horasResolucao?: number
+    }
+    Politica: {
+      /** @enum {string} */
+      prioridade?: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
+      /** Format: int32 */
+      horasPrimeiraResposta?: number
+      /** Format: int32 */
+      horasResolucao?: number
+    }
+    Janela: {
+      /** Format: int32 */
+      diaSemana?: number
+      inicio?: string
+      fim?: string
+    }
+    Calendario: {
+      expediente?: components['schemas']['Janela'][]
+      feriados?: components['schemas']['Feriado'][]
+    }
+    Feriado: {
+      /** Format: int64 */
+      id?: number
+      /** Format: date */
+      data?: string
+      descricao?: string
+    }
+    ErroLinha: {
+      /** Format: int32 */
+      linha?: number
+      motivo?: string
+    }
+    RelatorioImportacao: {
+      /** Format: int32 */
+      importados?: number
+      /** Format: int32 */
+      rejeitados?: number
+      erros?: components['schemas']['ErroLinha'][]
+    }
+    CriarCategoriaRequest: {
+      nome: string
+    }
+    CategoriaAdminResponse: {
+      /** Format: int64 */
+      id?: number
+      nome?: string
+      ativa?: boolean
+    }
+    FeriadoRequest: {
+      /** Format: date */
+      data: string
+      descricao: string
+    }
     CriarChamadoRequest: {
       titulo: string
       descricao: string
@@ -367,6 +600,27 @@ export interface components {
       /** @enum {string} */
       perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
     }
+    AtualizarUsuarioRequest: {
+      nome: string
+      /** Format: email */
+      email: string
+      /** @enum {string} */
+      perfil: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
+      ativo?: boolean
+    }
+    UsuarioAdminResponse: {
+      /** Format: int64 */
+      id?: number
+      nome?: string
+      email?: string
+      /** @enum {string} */
+      perfil?: 'FUNCIONARIO' | 'TI_AGENTE' | 'TI_ADMIN'
+      ativo?: boolean
+    }
+    AtualizarCategoriaRequest: {
+      nome: string
+      ativa?: boolean
+    }
     AtualizarChamadoRequest: {
       /** Format: int64 */
       version: number
@@ -411,6 +665,17 @@ export interface components {
       porPrioridade?: {
         [key: string]: number
       }
+    }
+    PaginaResponseUsuarioAdminResponse: {
+      content: components['schemas']['UsuarioAdminResponse'][]
+      /** Format: int32 */
+      page: number
+      /** Format: int32 */
+      size: number
+      /** Format: int64 */
+      totalElements: number
+      /** Format: int32 */
+      totalPages: number
     }
     PaginaResponseChamadoResponse: {
       content: components['schemas']['ChamadoResponse'][]
@@ -510,6 +775,151 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
+  atualizarPolitica: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        prioridade: 'BAIXA' | 'MEDIA' | 'ALTA' | 'CRITICA'
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PoliticaRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Politica']
+        }
+      }
+    }
+  }
+  expediente: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['Janela'][]
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Calendario']
+        }
+      }
+    }
+  }
+  importar: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          arquivo: string
+        }
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['RelatorioImportacao']
+        }
+      }
+    }
+  }
+  listar: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['CategoriaAdminResponse'][]
+        }
+      }
+    }
+  }
+  criar: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CriarCategoriaRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['CategoriaAdminResponse']
+        }
+      }
+    }
+  }
+  adicionarFeriado: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FeriadoRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Feriado']
+        }
+      }
+    }
+  }
   fila: {
     parameters: {
       query?: {
@@ -550,7 +960,7 @@ export interface operations {
       }
     }
   }
-  criar: {
+  criar_1: {
     parameters: {
       query?: never
       header?: never
@@ -600,7 +1010,7 @@ export interface operations {
       }
     }
   }
-  listar: {
+  listar_1: {
     parameters: {
       query?: {
         page?: number
@@ -625,7 +1035,7 @@ export interface operations {
       }
     }
   }
-  criar_1: {
+  criar_2: {
     parameters: {
       query?: never
       header?: never
@@ -651,7 +1061,7 @@ export interface operations {
       }
     }
   }
-  listar_1: {
+  listar_2: {
     parameters: {
       query?: {
         page?: number
@@ -732,6 +1142,58 @@ export interface operations {
       }
     }
   }
+  atualizar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AtualizarUsuarioRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['UsuarioAdminResponse']
+        }
+      }
+    }
+  }
+  atualizar_1: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AtualizarCategoriaRequest']
+      }
+    }
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['CategoriaAdminResponse']
+        }
+      }
+    }
+  }
   detalhe: {
     parameters: {
       query?: never
@@ -754,7 +1216,7 @@ export interface operations {
       }
     }
   }
-  atualizar: {
+  atualizar_2: {
     parameters: {
       query?: never
       header?: never
@@ -823,6 +1285,69 @@ export interface operations {
       }
     }
   }
+  listar_3: {
+    parameters: {
+      query?: {
+        page?: number
+        size?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PaginaResponseUsuarioAdminResponse']
+        }
+      }
+    }
+  }
+  politicas: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Politica'][]
+        }
+      }
+    }
+  }
+  calendario: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['Calendario']
+        }
+      }
+    }
+  }
   me: {
     parameters: {
       query?: never
@@ -868,7 +1393,7 @@ export interface operations {
       }
     }
   }
-  listar_2: {
+  listar_4: {
     parameters: {
       query?: {
         page?: number
@@ -917,7 +1442,7 @@ export interface operations {
       }
     }
   }
-  listar_3: {
+  listar_5: {
     parameters: {
       query?: never
       header?: never
@@ -996,6 +1521,26 @@ export interface operations {
         content: {
           '*/*': string
         }
+      }
+    }
+  }
+  removerFeriado: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
       }
     }
   }

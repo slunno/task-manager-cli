@@ -2,6 +2,160 @@
   "openapi": "3.1.0",
   "info": { "title": "OpenAPI definition", "version": "v0" },
   "paths": {
+    "/api/v1/ti/admin/slas/{prioridade}": {
+      "put": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "atualizarPolitica",
+        "parameters": [
+          {
+            "name": "prioridade",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["BAIXA", "MEDIA", "ALTA", "CRITICA"]
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PoliticaRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/Politica" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/calendario/expediente": {
+      "put": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "expediente",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Janela" }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/Calendario" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/usuarios/importacao": {
+      "post": {
+        "tags": ["usuario-admin-controller"],
+        "operationId": "importar",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "arquivo": { "type": "string", "format": "binary" }
+                },
+                "required": ["arquivo"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/RelatorioImportacao" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/categorias": {
+      "get": {
+        "tags": ["categoria-admin-controller"],
+        "operationId": "listar",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoriaAdminResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["categoria-admin-controller"],
+        "operationId": "criar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CriarCategoriaRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaAdminResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/calendario/feriados": {
+      "post": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "adicionarFeriado",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FeriadoRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/Feriado" } }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/chamados": {
       "get": {
         "tags": ["chamado-controller"],
@@ -119,7 +273,7 @@
       },
       "post": {
         "tags": ["chamado-controller"],
-        "operationId": "criar",
+        "operationId": "criar_1",
         "requestBody": {
           "content": {
             "application/json": {
@@ -175,7 +329,7 @@
     "/api/v1/chamados/{chamadoId}/comentarios": {
       "get": {
         "tags": ["comentario-controller"],
-        "operationId": "listar",
+        "operationId": "listar_1",
         "parameters": [
           {
             "name": "chamadoId",
@@ -211,7 +365,7 @@
       },
       "post": {
         "tags": ["comentario-controller"],
-        "operationId": "criar_1",
+        "operationId": "criar_2",
         "parameters": [
           {
             "name": "chamadoId",
@@ -245,7 +399,7 @@
     "/api/v1/chamados/{chamadoId}/anexos": {
       "get": {
         "tags": ["anexo-controller"],
-        "operationId": "listar_1",
+        "operationId": "listar_2",
         "parameters": [
           {
             "name": "chamadoId",
@@ -351,6 +505,78 @@
         }
       }
     },
+    "/api/v1/ti/admin/usuarios/{id}": {
+      "patch": {
+        "tags": ["usuario-admin-controller"],
+        "operationId": "atualizar",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarUsuarioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioAdminResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/categorias/{id}": {
+      "patch": {
+        "tags": ["categoria-admin-controller"],
+        "operationId": "atualizar_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarCategoriaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoriaAdminResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/chamados/{id}": {
       "get": {
         "tags": ["chamado-controller"],
@@ -376,7 +602,7 @@
       },
       "patch": {
         "tags": ["chamado-controller"],
-        "operationId": "atualizar",
+        "operationId": "atualizar_2",
         "parameters": [
           {
             "name": "id",
@@ -458,6 +684,71 @@
         }
       }
     },
+    "/api/v1/ti/admin/usuarios": {
+      "get": {
+        "tags": ["usuario-admin-controller"],
+        "operationId": "listar_3",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32", "default": 0 }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int32", "default": 20 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaResponseUsuarioAdminResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/slas": {
+      "get": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "politicas",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Politica" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ti/admin/calendario": {
+      "get": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "calendario",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/Calendario" } }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/me": {
       "get": {
         "tags": ["usuario-controller"],
@@ -515,7 +806,7 @@
     "/api/v1/chamados/{chamadoId}/linha-do-tempo": {
       "get": {
         "tags": ["linha-tempo-controller"],
-        "operationId": "listar_2",
+        "operationId": "listar_4",
         "parameters": [
           {
             "name": "chamadoId",
@@ -591,7 +882,7 @@
     "/api/v1/categorias": {
       "get": {
         "tags": ["categoria-controller"],
-        "operationId": "listar_3",
+        "operationId": "listar_5",
         "responses": {
           "200": {
             "description": "OK",
@@ -660,10 +951,121 @@
           }
         }
       }
+    },
+    "/api/v1/ti/admin/calendario/feriados/{id}": {
+      "delete": {
+        "tags": ["sla-admin-controller"],
+        "operationId": "removerFeriado",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
     }
   },
   "components": {
     "schemas": {
+      "PoliticaRequest": {
+        "type": "object",
+        "properties": {
+          "horasPrimeiraResposta": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "horasResolucao": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        }
+      },
+      "Politica": {
+        "type": "object",
+        "properties": {
+          "prioridade": {
+            "type": "string",
+            "enum": ["BAIXA", "MEDIA", "ALTA", "CRITICA"]
+          },
+          "horasPrimeiraResposta": { "type": "integer", "format": "int32" },
+          "horasResolucao": { "type": "integer", "format": "int32" }
+        }
+      },
+      "Janela": {
+        "type": "object",
+        "properties": {
+          "diaSemana": { "type": "integer", "format": "int32" },
+          "inicio": { "type": "string" },
+          "fim": { "type": "string" }
+        }
+      },
+      "Calendario": {
+        "type": "object",
+        "properties": {
+          "expediente": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Janela" }
+          },
+          "feriados": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Feriado" }
+          }
+        }
+      },
+      "Feriado": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "data": { "type": "string", "format": "date" },
+          "descricao": { "type": "string" }
+        }
+      },
+      "ErroLinha": {
+        "type": "object",
+        "properties": {
+          "linha": { "type": "integer", "format": "int32" },
+          "motivo": { "type": "string" }
+        }
+      },
+      "RelatorioImportacao": {
+        "type": "object",
+        "properties": {
+          "importados": { "type": "integer", "format": "int32" },
+          "rejeitados": { "type": "integer", "format": "int32" },
+          "erros": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ErroLinha" }
+          }
+        }
+      },
+      "CriarCategoriaRequest": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string", "maxLength": 120, "minLength": 0 }
+        },
+        "required": ["nome"]
+      },
+      "CategoriaAdminResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "nome": { "type": "string" },
+          "ativa": { "type": "boolean" }
+        }
+      },
+      "FeriadoRequest": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "string", "format": "date" },
+          "descricao": { "type": "string", "maxLength": 180, "minLength": 0 }
+        },
+        "required": ["data", "descricao"]
+      },
       "CriarChamadoRequest": {
         "type": "object",
         "properties": {
@@ -807,6 +1209,45 @@
           }
         }
       },
+      "AtualizarUsuarioRequest": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string", "maxLength": 180, "minLength": 0 },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254,
+            "minLength": 0
+          },
+          "perfil": {
+            "type": "string",
+            "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
+          },
+          "ativo": { "type": "boolean" }
+        },
+        "required": ["email", "nome", "perfil"]
+      },
+      "UsuarioAdminResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "nome": { "type": "string" },
+          "email": { "type": "string" },
+          "perfil": {
+            "type": "string",
+            "enum": ["FUNCIONARIO", "TI_AGENTE", "TI_ADMIN"]
+          },
+          "ativo": { "type": "boolean" }
+        }
+      },
+      "AtualizarCategoriaRequest": {
+        "type": "object",
+        "properties": {
+          "nome": { "type": "string", "maxLength": 120, "minLength": 0 },
+          "ativa": { "type": "boolean" }
+        },
+        "required": ["nome"]
+      },
       "AtualizarChamadoRequest": {
         "type": "object",
         "properties": {
@@ -861,6 +1302,20 @@
             "additionalProperties": { "type": "integer", "format": "int64" }
           }
         }
+      },
+      "PaginaResponseUsuarioAdminResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/UsuarioAdminResponse" }
+          },
+          "page": { "type": "integer", "format": "int32" },
+          "size": { "type": "integer", "format": "int32" },
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" }
+        },
+        "required": ["content", "page", "size", "totalElements", "totalPages"]
       },
       "PaginaResponseChamadoResponse": {
         "type": "object",

@@ -27,6 +27,11 @@ public class Categoria {
     this.ativa = true;
   }
 
+  public void atualizar(String nome, boolean ativa) {
+    this.nome = nome;
+    this.ativa = ativa;
+  }
+
   public Long getId() {
     return id;
   }
