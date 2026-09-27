@@ -8,6 +8,7 @@ import br.com.empresa.helpdesk.comentarios.infra.ComentarioRepository;
 import br.com.empresa.helpdesk.compartilhado.erros.RecursoNaoEncontradoException;
 import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
+import br.com.empresa.helpdesk.notificacoes.application.ComentarioCriadoEvent;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
 import java.time.Clock;
@@ -23,11 +24,17 @@ public class ComentarioService {
   private final ComentarioRepository repository;
   private final ChamadoService chamados;
   private final Clock clock;
+  private final org.springframework.context.ApplicationEventPublisher eventos;
 
-  public ComentarioService(ComentarioRepository repository, ChamadoService chamados, Clock clock) {
+  public ComentarioService(
+      ComentarioRepository repository,
+      ChamadoService chamados,
+      Clock clock,
+      org.springframework.context.ApplicationEventPublisher eventos) {
     this.repository = repository;
     this.chamados = chamados;
     this.clock = clock;
+    this.eventos = eventos;
   }
 
   @Transactional
@@ -38,9 +45,11 @@ public class ComentarioService {
     }
     Instant agora = Instant.now(clock);
     chamados.registrarComentario(chamadoId, ator, dados.interno(), agora);
-    return ComentarioResponse.de(
+    var comentario =
         repository.saveAndFlush(
-            new Comentario(chamadoId, ator.getId(), dados.texto(), dados.interno(), agora)));
+            new Comentario(chamadoId, ator.getId(), dados.texto(), dados.interno(), agora));
+    eventos.publishEvent(new ComentarioCriadoEvent(chamadoId, ator.getId(), dados.interno()));
+    return ComentarioResponse.de(comentario);
   }
 
   @Transactional(readOnly = true)

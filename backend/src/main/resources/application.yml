@@ -54,3 +54,8 @@ helpdesk:
   auth:
     mode: disabled
 
+
+  mail:
+    from: ${HELPDESK_MAIL_FROM:helpdesk@localhost}
+  portal:
+    url: ${HELPDESK_PORTAL_URL:http://127.0.0.1:5173}

@@ -11,6 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
   Optional<Usuario> findByEmailIgnoreCase(String email);
 
+  @Query(
+      "select u.email from Usuario u where u.ativo = true and u.perfil <> br.com.empresa.helpdesk.usuarios.domain.Perfil.FUNCIONARIO")
+  List<String> emailsTiAtivos();
+
   @Query("select u.id from Usuario u where u.setorId = :setorId")
   List<Long> idsPorSetor(Long setorId);
 

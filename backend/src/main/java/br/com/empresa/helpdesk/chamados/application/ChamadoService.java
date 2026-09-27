@@ -17,6 +17,7 @@ import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
 import br.com.empresa.helpdesk.historico.api.HistoricoResponse;
 import br.com.empresa.helpdesk.historico.application.HistoricoService;
+import br.com.empresa.helpdesk.notificacoes.application.ChamadoCriadoEvent;
 import br.com.empresa.helpdesk.usuarios.application.UsuarioService;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
@@ -90,7 +91,23 @@ public class ChamadoService {
             dados.categoriaId(),
             dados.prioridadeSugerida(),
             Instant.now(clock));
-    return mapper.paraResponse(repository.saveAndFlush(chamado));
+    repository.saveAndFlush(chamado);
+    eventos.publishEvent(new ChamadoCriadoEvent(chamado.getId()));
+    return mapper.paraResponse(chamado);
+  }
+
+  public record ResumoNotificacao(
+      Long id, String numero, String titulo, Long solicitanteId, Long responsavelId) {}
+
+  @Transactional(readOnly = true)
+  public ResumoNotificacao resumoParaNotificacao(Long id) {
+    Chamado chamado = exigir(id);
+    return new ResumoNotificacao(
+        chamado.getId(),
+        chamado.getNumero(),
+        chamado.getTitulo(),
+        chamado.getSolicitanteId(),
+        chamado.getResponsavelId());
   }
 
   @Transactional(readOnly = true)

@@ -51,6 +51,11 @@ public class UsuarioService {
   }
 
   @Transactional(readOnly = true)
+  public List<String> emailsTiAtivos() {
+    return repository.emailsTiAtivos();
+  }
+
+  @Transactional(readOnly = true)
   public List<Long> idsPorSetor(Long setorId) {
     return repository.idsPorSetor(setorId);
   }
