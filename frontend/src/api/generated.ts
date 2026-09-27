@@ -36,6 +36,38 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/chamados/{chamadoId}/comentarios': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['listar']
+    put?: never
+    post: operations['criar_1']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/chamados/{chamadoId}/anexos': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['listar_1']
+    put?: never
+    post: operations['enviar']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/auth/dev/login': {
     parameters: {
       query?: never
@@ -116,6 +148,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/chamados/{chamadoId}/linha-do-tempo': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['listar_2']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/chamados/meus': {
     parameters: {
       query?: never
@@ -139,7 +187,7 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    get: operations['listar']
+    get: operations['listar_3']
     put?: never
     post?: never
     delete?: never
@@ -172,6 +220,22 @@ export interface paths {
       cookie?: never
     }
     get: operations['config']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/anexos/{id}/download': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['baixar']
     put?: never
     post?: never
     delete?: never
@@ -225,6 +289,8 @@ export interface components {
       atualizadoEm: string
       /** Format: date-time */
       resolvidoEm: string | null
+      /** Format: date-time */
+      primeiraRespostaEm: string | null
       solucao: string | null
       /** Format: date-time */
       prazoResolucao: string | null
@@ -234,6 +300,39 @@ export interface components {
     AssumirChamadoRequest: {
       /** Format: int64 */
       version: number
+    }
+    CriarComentarioRequest: {
+      texto: string
+      interno?: boolean
+    }
+    ComentarioResponse: {
+      /** Format: int64 */
+      id?: number
+      /** Format: int64 */
+      chamadoId?: number
+      /** Format: int64 */
+      autorId?: number
+      texto?: string
+      interno?: boolean
+      /** Format: date-time */
+      criadoEm?: string
+    }
+    AnexoResponse: {
+      /** Format: int64 */
+      id?: number
+      /** Format: int64 */
+      chamadoId?: number
+      /** Format: int64 */
+      comentarioId?: number
+      nomeOriginal?: string
+      tipoMime?: string
+      /** Format: int64 */
+      tamanho?: number
+      /** Format: int64 */
+      criadoPor?: number
+      interno?: boolean
+      /** Format: date-time */
+      criadoEm?: string
     }
     LoginRequest: {
       /** Format: email */
@@ -299,6 +398,50 @@ export interface components {
     }
     PaginaResponseHistoricoResponse: {
       content: components['schemas']['HistoricoResponse'][]
+      /** Format: int32 */
+      page: number
+      /** Format: int32 */
+      size: number
+      /** Format: int64 */
+      totalElements: number
+      /** Format: int32 */
+      totalPages: number
+    }
+    LinhaTempoItemResponse: {
+      /** Format: int64 */
+      id?: number
+      tipo?: string
+      /** Format: int64 */
+      autorId?: number
+      texto?: string
+      status?: string
+      /** Format: date-time */
+      criadoEm?: string
+    }
+    PaginaResponseLinhaTempoItemResponse: {
+      content: components['schemas']['LinhaTempoItemResponse'][]
+      /** Format: int32 */
+      page: number
+      /** Format: int32 */
+      size: number
+      /** Format: int64 */
+      totalElements: number
+      /** Format: int32 */
+      totalPages: number
+    }
+    PaginaResponseComentarioResponse: {
+      content: components['schemas']['ComentarioResponse'][]
+      /** Format: int32 */
+      page: number
+      /** Format: int32 */
+      size: number
+      /** Format: int64 */
+      totalElements: number
+      /** Format: int32 */
+      totalPages: number
+    }
+    PaginaResponseAnexoResponse: {
+      content: components['schemas']['AnexoResponse'][]
       /** Format: int32 */
       page: number
       /** Format: int32 */
@@ -415,6 +558,114 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['ChamadoResponse']
+        }
+      }
+    }
+  }
+  listar: {
+    parameters: {
+      query?: {
+        page?: number
+        size?: number
+      }
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PaginaResponseComentarioResponse']
+        }
+      }
+    }
+  }
+  criar_1: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CriarComentarioRequest']
+      }
+    }
+    responses: {
+      /** @description Comentário criado */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['ComentarioResponse']
+        }
+      }
+    }
+  }
+  listar_1: {
+    parameters: {
+      query?: {
+        page?: number
+        size?: number
+      }
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PaginaResponseAnexoResponse']
+        }
+      }
+    }
+  }
+  enviar: {
+    parameters: {
+      query?: {
+        comentarioId?: number
+        interno?: boolean
+      }
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        'multipart/form-data': {
+          /** Format: binary */
+          arquivo: string
+        }
+      }
+    }
+    responses: {
+      /** @description Anexo armazenado */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['AnexoResponse']
         }
       }
     }
@@ -559,6 +810,31 @@ export interface operations {
       }
     }
   }
+  listar_2: {
+    parameters: {
+      query?: {
+        page?: number
+        size?: number
+      }
+      header?: never
+      path: {
+        chamadoId: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': components['schemas']['PaginaResponseLinhaTempoItemResponse']
+        }
+      }
+    }
+  }
   meus: {
     parameters: {
       query?: {
@@ -583,7 +859,7 @@ export interface operations {
       }
     }
   }
-  listar: {
+  listar_3: {
     parameters: {
       query?: never
       header?: never
@@ -639,6 +915,28 @@ export interface operations {
         }
         content: {
           '*/*': components['schemas']['ConfigResponse']
+        }
+      }
+    }
+  }
+  baixar: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          '*/*': string
         }
       }
     }

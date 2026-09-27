@@ -61,7 +61,7 @@ export function MeusChamadosPage() {
           <div className="mt-8 rounded-xl border border-cyan-200 bg-cyan-50 p-5">
             <h2 className="font-semibold">Você está na visão de funcionário</h2>
             <p className="mt-2 text-sm text-slate-700">
-              Para explorar a fila e as funções da etapa E3 nesta prévia local,
+              Para explorar a fila e as funções da etapa E4 nesta prévia local,
               entre como agente de TI.
             </p>
             <Button

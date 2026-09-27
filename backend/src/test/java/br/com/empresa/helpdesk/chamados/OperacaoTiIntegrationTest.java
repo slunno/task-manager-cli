@@ -238,6 +238,7 @@ class OperacaoTiIntegrationTest {
     comentar(agente, id, "Pode testar novamente?", false, 201);
     assertThat(chamados.findById(id).orElseThrow().getPrimeiraRespostaEm()).isNotNull();
     comentar(maria, id, "Minha resposta", true, 403);
+    comentar(joao, id, "Não autorizado", false, 404);
     mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(joao))
         .andExpect(status().isNotFound());
     mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(maria))
@@ -247,6 +248,12 @@ class OperacaoTiIntegrationTest {
     mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(agente))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.totalElements").value(2));
+    mvc.perform(get("/api/v1/chamados/" + id + "/linha-do-tempo").session(maria))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalElements").value(3))
+        .andExpect(jsonPath("$.content[2].texto").value("Pode testar novamente?"));
+    mvc.perform(get("/api/v1/chamados/" + id + "/linha-do-tempo").session(joao))
+        .andExpect(status().isNotFound());
     comentar(maria, id, "Ainda não funciona", false, 201);
     assertThat(chamados.findById(id).orElseThrow().getStatus().name()).isEqualTo("EM_ATENDIMENTO");
     mvc.perform(get("/api/v1/chamados/" + id + "/historico").session(agente))
@@ -292,6 +299,9 @@ class OperacaoTiIntegrationTest {
         .andExpect(
             result ->
                 assertThat(result.getResponse().getContentAsByteArray()).isEqualTo(pdf.getBytes()));
+    assertThat(publico.getResponse().getContentAsString()).doesNotContain("chaveStorage");
+    assertThat(anexos.findById(anexoId).orElseThrow().getChaveStorage())
+        .isNotEqualTo("relatorio.pdf");
     mvc.perform(get("/api/v1/anexos/" + anexoId + "/download").session(joao))
         .andExpect(status().isNotFound());
     mvc.perform(
@@ -309,6 +319,12 @@ class OperacaoTiIntegrationTest {
                 .session(maria)
                 .header("X-CSRF-TOKEN", csrf(maria)))
         .andExpect(status().isForbidden());
+    mvc.perform(
+            multipart("/api/v1/chamados/" + id + "/anexos")
+                .file(pdf)
+                .session(joao)
+                .header("X-CSRF-TOKEN", csrf(joao)))
+        .andExpect(status().isNotFound());
     MvcResult reservado =
         mvc.perform(
                 multipart("/api/v1/chamados/" + id + "/anexos")

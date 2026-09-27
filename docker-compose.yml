@@ -44,6 +44,10 @@ services:
       DATABASE_PASSWORD: ${HELPDESK_DB_PASSWORD}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
+      HELPDESK_STORAGE_MODE: local
+      HELPDESK_STORAGE_LOCAL_DIRECTORY: /app/data/anexos
+    volumes:
+      - attachments_data:/app/data/anexos
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,3 +69,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  attachments_data:

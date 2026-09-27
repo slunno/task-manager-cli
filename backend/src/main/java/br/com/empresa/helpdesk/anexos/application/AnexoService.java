@@ -5,7 +5,7 @@ import br.com.empresa.helpdesk.anexos.domain.Anexo;
 import br.com.empresa.helpdesk.anexos.infra.AnexoRepository;
 import br.com.empresa.helpdesk.chamados.application.ChamadoService;
 import br.com.empresa.helpdesk.chamados.domain.StatusChamado;
-import br.com.empresa.helpdesk.comentarios.infra.ComentarioRepository;
+import br.com.empresa.helpdesk.comentarios.application.ComentarioService;
 import br.com.empresa.helpdesk.compartilhado.erros.ConflitoChamadoException;
 import br.com.empresa.helpdesk.compartilhado.erros.RecursoNaoEncontradoException;
 import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
@@ -28,14 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class AnexoService {
   private final AnexoRepository repository;
-  private final ComentarioRepository comentarios;
+  private final ComentarioService comentarios;
   private final ChamadoService chamados;
   private final StorageService storage;
   private final Clock clock;
 
   public AnexoService(
       AnexoRepository repository,
-      ComentarioRepository comentarios,
+      ComentarioService comentarios,
       ChamadoService chamados,
       StorageService storage,
       Clock clock) {
@@ -58,11 +58,7 @@ public class AnexoService {
       throw new AccessDeniedException("Anexo interno exclusivo da TI");
     }
     if (comentarioId != null) {
-      var comentario =
-          comentarios
-              .findByIdAndChamadoId(comentarioId, chamadoId)
-              .orElseThrow(() -> new RecursoNaoEncontradoException("Comentário não encontrado"));
-      if (comentario.isInterno() != interno) {
+      if (comentarios.visibilidadeDoComentario(comentarioId, chamadoId) != interno) {
         throw new RequisicaoInvalidaException("Visibilidade do anexo deve seguir o comentário");
       }
     }

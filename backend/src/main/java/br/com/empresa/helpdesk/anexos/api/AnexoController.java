@@ -4,6 +4,7 @@ import br.com.empresa.helpdesk.anexos.application.AnexoService;
 import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
 import br.com.empresa.helpdesk.compartilhado.seguranca.UsuarioSessaoFilter;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +26,7 @@ public class AnexoController {
     this.anexos = anexos;
   }
 
+  @ApiResponse(responseCode = "201", description = "Anexo armazenado")
   @PostMapping(
       value = "/api/v1/chamados/{chamadoId}/anexos",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

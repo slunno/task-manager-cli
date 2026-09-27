@@ -4,6 +4,7 @@ import br.com.empresa.helpdesk.comentarios.application.ComentarioService;
 import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
 import br.com.empresa.helpdesk.compartilhado.seguranca.UsuarioSessaoFilter;
 import br.com.empresa.helpdesk.usuarios.domain.Usuario;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -23,6 +24,7 @@ public class ComentarioController {
   }
 
   @PostMapping
+  @ApiResponse(responseCode = "201", description = "Comentário criado")
   public ResponseEntity<ComentarioResponse> criar(
       @PathVariable Long chamadoId,
       @Valid @RequestBody CriarComentarioRequest dados,

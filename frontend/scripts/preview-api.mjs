@@ -38,6 +38,7 @@ const base = {
   criadoEm: agora,
   atualizadoEm: agora,
   resolvidoEm: null,
+  primeiraRespostaEm: null,
   solucao: null,
   prazoResolucao: null,
   version: 0,
@@ -70,6 +71,8 @@ const chamados = [
   },
 ]
 const historico = []
+const comentarios = []
+const anexos = []
 let usuario = null
 
 function responder(response, status, body, headers = {}) {
@@ -243,6 +246,153 @@ const server = createServer(async (request, response) => {
     const caminhoHistorico = /^\/api\/v1\/chamados\/(\d+)\/historico$/.exec(
       caminho,
     )
+    const caminhoLinhaTempo =
+      /^\/api\/v1\/chamados\/(\d+)\/linha-do-tempo$/.exec(caminho)
+    if (caminhoLinhaTempo && request.method === 'GET') {
+      const chamado = chamados.find(
+        (item) => item.id === Number(caminhoLinhaTempo[1]),
+      )
+      if (!chamado || (!ti() && chamado.solicitanteId !== usuario.id))
+        return responder(response, 404, { detail: 'Chamado não encontrado' })
+      const eventos = [
+        ...comentarios
+          .filter((item) => item.chamadoId === chamado.id && !item.interno)
+          .map((item) => ({
+            id: item.id,
+            tipo: 'COMENTARIO',
+            autorId: item.autorId,
+            texto: item.texto,
+            status: null,
+            criadoEm: item.criadoEm,
+          })),
+        ...historico
+          .filter(
+            (item) => item.chamadoId === chamado.id && item.campo === 'status',
+          )
+          .map((item) => ({
+            id: item.id,
+            tipo: 'STATUS',
+            autorId: item.usuarioId,
+            texto: null,
+            status: item.valorNovo,
+            criadoEm: item.criadoEm,
+          })),
+      ].sort(
+        (a, b) =>
+          a.criadoEm.localeCompare(b.criadoEm) ||
+          a.tipo.localeCompare(b.tipo) ||
+          a.id - b.id,
+      )
+      return responder(response, 200, pagina(eventos, url.searchParams))
+    }
+    const caminhoComentarios = /^\/api\/v1\/chamados\/(\d+)\/comentarios$/.exec(
+      caminho,
+    )
+    const caminhoAnexos = /^\/api\/v1\/chamados\/(\d+)\/anexos$/.exec(caminho)
+    const caminhoDownload = /^\/api\/v1\/anexos\/(\d+)\/download$/.exec(caminho)
+    if (caminhoComentarios || caminhoAnexos) {
+      const match = caminhoComentarios ?? caminhoAnexos
+      const chamado = chamados.find((item) => item.id === Number(match[1]))
+      if (!chamado || (!ti() && chamado.solicitanteId !== usuario.id))
+        return responder(response, 404, { detail: 'Chamado não encontrado' })
+      const lista = caminhoComentarios ? comentarios : anexos
+      if (request.method === 'GET')
+        return responder(
+          response,
+          200,
+          pagina(
+            lista.filter(
+              (item) =>
+                item.chamadoId === chamado.id && (ti() || !item.interno),
+            ),
+            url.searchParams,
+          ),
+        )
+      if (request.method === 'POST') {
+        if (!validarCsrf(request, response)) return
+        if (['RESOLVIDO', 'FECHADO'].includes(chamado.status))
+          return responder(response, 409, { detail: 'Chamado concluído' })
+        if (caminhoComentarios) {
+          const dados = await corpoJson(request)
+          if (!dados.texto?.trim())
+            return responder(response, 400, { detail: 'Informe a mensagem' })
+          if (dados.interno && !ti())
+            return responder(response, 403, {
+              detail: 'Nota interna exclusiva da TI',
+            })
+          const momento = new Date().toISOString()
+          const item = {
+            id: comentarios.length + 1,
+            chamadoId: chamado.id,
+            autorId: usuario.id,
+            texto: dados.texto.trim(),
+            interno: Boolean(dados.interno),
+            criadoEm: momento,
+          }
+          comentarios.push(item)
+          if (ti() && !item.interno && !chamado.primeiraRespostaEm)
+            chamado.primeiraRespostaEm = momento
+          if (!ti() && chamado.status === 'AGUARDANDO_USUARIO') {
+            registrar(chamado, 'status', chamado.status, 'EM_ATENDIMENTO')
+            chamado.status = 'EM_ATENDIMENTO'
+            chamado.version++
+            chamado.atualizadoEm = momento
+          }
+          return responder(response, 201, item)
+        }
+        const partes = []
+        let tamanho = 0
+        for await (const parte of request) {
+          partes.push(parte)
+          tamanho += parte.length
+          if (tamanho > 11 * 1024 * 1024)
+            return responder(response, 413, { detail: 'Anexo excede 10 MB' })
+        }
+        const corpo = Buffer.concat(partes)
+        const texto = corpo.toString('latin1')
+        const nome = /filename="([^"]+)"/.exec(texto)?.[1]?.split(/[\\/]/).pop()
+        const interno = /name="interno"\r\n\r\ntrue/.test(texto)
+        if (!nome)
+          return responder(response, 400, { detail: 'Selecione um arquivo' })
+        if (interno && !ti())
+          return responder(response, 403, {
+            detail: 'Anexo interno exclusivo da TI',
+          })
+        const item = {
+          id: anexos.length + 1,
+          chamadoId: chamado.id,
+          comentarioId: null,
+          nomeOriginal: nome,
+          tipoMime: nome.endsWith('.pdf') ? 'application/pdf' : 'text/plain',
+          tamanho,
+          criadoPor: usuario.id,
+          interno,
+          criadoEm: new Date().toISOString(),
+        }
+        anexos.push(item)
+        return responder(response, 201, item)
+      }
+    }
+    if (caminhoDownload && request.method === 'GET') {
+      const item = anexos.find(
+        (anexo) => anexo.id === Number(caminhoDownload[1]),
+      )
+      const chamado = chamados.find((ch) => ch.id === item?.chamadoId)
+      if (
+        !item ||
+        !chamado ||
+        (!ti() && (chamado.solicitanteId !== usuario.id || item.interno))
+      )
+        return responder(response, 404, { detail: 'Anexo não encontrado' })
+      response.writeHead(200, {
+        'Content-Type': item.tipoMime,
+        'Content-Disposition':
+          'attachment; filename="' + item.nomeOriginal + '"',
+        'Cache-Control': 'no-store',
+      })
+      response.end('Arquivo de demonstração da prévia local.')
+      return
+    }
     if (request.method === 'GET' && caminhoHistorico) {
       if (!ti())
         return responder(response, 403, { detail: 'Acesso restrito à TI' })

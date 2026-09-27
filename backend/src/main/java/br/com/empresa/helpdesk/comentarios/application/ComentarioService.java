@@ -5,6 +5,7 @@ import br.com.empresa.helpdesk.comentarios.api.ComentarioResponse;
 import br.com.empresa.helpdesk.comentarios.api.CriarComentarioRequest;
 import br.com.empresa.helpdesk.comentarios.domain.Comentario;
 import br.com.empresa.helpdesk.comentarios.infra.ComentarioRepository;
+import br.com.empresa.helpdesk.compartilhado.erros.RecursoNaoEncontradoException;
 import br.com.empresa.helpdesk.compartilhado.erros.RequisicaoInvalidaException;
 import br.com.empresa.helpdesk.compartilhado.paginacao.PaginaResponse;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
@@ -40,6 +41,14 @@ public class ComentarioService {
     return ComentarioResponse.de(
         repository.saveAndFlush(
             new Comentario(chamadoId, ator.getId(), dados.texto(), dados.interno(), agora)));
+  }
+
+  @Transactional(readOnly = true)
+  public boolean visibilidadeDoComentario(Long comentarioId, Long chamadoId) {
+    return repository
+        .findByIdAndChamadoId(comentarioId, chamadoId)
+        .orElseThrow(() -> new RecursoNaoEncontradoException("Comentário não encontrado"))
+        .isInterno();
   }
 
   @Transactional(readOnly = true)

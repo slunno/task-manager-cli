@@ -62,3 +62,11 @@ O volume `postgres_data` guarda dados locais. Para backup em ambiente real, exec
 ## Saúde e diagnóstico
 
 `/actuator/health` cobre liveness/readiness do processo. Métricas e logs estruturados de negócio serão adicionados nas etapas com fluxos reais. Não registre conteúdo de chamados, anexos ou dados pessoais em logs.
+
+## Armazenamento de anexos
+
+Em dev, o backend grava em `./data/anexos` dentro do contêiner (ou em `HELPDESK_STORAGE_LOCAL_DIRECTORY` fora do Compose). Mantenha esse diretório fora da pasta pública do frontend. No Compose, o volume `attachments_data` persiste os arquivos; faça backup junto do PostgreSQL, preservando a consistência dos metadados.
+
+Em produção, `application-prod.yml` exige S3 compatível. Crie um bucket privado antes de iniciar e configure `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_SECRET_KEY` e `HELPDESK_S3_BUCKET` no gerenciador de segredos. Não conceda leitura pública ou URLs permanentes. Valide upload e download com contas de funcionário, agente e chamado alheio antes de liberar o ambiente.
+
+Na prévia sem Docker, comentários e metadados de anexos ficam em memória e o download devolve um arquivo demonstrativo; a validação real de conteúdo e a persistência são feitas pelo backend Java.

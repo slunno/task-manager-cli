@@ -10,6 +10,7 @@ import { useMe } from '../auth/useAuth'
 import { prioridadeTexto, statusTexto } from './formatacao'
 import { GestaoChamado } from './GestaoChamado'
 import { HistoricoChamadoPanel } from './HistoricoChamadoPanel'
+import { InteracoesChamadoPanel } from './InteracoesChamadoPanel'
 
 export function DetalheChamadoPage() {
   const sessao = useMe()
@@ -175,6 +176,17 @@ export function DetalheChamadoPage() {
           </button>
         </p>
       )}
+      {chamado.data && sessao.data && (
+        <InteracoesChamadoPanel
+          chamadoId={chamado.data.id}
+          usuarioId={sessao.data.id}
+          ehTi={ehTi}
+          concluido={
+            chamado.data.status === 'RESOLVIDO' ||
+            chamado.data.status === 'FECHADO'
+          }
+        />
+      )}{' '}
       {ehTi && chamado.data && (
         <HistoricoChamadoPanel chamadoId={chamado.data.id} />
       )}

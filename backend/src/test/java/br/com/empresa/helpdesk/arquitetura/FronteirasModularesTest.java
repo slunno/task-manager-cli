@@ -48,6 +48,24 @@ class FronteirasModularesTest {
           .resideInAPackage("..chamados.infra..");
 
   @ArchTest
+  static final ArchRule repositoriosDeComentariosNaoVazam =
+      noClasses()
+          .that()
+          .resideOutsideOfPackage("..comentarios..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAPackage("..comentarios.infra..");
+
+  @ArchTest
+  static final ArchRule repositoriosDeAnexosNaoVazam =
+      noClasses()
+          .that()
+          .resideOutsideOfPackage("..anexos..")
+          .should()
+          .dependOnClassesThat()
+          .resideInAPackage("..anexos.infra..");
+
+  @ArchTest
   static final ArchRule dominioNaoDependeDeCamadasExternas =
       noClasses()
           .that()
