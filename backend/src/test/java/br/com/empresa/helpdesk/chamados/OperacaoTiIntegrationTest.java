@@ -13,6 +13,7 @@ import br.com.empresa.helpdesk.admin.infra.CategoriaRepository;
 import br.com.empresa.helpdesk.chamados.domain.Chamado;
 import br.com.empresa.helpdesk.chamados.domain.Prioridade;
 import br.com.empresa.helpdesk.chamados.infra.ChamadoRepository;
+import br.com.empresa.helpdesk.comentarios.infra.ComentarioRepository;
 import br.com.empresa.helpdesk.historico.infra.HistoricoChamadoRepository;
 import br.com.empresa.helpdesk.usuarios.domain.Perfil;
 import br.com.empresa.helpdesk.usuarios.infra.UsuarioRepository;
@@ -40,6 +41,7 @@ class OperacaoTiIntegrationTest {
   @Autowired private MockMvc mvc;
   @Autowired private ObjectMapper mapper;
   @Autowired private ChamadoRepository chamados;
+  @Autowired private ComentarioRepository comentarios;
   @Autowired private HistoricoChamadoRepository historico;
   @Autowired private CategoriaRepository categorias;
   @Autowired private UsuarioRepository usuarios;
@@ -48,6 +50,7 @@ class OperacaoTiIntegrationTest {
 
   @BeforeEach
   void preparar() {
+    comentarios.deleteAll();
     historico.deleteAll();
     chamados.deleteAll();
     categorias.deleteAll();
@@ -216,6 +219,45 @@ class OperacaoTiIntegrationTest {
         .isInstanceOf(OptimisticLockingFailureException.class);
   }
 
+  @Test
+  void comentariosIsolamNotasInternasEReabremAtendimento() throws Exception {
+    MockHttpSession maria = entrar("maria@empresa.com", "Maria");
+    MockHttpSession joao = entrar("joao@empresa.com", "João");
+    MockHttpSession agente = entrar("agente@empresa.com", "Agente");
+    promover("agente@empresa.com", Perfil.TI_AGENTE);
+    long id = criar(maria, "Problema de rede").path("id").asLong();
+    assumir(agente, id, 0, 200);
+    alterar(agente, id, Map.of("version", 1, "status", "AGUARDANDO_USUARIO"), 200);
+
+    comentar(agente, id, "Investigação reservada", true, 201);
+    comentar(agente, id, "Pode testar novamente?", false, 201);
+    assertThat(chamados.findById(id).orElseThrow().getPrimeiraRespostaEm()).isNotNull();
+    comentar(maria, id, "Minha resposta", true, 403);
+    mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(joao))
+        .andExpect(status().isNotFound());
+    mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(maria))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalElements").value(1))
+        .andExpect(jsonPath("$.content[0].texto").value("Pode testar novamente?"));
+    mvc.perform(get("/api/v1/chamados/" + id + "/comentarios").session(agente))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.totalElements").value(2));
+    comentar(maria, id, "Ainda não funciona", false, 201);
+    assertThat(chamados.findById(id).orElseThrow().getStatus().name())
+        .isEqualTo("EM_ATENDIMENTO");
+    mvc.perform(get("/api/v1/chamados/" + id + "/historico").session(agente))
+        .andExpect(jsonPath("$.content[0].valorNovo").value("EM_ATENDIMENTO"));
+  }
+
+  private void comentar(MockHttpSession sessao, long id, String texto, boolean interno, int esperado)
+      throws Exception {
+    mvc.perform(post("/api/v1/chamados/" + id + "/comentarios")
+            .session(sessao)
+            .header("X-CSRF-TOKEN", csrf(sessao))
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsString(Map.of("texto", texto, "interno", interno))))
+        .andExpect(status().is(esperado));
+  }
   private JsonNode assumir(MockHttpSession sessao, long id, int version, int esperado)
       throws Exception {
     MvcResult result =
@@ -296,3 +338,4 @@ class OperacaoTiIntegrationTest {
     return mapper.readTree(result.getResponse().getContentAsString()).path("token").asText();
   }
 }
+

@@ -66,6 +66,9 @@ public class Chamado {
   @Column(name = "resolvido_em")
   private Instant resolvidoEm;
 
+  @Column(name = "primeira_resposta_em")
+  private Instant primeiraRespostaEm;
+
   @Column(columnDefinition = "text")
   private String solucao;
 
@@ -177,6 +180,14 @@ public class Chamado {
 
   public Instant getResolvidoEm() {
     return resolvidoEm;
+  }
+
+  public Instant getPrimeiraRespostaEm() {
+    return primeiraRespostaEm;
+  }
+
+  public void registrarPrimeiraResposta(Instant agora) {
+    if (primeiraRespostaEm == null) primeiraRespostaEm = agora;
   }
 
   public String getSolucao() {

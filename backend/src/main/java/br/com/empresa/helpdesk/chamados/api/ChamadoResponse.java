@@ -21,6 +21,8 @@ public record ChamadoResponse(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant criadoEm,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant atualizadoEm,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant resolvidoEm,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true)
+        Instant primeiraRespostaEm,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) String solucao,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true) Instant prazoResolucao,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Long version) {}

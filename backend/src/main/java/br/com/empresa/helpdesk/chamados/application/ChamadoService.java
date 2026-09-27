@@ -128,13 +128,35 @@ public class ChamadoService {
 
   @Transactional(readOnly = true)
   public ChamadoResponse detalhe(Long id, Usuario ator) {
-    var encontrado =
-        ator.getPerfil() == Perfil.FUNCIONARIO
+    return mapper.paraResponse(exigirAcesso(id, ator));
+  }
+
+  @Transactional(readOnly = true)
+  public Chamado exigirAcesso(Long id, Usuario ator) {
+    return (ator.getPerfil() == Perfil.FUNCIONARIO
             ? repository.findByIdAndSolicitanteId(id, ator.getId())
-            : repository.findById(id);
-    return encontrado
-        .map(mapper::paraResponse)
+            : repository.findById(id))
         .orElseThrow(() -> new RecursoNaoEncontradoException("Chamado não encontrado"));
+  }
+
+  @Transactional
+  public void registrarComentario(Long id, Usuario ator, boolean interno, Instant agora) {
+    Chamado chamado = exigirAcesso(id, ator);
+    if (chamado.getStatus() == StatusChamado.RESOLVIDO
+        || chamado.getStatus() == StatusChamado.FECHADO) {
+      throw new ConflitoChamadoException("Chamado concluído não aceita comentários");
+    }
+    if (interno) return;
+    if (ator.getPerfil() == Perfil.FUNCIONARIO
+        && chamado.getStatus() == StatusChamado.AGUARDANDO_USUARIO) {
+      Estado anterior = Estado.de(chamado);
+      chamado.alterarStatus(StatusChamado.EM_ATENDIMENTO, null, agora);
+      repository.saveAndFlush(chamado);
+      registrarAlteracoes(anterior, chamado, ator.getId(), agora);
+    } else if (ator.getPerfil() != Perfil.FUNCIONARIO && chamado.getPrimeiraRespostaEm() == null) {
+      chamado.registrarPrimeiraResposta(agora);
+      repository.saveAndFlush(chamado);
+    }
   }
 
   @Transactional
