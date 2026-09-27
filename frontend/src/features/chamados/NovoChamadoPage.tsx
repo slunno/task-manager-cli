@@ -15,6 +15,7 @@ import { Textarea } from '../../components/ui/textarea'
 import { AreaPage } from '../auth/AreaPage'
 import { useMe } from '../auth/useAuth'
 import { PessoaPicker } from './PessoaPicker'
+import { buscarArtigos } from '../../api/conhecimento'
 
 const esquema = z.object({
   titulo: z
@@ -56,6 +57,13 @@ export function NovoChamadoPage() {
       prioridadeSugerida: '',
       solicitanteId: '',
     },
+  })
+  const tituloDigitado = formulario.watch('titulo')
+  const sugestoes = useQuery({
+    queryKey: ['sugestoes-artigos', tituloDigitado.trim()],
+    queryFn: () => buscarArtigos(tituloDigitado.trim(), 0),
+    enabled: tituloDigitado.trim().length >= 5,
+    staleTime: 60_000,
   })
   const criar = useMutation({
     mutationFn: criarChamado,
@@ -118,6 +126,41 @@ export function NovoChamadoPage() {
                 </p>
               )}
             </div>
+            {tituloDigitado.trim().length >= 5 && (
+              <aside
+                aria-label="Artigos sugeridos"
+                className="rounded-lg border border-cyan-200 bg-cyan-50 p-4 text-sm"
+              >
+                <p className="font-semibold">
+                  Talvez a resposta já esteja aqui
+                </p>
+                {sugestoes.isPending && (
+                  <p role="status" className="mt-2">
+                    Buscando orientações…
+                  </p>
+                )}
+                {sugestoes.isError && (
+                  <p role="alert" className="mt-2">
+                    Não foi possível buscar orientações.
+                  </p>
+                )}
+                {sugestoes.data?.content.length === 0 && (
+                  <p className="mt-2">Nenhum artigo relacionado.</p>
+                )}
+                <ul className="mt-2 space-y-2">
+                  {sugestoes.data?.content.slice(0, 3).map((artigo) => (
+                    <li key={artigo.id}>
+                      <Link
+                        className="font-semibold text-ocean underline"
+                        to="/conhecimento"
+                      >
+                        {artigo.titulo}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            )}
             <div>
               <label
                 className="mb-2 block text-sm font-semibold"

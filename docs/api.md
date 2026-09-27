@@ -81,3 +81,15 @@ Arquivos aceitos: PDF, PNG, JPG/JPEG e TXT em UTF-8, até 10 MB. Extensão, MIME
 | GET/POST | /api/v1/chamados/{id}/avaliacao | dono ou TI para leitura; solicitante + CSRF para criação | Nota 1–5 e comentário opcional de até 1.000 caracteres |
 
 O SLA usa o fuso America/Sao_Paulo, expediente e feriados cadastrados; pausa em AGUARDANDO_USUARIO e retoma após resposta. A alteração de política/calendário afeta novos prazos calculados. Alertas de resolução próxima entram na outbox com chave de deduplicação. A outbox e o fechamento automático usam jobs com ShedLock. O fechamento de RESOLVIDO ocorre após 3 dias por padrão; o limite para reabrir é de 7 dias por padrão, porém um chamado FECHADO não pode ser reaberto. As duas durações são configuráveis por ambiente. Ao reabrir, a avaliação anterior é removida para permitir uma nova avaliação após a próxima resolução.
+
+## Conhecimento e produtividade — E9
+
+| Método | Caminho | Acesso | Resultado |
+| --- | --- | --- | --- |
+| GET | /api/v1/artigos?texto=&categoriaId=&page=&size= | autenticado | Busca paginada; funcionário recebe somente artigos publicados |
+| GET | /api/v1/artigos/{id} | autenticado | Rascunho retorna 404 ao funcionário |
+| POST/PUT | /api/v1/ti/artigos[/{id}] | TI + CSRF | Cria ou edita artigo e publicação |
+| GET/POST/PUT | /api/v1/ti/respostas-prontas[/{id}] | TI; escrita com CSRF | Lista ativas, cria ou edita texto reutilizável |
+| GET/POST/DELETE | /api/v1/ti/filtros-salvos[/{id}] | TI; escrita com CSRF | Filtros da fila pertencem ao usuário logado |
+
+Artigos têm título, conteúdo, categoria opcional e estado de publicação. A busca é limitada a 120 caracteres, 50 itens por página e não expõe rascunhos em consulta ou detalhe para funcionários. Filtros aceitam somente as chaves conhecidas da fila, têm limite de 20 por usuário e não podem ser removidos por outro agente. Respostas prontas preenchem o campo da conversa; o agente revisa o texto antes de enviar.

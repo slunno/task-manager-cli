@@ -16,6 +16,11 @@ import { dataHora } from '../../lib/dataHora'
 import { AreaPage } from '../auth/AreaPage'
 import { prioridadeTexto, statusTexto } from './formatacao'
 import { PessoaPicker } from './PessoaPicker'
+import {
+  excluirFiltro,
+  listarFiltros,
+  salvarFiltro,
+} from '../../api/conhecimento'
 
 const STATUS: StatusChamado[] = [
   'ABERTO',
@@ -90,6 +95,7 @@ function filtrosDaUrl(parametros: URLSearchParams): FiltrosFila {
 
 export function FilaTiPage() {
   const [parametros, setParametros] = useSearchParams()
+  const [nomeFiltro, setNomeFiltro] = useState('')
   const chaveFiltros = parametros.toString()
   const filtros = filtrosDaUrl(parametros)
   const cliente = useQueryClient()
@@ -102,6 +108,22 @@ export function FilaTiPage() {
     queryKey: ['categorias'],
     queryFn: getCategorias,
     staleTime: 60_000,
+  })
+  const filtrosSalvos = useQuery({
+    queryKey: ['filtros-salvos'],
+    queryFn: listarFiltros,
+  })
+  const salvarVista = useMutation({
+    mutationFn: () => salvarFiltro(nomeFiltro.trim(), parametros.toString()),
+    onSuccess: () => {
+      setNomeFiltro('')
+      void cliente.invalidateQueries({ queryKey: ['filtros-salvos'] })
+    },
+  })
+  const excluirVista = useMutation({
+    mutationFn: excluirFiltro,
+    onSuccess: () =>
+      void cliente.invalidateQueries({ queryKey: ['filtros-salvos'] }),
   })
   const assumir = useMutation({
     mutationFn: ({ id, version }: { id: number; version: number }) =>
@@ -162,6 +184,80 @@ export function FilaTiPage() {
           Vencendo SLA
         </Button>
       </div>
+      <section
+        aria-label="Filtros salvos"
+        className="mt-5 rounded-xl border border-slate-200 bg-white p-4"
+      >
+        <h2 className="font-semibold">Meus filtros</h2>
+        {filtrosSalvos.isPending && (
+          <p role="status" className="mt-2 text-sm">
+            Carregando filtros…
+          </p>
+        )}
+        {filtrosSalvos.isError && (
+          <p role="alert" className="mt-2 text-sm text-red-800">
+            Não foi possível carregar os filtros.
+          </p>
+        )}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {filtrosSalvos.data?.map((filtro) => (
+            <span
+              key={filtro.id}
+              className="inline-flex items-center rounded-lg border border-slate-200"
+            >
+              <button
+                className="px-3 py-2 text-sm font-semibold text-ocean"
+                onClick={() =>
+                  setParametros(new URLSearchParams(filtro.parametros))
+                }
+              >
+                {filtro.nome}
+              </button>
+              <button
+                aria-label={`Excluir filtro ${filtro.nome}`}
+                className="px-2 text-red-700"
+                disabled={excluirVista.isPending}
+                onClick={() => excluirVista.mutate(filtro.id)}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <form
+          className="mt-3 flex flex-wrap items-end gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (nomeFiltro.trim() && parametros.toString()) salvarVista.mutate()
+          }}
+        >
+          <label className="text-sm font-medium">
+            Nome do filtro
+            <input
+              value={nomeFiltro}
+              onChange={(e) => setNomeFiltro(e.target.value)}
+              maxLength={80}
+              className="mt-1 h-10 rounded-md border border-slate-300 px-3"
+            />
+          </label>
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={
+              !nomeFiltro.trim() ||
+              !parametros.toString() ||
+              salvarVista.isPending
+            }
+          >
+            Salvar filtro atual
+          </Button>
+        </form>
+        {(salvarVista.isError || excluirVista.isError) && (
+          <p role="alert" className="mt-2 text-sm text-red-800">
+            {salvarVista.error?.message ?? excluirVista.error?.message}
+          </p>
+        )}
+      </section>
 
       <form
         key={chaveFiltros}

@@ -2,7 +2,7 @@
 
 ## Módulos
 
-O backend é um monólito modular com os módulos `usuarios`, `chamados`, `comentarios`, `anexos`, `historico`, `notificacoes`, `sla`, `avaliacoes`, `admin` e `compartilhado`. O frontend React usa rotas por perfil e consome somente `/api/v1`. PostgreSQL armazena dados e outbox; MinIO ou storage S3 compatível armazena anexos; SMTP entrega notificações.
+O backend é um monólito modular com os módulos `usuarios`, `chamados`, `comentarios`, `anexos`, `historico`, `notificacoes`, `sla`, `avaliacoes`, `conhecimento`, `admin` e `compartilhado`. O frontend React usa rotas por perfil e consome somente `/api/v1`. PostgreSQL armazena dados e outbox; MinIO ou storage S3 compatível armazena anexos; SMTP entrega notificações.
 
 ```mermaid
 flowchart LR
@@ -31,4 +31,3 @@ flowchart LR
 - `America/Sao_Paulo` é o fuso de exibição; instantes persistidos serão UTC.
 - O código de tarefas existente é legado distinto do helpdesk e será preservado em `legacy/task-manager-cli` sem ser incluído nos builds novos.
 - Não há Docker instalado na máquina atual; a validação de Compose dependerá de um ambiente com Docker.
-

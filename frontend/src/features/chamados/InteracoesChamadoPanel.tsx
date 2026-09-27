@@ -10,6 +10,7 @@ import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader } from '../../components/ui/card'
 import { dataHora } from '../../lib/dataHora'
 import { LinhaTempoPublica } from './LinhaTempoPublica'
+import { listarRespostas } from '../../api/conhecimento'
 
 const tiposPermitidos = 'application/pdf,image/png,image/jpeg,text/plain'
 const limite = 10 * 1024 * 1024
@@ -38,6 +39,11 @@ export function InteracoesChamadoPanel({
     queryFn: () => getComentarios(chamadoId, paginaComentarios),
     retry: false,
     enabled: ehTi,
+  })
+  const respostas = useQuery({
+    queryKey: ['respostas-prontas'],
+    queryFn: listarRespostas,
+    enabled: ehTi && !concluido,
   })
   const anexos = useQuery({
     queryKey: ['anexos', chamadoId, paginaAnexos],
@@ -184,6 +190,33 @@ export function InteracoesChamadoPanel({
           )}
           {!concluido && (
             <form className="mt-6 space-y-3 border-t pt-5" onSubmit={comentar}>
+              {ehTi && (
+                <label className="block text-sm font-semibold">
+                  Usar resposta pronta
+                  <select
+                    className="mt-2 h-10 w-full rounded-md border border-slate-300 bg-white px-3"
+                    defaultValue=""
+                    onChange={(e) => {
+                      const modelo = respostas.data?.find(
+                        (r) => r.id === Number(e.target.value),
+                      )
+                      if (modelo) setTexto(modelo.texto)
+                    }}
+                  >
+                    <option value="">Selecione, se desejar</option>
+                    {respostas.data?.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.titulo}
+                      </option>
+                    ))}
+                  </select>
+                  {respostas.isError && (
+                    <span className="mt-1 block text-red-800">
+                      Respostas prontas indisponíveis.
+                    </span>
+                  )}
+                </label>
+              )}
               <label
                 htmlFor="texto-comentario"
                 className="block text-sm font-semibold"

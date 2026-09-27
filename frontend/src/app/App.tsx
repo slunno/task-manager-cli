@@ -11,6 +11,7 @@ import { FilaTiPage } from '../features/chamados/FilaTiPage'
 import { DashboardTiPage } from '../features/chamados/DashboardTiPage'
 import { MeusChamadosPage } from '../features/chamados/MeusChamadosPage'
 import { NovoChamadoPage } from '../features/chamados/NovoChamadoPage'
+import { ConhecimentoPage } from '../features/conhecimento/ConhecimentoPage'
 
 const TODOS = ['FUNCIONARIO', 'TI_AGENTE', 'TI_ADMIN'] as const
 const TI = ['TI_AGENTE', 'TI_ADMIN'] as const
@@ -54,6 +55,14 @@ export function App() {
         element={
           <ExigirPerfil permitido={[...TODOS]}>
             <DetalheChamadoPage />
+          </ExigirPerfil>
+        }
+      />
+      <Route
+        path="/conhecimento"
+        element={
+          <ExigirPerfil permitido={[...TODOS]}>
+            <ConhecimentoPage />
           </ExigirPerfil>
         }
       />

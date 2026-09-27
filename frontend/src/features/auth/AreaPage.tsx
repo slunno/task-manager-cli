@@ -77,6 +77,12 @@ export function AreaPage({
           >
             Novo chamado
           </Link>
+          <Link
+            className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
+            to="/conhecimento"
+          >
+            Conhecimento
+          </Link>
           {usuario.perfil !== 'FUNCIONARIO' && (
             <Link
               className="rounded-lg px-3 py-2 text-ocean hover:bg-mist"
