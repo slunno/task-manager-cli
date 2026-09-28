@@ -66,3 +66,11 @@ V9 é usada pela C5 e V10 será usada pelo histórico da C6, corrigindo o confli
 V10 bloqueia UPDATE e DELETE do histórico; exclusão só no contexto local da transação da retenção. RetencaoService exige autocommit desligado no PostgreSQL e desativa o contexto antes de retornar, sem ativação global. ADR 0007 descreve a garantia e seu limite contra administradores do banco. H2 mantém os testes funcionais e não simula o trigger.
 
 HistoricoPostgresTest executa no PostgreSQL real da CI: operações avulsas rejeitadas, UPDATE rejeitado mesmo com contexto, rollback sem perda, retenção anonimiza/apaga e DELETE posterior continua bloqueado. V1–V8 preservadas. A CI da C5 também aprovou o p95 de fila e dashboard com 100 mil chamados.
+
+## C7 — Qualidade
+
+JaCoCo 0.8.15 instalado por necessidade de medição/gate: resultado inicial 85,16% (1.395/1.638 linhas) no conjunto domain/application; gate LINE de 80% aplicado ao mesmo escopo, sem exclusão de classes do negócio e sem redução do mínimo. Relatório por pacote e plano de melhoria em docs/qualidade.md. Spotless permanece obrigatório; referências órfãs de configuração da IDE foram retiradas na C1, sem adotar Checkstyle adicional.
+
+Os dez testes originais do frontend foram preservados por funcionalidade. Novos testes de dashboard/admin/relatórios/fila/detalhe elevam a suíte a 19. Playwright 1.63.0 foi adicionado somente em desenvolvimento, com quatro fluxos serializados no Compose real, upload/download, CSRF, headers nginx e entrega HTML/texto no MailHog. CI publica relatório/capturas e cobre PostgreSQL sem skips. A avaliação ocorre após a nova resolução, preservando a regra existente.
+
+A primeira CI da C6 detectou uma asserção que buscava o texto no wrapper Spring; o trigger já bloqueava a operação. O teste foi corrigido para verificar a causa PostgreSQL no commit e640103; CI aprovada sem alterar o trigger.
