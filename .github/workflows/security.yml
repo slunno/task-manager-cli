@@ -1,0 +1,79 @@
+name: Segurança
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: '23 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        if: matrix.language == 'java-kotlin'
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - name: Compilar Java para análise
+        if: matrix.language == 'java-kotlin'
+        working-directory: backend
+        run: ./mvnw -B -DskipTests package
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
+
+  images:
+    name: Trivy (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Relatório consultivo durante a triagem inicial, sem ocultar o exit code do scanner.
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir imagem sem segredos de execução
+        run: docker build -f "${{ matrix.service }}/Dockerfile" -t "helpdesk-${{ matrix.service }}:scan" .
+      - uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: helpdesk-${{ matrix.service }}:scan
+          format: json
+          output: trivy-${{ matrix.service }}.json
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: false
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-${{ matrix.service }}
+          path: trivy-${{ matrix.service }}.json
+          retention-days: 14

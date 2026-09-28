@@ -141,3 +141,7 @@ Confirmado `unsafe-inline` somente para estilos. Sem usos de estilos inline no c
 
 Confirmada ausência de limites. Adicionado filtro em memória com janela fixa e chaves limitadas, após CSRF e antes dos handlers de login OIDC. Login usa IP; mutações sensíveis usam usuário autenticado. Recusa 429 Problem Details/Retry-After, parâmetros configuráveis e perfil test desligado. Testes dedicados verificam cotas, usuários distintos, expiração, capacidade e concorrência. Substituído tratamento genérico de forwarded headers pela confiança explícita do Tomcat, vazia por padrão; nginx não preserva X-Forwarded-For recebido do visitante. Não foram criadas dependências, endpoints ou mudanças de contratos OpenAPI. O limite por instância e as fronteiras da janela ficam documentados.
 
+## R5 — Dependências e análise de segurança
+
+Confirmada ausência das automações. Dependabot semanal e agrupado cobre Maven, npm, Actions e Docker. Workflow separado executa CodeQL Java/Kotlin com build explícito e JavaScript/TypeScript sem build, com permissões mínimas; Trivy constrói e analisa as duas imagens, publicando relatórios HIGH/CRITICAL inclusive sem correção disponível. Trivy é consultivo durante a triagem inicial, com status de falha e artefatos preservados, sem exclusões silenciosas ou alegação de ausência de vulnerabilidades. Torná-lo bloqueante exige tratar os resultados reais; CodeQL não foi tornado consultivo por antecipação. Não há credenciais de runtime nos builds.
+
