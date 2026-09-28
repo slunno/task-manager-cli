@@ -16,7 +16,7 @@ Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente 
 ## Riscos e validação antes de produção
 
 - Validar configuração do IdP, domínio autorizado, proxy HTTPS, política de sessão, bucket privado, SMTP e segredos no ambiente de destino.
-- Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo, assinatura e limites de ZIP/Office; `ScannerAnexo` é um ponto de extensão com padrão sem varredura antivírus. Reduza tipos com `HELPDESK_ATTACHMENT_TYPES` quando necessário. Arquivos compactados aninhados são bloqueados, inclusive Office dentro de ZIP, por decisão conservadora.
+- Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo, assinatura e limites de ZIP/Office; `ScannerAnexo` é um ponto de extensão com padrão sem varredura antivírus. Reduza tipos com `HELPDESK_ATTACHMENT_TYPES` quando necessário. Nomes/extensões de compactados aninhados conhecidos são bloqueados, inclusive Office dentro de ZIP, por decisão conservadora. Arquivos renomeados podem escapar dessa identificação e exigem scanner externo.
 - Definir retenção e janela de backup com o responsável por privacidade. Testar restauração isolada e remoção física de anexos.
 - Executar verificação de dependências e teste de penetração no ambiente de homologação. A revisão de código não substitui esses controles operacionais.
 
@@ -30,7 +30,7 @@ Produção exige `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_
 
 `HELPDESK_MAIL_TI_MODE` aceita `usuarios` ou `lista`; a lista validada fica em `HELPDESK_MAIL_TI_ADDRESSES`. A configuração define quem recebe informação operacional e deve passar por revisão do dono. Templates escapam conteúdo dinâmico e têm alternativa de texto; descrição, solução e notas internas não são incluídas. Alertas SLA usam título genérico. Não há garantia de entrega exatamente uma vez após falha entre SMTP e confirmação da outbox.
 
-`HELPDESK_ATTACHMENT_TYPES` só habilita formatos suportados. A proteção de ZIP limita descompactação/entradas e bloqueia conteúdo executável identificável, macros e arquivos compactados dentro de compactados; não é uma garantia de ausência de malware. O scanner padrão é uma extensão sem antivírus. Conteúdo é sempre baixado como attachment/nosniff.
+`HELPDESK_ATTACHMENT_TYPES` só habilita formatos suportados. A proteção de ZIP limita descompactação/entradas e bloqueia nomes/extensões de executáveis e compactados conhecidos e macros identificáveis; não é uma garantia de ausência de malware. O scanner padrão é uma extensão sem antivírus. Conteúdo é sempre baixado como attachment/nosniff.
 
 ## Evidência automatizada
 

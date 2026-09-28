@@ -85,7 +85,7 @@ O pipeline executa testes, lint e build. O teste de PostgreSQL com Testcontainer
 
 ## Armazenamento de anexos
 
-`HELPDESK_ATTACHMENT_TYPES` define as extensões habilitadas dentre as suportadas (padrão no `.env.example`). Tipos não suportados impedem inicialização; essa configuração não libera executáveis. A validação de ZIP/Office tem limites fixos de entradas/descompactação e rejeita macros identificáveis, caminhos perigosos e compactados aninhados. O scanner padrão aceita após a validação de formato; para antivírus, registre outra implementação `ScannerAnexo`. Não há integração antivírus nesta entrega.
+`HELPDESK_ATTACHMENT_TYPES` define as extensões habilitadas dentre as suportadas (padrão no `.env.example`). Tipos não suportados impedem inicialização; essa configuração não libera executáveis. A validação de ZIP/Office tem limites fixos de entradas/descompactação e rejeita macros identificáveis, caminhos perigosos e nomes/extensões de compactados aninhados conhecidos. O scanner padrão aceita após a validação de formato; para antivírus, registre outra implementação `ScannerAnexo`. Não há integração antivírus nesta entrega.
 
 Em dev, o backend grava em `./data/anexos` dentro do contêiner (ou em `HELPDESK_STORAGE_LOCAL_DIRECTORY` fora do Compose). Mantenha esse diretório fora da pasta pública do frontend. No Compose, o volume `attachments_data` persiste os arquivos; faça backup junto do PostgreSQL, preservando a consistência dos metadados.
 
