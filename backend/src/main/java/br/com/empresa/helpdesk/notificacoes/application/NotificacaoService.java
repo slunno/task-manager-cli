@@ -19,22 +19,25 @@ public class NotificacaoService {
   private final UsuarioService usuarios;
   private final ChamadoService chamados;
   private final Clock clock;
+  private final DestinatariosTi ti;
 
   public NotificacaoService(
       NotificacaoOutboxRepository repository,
       UsuarioService usuarios,
       ChamadoService chamados,
-      Clock clock) {
+      Clock clock,
+      DestinatariosTi ti) {
     this.repository = repository;
     this.usuarios = usuarios;
     this.chamados = chamados;
     this.clock = clock;
+    this.ti = ti;
   }
 
   @EventListener
   public void criado(ChamadoCriadoEvent evento) {
     var chamado = chamados.resumoParaNotificacao(evento.chamadoId());
-    usuarios.emailsTiAtivos().forEach(email -> enfileirar("CHAMADO_CRIADO", email, chamado));
+    ti.emails().forEach(email -> enfileirar("CHAMADO_CRIADO", email, chamado));
   }
 
   @EventListener
@@ -53,7 +56,7 @@ public class NotificacaoService {
   @EventListener
   public void reaberto(ChamadoReabertoEvent evento) {
     var chamado = chamados.resumoParaNotificacao(evento.chamadoId());
-    usuarios.emailsTiAtivos().forEach(email -> enfileirar("REABERTURA", email, chamado));
+    ti.emails().forEach(email -> enfileirar("REABERTURA", email, chamado));
   }
 
   @EventListener
@@ -65,6 +68,29 @@ public class NotificacaoService {
             ? chamado.responsavelId()
             : chamado.solicitanteId();
     if (destinatarioId != null) destinatarioAtivo(destinatarioId, "COMENTARIO", chamado);
+    else ti.emails().forEach(email -> enfileirar("COMENTARIO", email, chamado));
+  }
+
+  public void alertarPrazo(
+      ChamadoService.ResumoNotificacao chamado, String prazo, Instant instante) {
+    var responsavel =
+        chamado.responsavelId() == null
+            ? java.util.Optional.<Usuario>empty()
+            : usuarios.buscarAtivoPorId(chamado.responsavelId());
+    var emails =
+        responsavel.map(pessoa -> java.util.List.of(pessoa.getEmail())).orElseGet(ti::emails);
+    for (String email : emails) {
+      String destinatario =
+          java.util
+              .UUID
+              .nameUUIDFromBytes(email.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+              .toString();
+      enfileirarUnica(
+          "SLA_" + prazo,
+          email,
+          chamado,
+          "SLA:" + chamado.id() + ":" + prazo + ":" + instante.toEpochMilli() + ":" + destinatario);
+    }
   }
 
   private void destinatarioAtivo(
@@ -96,7 +122,11 @@ public class NotificacaoService {
             "numero",
             chamado.numero(),
             "titulo",
-            chamado.titulo(),
+            tipo.startsWith("SLA_")
+                ? "Prazo de atendimento próximo do vencimento"
+                : chamado.titulo(),
+            "status",
+            chamado.status().name(),
             "chamadoId",
             chamado.id().toString()),
         Instant.now(clock));

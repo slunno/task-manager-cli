@@ -117,32 +117,38 @@ public class ChamadoService {
       String titulo,
       Long solicitanteId,
       Long responsavelId,
-      Instant prazoResolucao) {}
+      Instant prazoResolucao,
+      Instant prazoPrimeiraResposta,
+      Instant primeiraRespostaEm,
+      StatusChamado status) {}
 
   @Transactional(readOnly = true)
   public ResumoNotificacao resumoParaNotificacao(Long id) {
-    Chamado chamado = exigir(id);
+    return resumoNotificacao(exigir(id));
+  }
+
+  private ResumoNotificacao resumoNotificacao(Chamado chamado) {
     return new ResumoNotificacao(
         chamado.getId(),
         chamado.getNumero(),
         chamado.getTitulo(),
         chamado.getSolicitanteId(),
         chamado.getResponsavelId(),
-        chamado.getPrazoResolucao());
+        chamado.getPrazoResolucao(),
+        chamado.getPrazoPrimeiraResposta(),
+        chamado.getPrimeiraRespostaEm(),
+        chamado.getStatus());
   }
 
   @Transactional(readOnly = true)
   public List<ResumoNotificacao> vencendoSla(Instant inicio, Instant fim) {
-    return repository.vencendoSla(inicio, fim).stream()
-        .map(
-            c ->
-                new ResumoNotificacao(
-                    c.getId(),
-                    c.getNumero(),
-                    c.getTitulo(),
-                    c.getSolicitanteId(),
-                    c.getResponsavelId(),
-                    c.getPrazoResolucao()))
+    return repository.vencendoSla(inicio, fim).stream().map(this::resumoNotificacao).toList();
+  }
+
+  @Transactional(readOnly = true)
+  public List<ResumoNotificacao> vencendoPrimeiraResposta(Instant inicio, Instant fim) {
+    return repository.vencendoPrimeiraResposta(inicio, fim).stream()
+        .map(this::resumoNotificacao)
         .toList();
   }
 

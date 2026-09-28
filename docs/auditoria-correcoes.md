@@ -41,3 +41,11 @@ Resultados, decisões, limitações e passos manuais serão registrados nas seç
 Configuração S3 obrigatória no perfil prod, sem fallback local; validação de campos não vazios com mensagens que identificam a variável, sem expor valores. SMTP configurável com padrões MailHog em dev e autenticação/STARTTLS obrigatório em prod; timeouts adicionados. CSP, nosniff, Referrer-Policy, Permissions-Policy e HSTS condicionado a HTTPS no nginx. Se houver terminação TLS externa, HSTS fica nesse proxy.
 
 Validação: nove testes de contexto isolado carregam os arquivos reais de configuração e verificam ausência de cada variável, seleção S3, rejeição local/TLS e compatibilidade dev; build de produção do frontend aprovado. Inicialização não testa conexão remota ao bucket/SMTP; upload/download e nginx em execução serão verificados no Compose da C7. Docker não está instalado localmente, sem alterar essa limitação inicial.
+
+## C3 — Notificações e SLA
+
+Consultas de resolução incluem chamados sem responsável; consulta separada de primeira resposta exige ausência de resposta, prazo na próxima hora e SLA ativo. Destinatários da TI são configuráveis (`usuarios` como padrão ou `lista` de caixas). O mesmo mecanismo atende criação, reabertura, comentários do solicitante sem responsável e alertas. Responsável inativo também encaminha alerta à TI. Deduplicação inclui chamado/tipo/instante e identificador do destinatário, necessário quando houver várias caixas.
+
+Envio MIME com HTML escapado e texto alternativo, status, número e link; resolução aponta para `#avaliacao`. Nenhuma descrição, solução ou nota interna entra no payload; alertas SLA usam título genérico. Não foi adicionada biblioteca de template: o escape usa `HtmlUtils` do Spring. A entrega SMTP mantém a semântica documentada de pelo menos uma tentativa, podendo repetir se houver queda após envio e antes do commit; a deduplicação impede reenfileirar a cada execução do alerta, sem prometer exatamente uma entrega SMTP.
+
+Validação: testes com relógio fixo para ambos os prazos, sem responsável, configuração de destinatários, execuções consecutivas sem duplicatas, MIME HTML/texto e ausência de vazamento; consulta de banco testa chamados respondidos, pausados e concluídos.

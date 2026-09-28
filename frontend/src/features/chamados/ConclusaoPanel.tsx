@@ -33,7 +33,10 @@ export function ConclusaoPanel({ chamado }: { chamado: Chamado }) {
   })
 
   return (
-    <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+    <section
+      id="avaliacao"
+      className="mt-6 rounded-2xl border border-slate-200 bg-white p-6"
+    >
       <h2 className="text-xl font-semibold">Conclusão do atendimento</h2>
       {chamado.resolvidoEm && (
         <p className="mt-2 text-sm text-slate-600">

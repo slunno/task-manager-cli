@@ -17,8 +17,12 @@ public interface ChamadoRepository
       br.com.empresa.helpdesk.chamados.domain.StatusChamado status, Instant limite);
 
   @org.springframework.data.jpa.repository.Query(
-      "select c from Chamado c where c.status not in (br.com.empresa.helpdesk.chamados.domain.StatusChamado.RESOLVIDO, br.com.empresa.helpdesk.chamados.domain.StatusChamado.FECHADO) and c.slaPausadoEm is null and c.responsavelId is not null and c.prazoResolucao between :inicio and :fim")
+      "select c from Chamado c where c.status not in (br.com.empresa.helpdesk.chamados.domain.StatusChamado.RESOLVIDO, br.com.empresa.helpdesk.chamados.domain.StatusChamado.FECHADO) and c.slaPausadoEm is null and c.prazoResolucao between :inicio and :fim")
   List<Chamado> vencendoSla(Instant inicio, Instant fim);
+
+  @org.springframework.data.jpa.repository.Query(
+      "select c from Chamado c where c.status not in (br.com.empresa.helpdesk.chamados.domain.StatusChamado.RESOLVIDO, br.com.empresa.helpdesk.chamados.domain.StatusChamado.FECHADO) and c.slaPausadoEm is null and c.primeiraRespostaEm is null and c.prazoPrimeiraResposta between :inicio and :fim")
+  List<Chamado> vencendoPrimeiraResposta(Instant inicio, Instant fim);
 
   Optional<Chamado> findByIdAndSolicitanteId(Long id, Long solicitanteId);
 

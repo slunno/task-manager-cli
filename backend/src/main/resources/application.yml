@@ -72,6 +72,9 @@ helpdesk:
     mode: disabled
   mail:
     from: ${HELPDESK_MAIL_FROM:helpdesk@localhost}
+    ti:
+      mode: ${HELPDESK_MAIL_TI_MODE:usuarios}
+      addresses: ${HELPDESK_MAIL_TI_ADDRESSES:}
   portal:
     url: ${HELPDESK_PORTAL_URL:http://127.0.0.1:5173}
   conclusao:

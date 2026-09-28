@@ -71,6 +71,10 @@ public class NotificacaoOutbox {
     return tipo;
   }
 
+  public String getDedupKey() {
+    return dedupKey;
+  }
+
   public String getDestinatario() {
     return destinatario;
   }
