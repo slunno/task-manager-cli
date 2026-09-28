@@ -63,7 +63,7 @@
           <execution><id>cobertura-agente</id><goals><goal>prepare-agent</goal></goals></execution>
           <execution><id>cobertura-relatorio</id><phase>verify</phase><goals><goal>report</goal></goals></execution>
           <execution><id>cobertura-gate</id><phase>verify</phase><goals><goal>check</goal></goals>
-            <configuration><rules><rule><element>BUNDLE</element><limits><limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.80</minimum></limit></limits></rule></rules></configuration>
+            <configuration><rules><rule><element>BUNDLE</element><limits><limit><counter>LINE</counter><value>COVEREDRATIO</value><minimum>0.80</minimum></limit><limit><counter>BRANCH</counter><value>COVEREDRATIO</value><minimum>0.55</minimum></limit></limits></rule></rules></configuration>
           </execution>
         </executions>
       </plugin>

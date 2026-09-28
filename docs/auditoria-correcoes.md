@@ -145,3 +145,7 @@ Confirmada ausência de limites. Adicionado filtro em memória com janela fixa e
 
 Confirmada ausência das automações. Dependabot semanal e agrupado cobre Maven, npm, Actions e Docker. Workflow separado executa CodeQL Java/Kotlin com build explícito e JavaScript/TypeScript sem build, com permissões mínimas; Trivy constrói e analisa as duas imagens, publicando relatórios HIGH/CRITICAL inclusive sem correção disponível. Trivy é consultivo durante a triagem inicial, com status de falha e artefatos preservados, sem exclusões silenciosas ou alegação de ausência de vulnerabilidades. Torná-lo bloqueante exige tratar os resultados reais; CodeQL não foi tornado consultivo por antecipação. Não há credenciais de runtime nos builds.
 
+## R6 — Cobertura de ramos e regras críticas
+
+Medidos 58,72% de ramos antes de alterar o gate, adotado mínimo conservador de 55% e mantidos 80% de linhas. Novos testes cobrem conflito/desativação/vínculo de setores, validação/edição de avisos, privacidade e autoria de artigos, domínio e inatividade OIDC e impedimento de elevação de perfil por claims. A confiança de forwarded headers é verificada na valve real do Tomcat com requisições simuladas. O primeiro teste com servidor HTTP local falhou por socket Unix do JDK Windows; substituído pela verificação da valve, sem desabilitar a proteção nem o teste de confiança. Verify final aprovado com 110 testes (cinco PostgreSQL omitidos localmente), 88,10% de linhas e 60,89% de ramos. Não foram alteradas classes de negócio para aumentar números nem excluídos pacotes do gate.
+

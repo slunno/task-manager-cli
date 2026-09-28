@@ -2,11 +2,15 @@
 
 ## Cobertura
 
-JaCoCo 0.8.15 mede linhas das classes em `**/domain/**` e `**/application/**`, incluindo todos os módulos (66 classes na medição inicial). `verify` gera HTML/XML/CSV em `backend/target/site/jacoco` e exige **80% no conjunto desses pacotes**. Não inclui controllers, infraestrutura, DTOs externos ou código gerado de mapeamento. A métrica não afirma 80% em cada pacote isolado nem cobertura de branches.
+JaCoCo 0.8.15 mede linhas e ramos das classes em `**/domain/**` e `**/application/**`, incluindo todos os módulos (66 classes na medição inicial). `verify` gera HTML/XML/CSV em `backend/target/site/jacoco` e exige **80% de linhas e 55% de ramos no conjunto desses pacotes**. Não inclui controllers, infraestrutura, DTOs externos ou código gerado de mapeamento. Os limites não se aplicam individualmente a cada pacote.
 
 Medição anterior ao gate: **1.395/1.638 linhas = 85,16%**, suíte completa local, com cinco testes PostgreSQL omitidos automaticamente por ausência de Docker. Na CI esses testes são executados; a medição com PostgreSQL foi **1.404/1.638 linhas = 85,71%**. O limite solicitado foi mantido em 80%, sem reduzir para esconder lacunas. O relatório é publicado como artefato da CI.
 
-Próximos incrementos de cobertura por pacote: admin/application (50%: edição/desativação de setores e erros); gestao/application (55,6%: conflitos e validações de vínculos); conhecimento/domain (61,1%: edição e desativação); usuarios/application (74,3%: caminhos OIDC, identidade inválida e usuário inativo); sla/application (75%: pausas/retomadas e políticas ausentes). Os números por pacote são da medição inicial, disponíveis no relatório. São um plano de melhoria, sem excluir classes reais do gate.
+Lacunas da medição inicial: admin/application (50%); gestao/application (55,6%); conhecimento/domain (61,1%); usuarios/application (74,3%); sla/application (75%). A segunda rodada acrescenta testes de renomeação/conflitos/desativação de setores, períodos inválidos e edição de avisos, despublicação/privacidade/autoria de artigos e domínio/verificação/inatividade/perfil no OIDC. Os testes de taxa cobrem concorrência, capacidade, expiração e separação de usuários; a valve real do Tomcat é exercitada com requisições simuladas para verificar confiança no proxy sem depender de sockets locais. Permanecem oportunidades de ampliar regras de vínculos e SLA, sem excluir suas classes do gate.
+
+A linha de base de ramos foi **488/831 = 58,72%**. O gate de 55% foi escolhido antes dos novos testes, arredondando conservadoramente a medição; não foi reduzido após falhas. Testes adicionais melhoram a cobertura, mas não substituem a matriz de autorização nem demonstram ausência de defeitos.
+
+Após R6, `mvnw.cmd -B verify` aprovado: **110 testes, zero falhas/erros, cinco PostgreSQL omitidos por ausência de Docker**. Cobertura local: **1.443/1.638 linhas = 88,10%** e **506/831 ramos = 60,89%**. O relatório completo é artefato da CI; os testes PostgreSQL são executados no runner com Docker.
 
 ## Formatação
 
@@ -18,7 +22,7 @@ Os dez testes do antigo App.test.tsx foram preservados em Acesso, NovoChamadoPag
 
 ## E2E real
 
-Playwright 1.63.0 é dependência de desenvolvimento para testar navegador real. Quatro cenários encadeados usam Chrome/Chromium contra **nginx do build de produção + Spring perfil dev + PostgreSQL + MailHog** no Docker Compose, sem mocks. Somente o agente é inserido por SQL no ambiente descartável; funcionários usam login dev normal, sem elevação de perfil pela API.
+Playwright 1.63.0 é dependência de desenvolvimento para testar navegador real. Quatro cenários encadeados e um cenário de exposição/CSP do proxy usam Chrome/Chromium contra **nginx do build de produção + Spring perfil dev + PostgreSQL + MailHog** no Docker Compose, sem mocks. Somente o agente é inserido por SQL no ambiente descartável; funcionários usam login dev normal, sem elevação de perfil pela API.
 
 Fluxos: funcionário abre/anexa/lista; TI assume/comenta/nota interna/resolve; solicitante vê apenas conteúdo público, reabre para ABERTO/sem responsável, TI assume/resolve novamente e solicitante avalia; outro funcionário recebe página/HTTP 404 também para timeline e anexos. A nova resolução é necessária porque a regra atual só permite avaliar chamados concluídos. Também verificam CSRF, cabeçalhos de segurança e erros JavaScript. Os cenários são serializados porque representam o mesmo atendimento; uma falha interrompe o restante sem esconder o erro.
 
