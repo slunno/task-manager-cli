@@ -1,0 +1,13 @@
+# Ativa login real com senha. O backend nunca usa a chave secreta para validar senhas.
+spring:
+  config:
+    activate:
+      on-profile: supabase-auth
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+helpdesk:
+  auth:
+    mode: supabase
+    supabase:
+      url: ${SUPABASE_URL}
+      publishable-key: ${SUPABASE_PUBLISHABLE_KEY}

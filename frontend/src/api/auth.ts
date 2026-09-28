@@ -8,7 +8,7 @@ export interface Usuario {
 }
 
 export interface AuthConfig {
-  modo: 'dev' | 'oidc' | 'disabled'
+  modo: 'dev' | 'oidc' | 'supabase' | 'disabled'
   urlLogin: string | null
   previewDemo?: boolean
 }
@@ -80,6 +80,18 @@ export async function logout(): Promise<void> {
   await request<void>('/api/v1/auth/logout', {
     method: 'POST',
     headers: { 'X-CSRF-TOKEN': token },
+  })
+}
+
+export async function loginPassword(dados: {
+  email: string
+  senha: string
+}): Promise<Usuario> {
+  const token = await getCsrfToken()
+  return request<Usuario>('/api/v1/auth/password/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+    body: JSON.stringify(dados),
   })
 }
 

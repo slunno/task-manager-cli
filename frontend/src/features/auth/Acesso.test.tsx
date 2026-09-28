@@ -15,6 +15,46 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+it('entra com senha pelo Supabase e preserva o token CSRF', async () => {
+  const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const path = caminho(input)
+    if (path === '/api/v1/me')
+      return resposta({ detail: 'Autenticação necessária' }, 401)
+    if (path === '/api/v1/auth/config')
+      return resposta({ modo: 'supabase', urlLogin: null })
+    if (path === '/api/v1/auth/csrf') return resposta({ token: 'csrf-teste' })
+    if (path === '/api/v1/auth/password/login' && init?.method === 'POST')
+      return resposta(funcionario)
+    if (path.startsWith('/api/v1/chamados/meus?')) return resposta(paginaVazia)
+    if (path === '/api/v1/categorias') return resposta([])
+    throw new Error(`Rota inesperada: ${path}`)
+  })
+  vi.stubGlobal('fetch', fetch)
+  montar('/login')
+  fireEvent.change(await screen.findByLabelText('E-mail'), {
+    target: { value: 'maria@empresa.com' },
+  })
+  fireEvent.change(screen.getByLabelText('Senha'), {
+    target: { value: 'senha-de-teste' },
+  })
+  expect(screen.queryByLabelText('Nome')).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', { name: 'Entrar' }))
+  expect(
+    await screen.findByRole('heading', { name: 'Meus chamados' }),
+  ).toBeInTheDocument()
+  expect(fetch).toHaveBeenCalledWith(
+    '/api/v1/auth/password/login',
+    expect.objectContaining({
+      credentials: 'same-origin',
+      headers: expect.objectContaining({ 'X-CSRF-TOKEN': 'csrf-teste' }),
+      body: JSON.stringify({
+        email: 'maria@empresa.com',
+        senha: 'senha-de-teste',
+      }),
+    }),
+  )
+})
+
 it('envia quem não tem sessão para o login e entra em modo dev', async () => {
   const fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = caminho(input)

@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("prod")
+@Profile("prod & !supabase-auth")
 public class CorporateOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
   private final OidcUserService delegate = new OidcUserService();
   private final UsuarioService usuarios;

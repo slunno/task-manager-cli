@@ -26,7 +26,7 @@ public class SegurancaConfig {
   }
 
   @Bean
-  @Profile("!prod")
+  @Profile("!prod | supabase-auth")
   SecurityFilterChain localSecurityFilterChain(
       HttpSecurity http,
       UsuarioSessaoFilter usuarioFilter,
@@ -38,7 +38,7 @@ public class SegurancaConfig {
   }
 
   @Bean
-  @Profile("prod")
+  @Profile("prod & !supabase-auth")
   SecurityFilterChain oidcSecurityFilterChain(
       HttpSecurity http,
       UsuarioSessaoFilter usuarioFilter,
@@ -71,7 +71,8 @@ public class SegurancaConfig {
                         "/api/v1/auth/config",
                         "/api/v1/auth/csrf")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/dev/login")
+                    .requestMatchers(
+                        HttpMethod.POST, "/api/v1/auth/dev/login", "/api/v1/auth/password/login")
                     .permitAll()
                     .requestMatchers("/actuator/metrics", "/actuator/metrics/**")
                     .hasRole("TI_ADMIN")

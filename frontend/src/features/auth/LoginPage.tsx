@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { destinoInicial, getAuthConfig, loginDev } from '../../api/auth'
 import { Carregando } from './Guardas'
 import { ME_QUERY_KEY, useMe } from './useAuth'
+import { PasswordLoginForm } from './PasswordLoginForm'
 
 const esquemaLogin = z.object({
   email: z.email('Informe um e-mail válido'),
@@ -70,6 +71,8 @@ export function LoginPage() {
               Não foi possível verificar o acesso. Atualize a página e tente
               novamente.
             </div>
+          ) : config.data?.modo === 'supabase' ? (
+            <PasswordLoginForm />
           ) : config.data?.modo === 'oidc' ? (
             <a
               href={config.data.urlLogin ?? '#'}

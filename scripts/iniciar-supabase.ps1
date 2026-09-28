@@ -3,6 +3,7 @@ param(
     [ValidateSet('dev', 'prod')]
     [string]$Perfil = 'dev',
     [string]$ArquivoAmbiente,
+    [switch]$LoginSupabase,
     [switch]$ValidarConfiguracao
 )
 
@@ -33,7 +34,7 @@ try {
         }
         $nomeVariavel = $Matches[1]
         $valorVariavel = $Matches[2].Trim()
-        if ($nomeVariavel -notmatch '^(SUPABASE_DB_[A-Z_]+|SMTP_[A-Z_]+|HELPDESK_[A-Z_]+|OIDC_[A-Z_]+|PORT)$') {
+        if ($nomeVariavel -notmatch '^(SUPABASE_DB_[A-Z_]+|SUPABASE_URL|SUPABASE_PUBLISHABLE_KEY|SMTP_[A-Z_]+|HELPDESK_[A-Z_]+|OIDC_[A-Z_]+|PORT)$') {
             throw "Variavel nao permitida no arquivo de ambiente, linha $numeroLinha."
         }
         if ($valorVariavel.Length -ge 2) {
@@ -59,10 +60,19 @@ try {
             throw 'Defina usuario e senha nas variaveis separadas, sem credenciais na URL.'
         }
     }
-    Definir-VariavelLocal 'SPRING_PROFILES_ACTIVE' "$Perfil,supabase"
+    $perfisAtivos = "$Perfil,supabase"
+    if ($LoginSupabase) {
+        if ($env:SUPABASE_URL -ne 'https://evsmgbziifqbyahvcwsc.supabase.co' -or
+            [string]::IsNullOrWhiteSpace($env:SUPABASE_PUBLISHABLE_KEY) -or
+            $env:SUPABASE_PUBLISHABLE_KEY.StartsWith('sb_secret_')) {
+            throw 'Configure SUPABASE_URL do Projeto de chamados e SUPABASE_PUBLISHABLE_KEY em .env.supabase.'
+        }
+        $perfisAtivos += ',supabase-auth'
+    }
+    Definir-VariavelLocal 'SPRING_PROFILES_ACTIVE' $perfisAtivos
     if ($Perfil -eq 'dev') { Definir-VariavelLocal 'SERVER_ADDRESS' '127.0.0.1' }
     if ($ValidarConfiguracao) {
-        Write-Output "Arquivo de ambiente validado; perfis $Perfil,supabase. Nenhuma conexao foi aberta."
+        Write-Output "Arquivo de ambiente validado; perfis $perfisAtivos. Nenhuma conexao foi aberta."
         return
     }
     Push-Location (Join-Path $raizProjeto 'backend')
