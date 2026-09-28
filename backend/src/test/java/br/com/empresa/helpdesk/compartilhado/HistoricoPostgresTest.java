@@ -63,10 +63,12 @@ class HistoricoPostgresTest {
                     "update historico_chamado set valor_novo='alterado' where chamado_id=?",
                     chamado))
         .isInstanceOf(DataAccessException.class)
+        .rootCause()
         .hasMessageContaining("imutável");
     assertThatThrownBy(
             () -> jdbc.update("delete from historico_chamado where chamado_id=?", chamado))
         .isInstanceOf(DataAccessException.class)
+        .rootCause()
         .hasMessageContaining("imutável");
     assertThat(
             jdbc.queryForObject(
