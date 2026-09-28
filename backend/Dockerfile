@@ -1,11 +1,11 @@
-FROM maven:3.9.11-eclipse-temurin-21 AS build
+FROM maven:3.9.15-eclipse-temurin-26 AS build
 WORKDIR /workspace
 COPY backend/pom.xml ./pom.xml
 RUN mvn -B dependency:go-offline
 COPY backend/src ./src
 RUN mvn -B -DskipTests package
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
     && groupadd -r helpdesk && useradd -r -g helpdesk helpdesk && mkdir -p /app/data/anexos && chown -R helpdesk:helpdesk /app/data
