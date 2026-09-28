@@ -149,3 +149,7 @@ Confirmada ausência das automações. Dependabot semanal e agrupado cobre Maven
 
 Medidos 58,72% de ramos antes de alterar o gate, adotado mínimo conservador de 55% e mantidos 80% de linhas. Novos testes cobrem conflito/desativação/vínculo de setores, validação/edição de avisos, privacidade e autoria de artigos, domínio e inatividade OIDC e impedimento de elevação de perfil por claims. A confiança de forwarded headers é verificada na valve real do Tomcat com requisições simuladas. O primeiro teste com servidor HTTP local falhou por socket Unix do JDK Windows; substituído pela verificação da valve, sem desabilitar a proteção nem o teste de confiança. Verify final aprovado com 110 testes (cinco PostgreSQL omitidos localmente), 88,10% de linhas e 60,89% de ramos. Não foram alteradas classes de negócio para aumentar números nem excluídos pacotes do gate.
 
+## R7 — Higiene remota e ações do dono
+
+Confirmado por `git rev-list --left-right --count origin/master...origin/codex/c7-validacao` que a branch antiga está atrás de master e não tem commits exclusivos. Não foi mesclada, apagada nem usada como base. O dono pode removê-la após conferir que não há trabalho pendente; utilizar seu estado antigo como base de uma entrega pode reintroduzir código/documentação desatualizados. Permanecem ações manuais: renomear o repositório e atualizar integrações/remotes; conferir Actions no último commit; rotacionar credenciais que tenham sido expostas. Nenhum histórico foi reescrito e `legacy/` e migrations V1–V10 foram preservados.
+
