@@ -105,3 +105,7 @@ O SLA considera America/Sao_Paulo, janelas de expediente e feriados administrado
 # Indicadores de resolução
 
 A V9 adiciona a medição incremental de minutos úteis na resolução. O calendário atual é aplicado pelo `CalendarioUtil`, incluindo a espera pelo solicitante; reabrir limpa a medição até a próxima resolução. Não há backfill de resoluções antigas porque o calendário histórico não foi versionado. O dashboard informa quantas não têm medição. Filtra por data de criação (últimos 30 dias por padrão), com máximo de 366 dias. Ver ADR 0008.
+
+## Histórico e retenção
+
+A V10 protege historico_chamado contra UPDATE e DELETE direto. RetencaoService usa configuração PostgreSQL local à transação apenas durante o lote e desativa antes de retornar. O usuário de banco não deve ter privilégios de dono/superusuário; administradores podem contornar triggers. Consulte ADR 0007. Não use SET global para manutenção. Rollback preserva o histórico; a limpeza de objetos continua na fila de remoção após a anonimização.

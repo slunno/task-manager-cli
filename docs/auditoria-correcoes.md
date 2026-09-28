@@ -60,3 +60,9 @@ Adicionados GIF, WebP, CSV, LOG, DOCX, XLSX e ZIP com validação de conteúdo e
 Agregações no banco com período inclusivo por criação, 30 dias por padrão, categorias e percentual de resolvidos dentro do prazo. Média calculada sobre minutos úteis persistidos ao resolver, reutilizando CalendarioUtil; reabertura limpa a medição. Registros antigos sem medição não recebem estimativa falsa e são informados na resposta/tela. ADR 0008 registra a decisão e inclusão da espera pelo solicitante.
 
 V9 é usada pela C5 e V10 será usada pelo histórico da C6, corrigindo o conflito de numeração do prompt sem alterar V1–V8. Testes controlados incluem fim de semana, feriado, SLA dentro/fora e chamado fora do período; teste PostgreSQL de 100 mil chamados também mede p95 do dashboard (<300 ms). A execução PostgreSQL é feita na CI, pois não há Docker local. Contrato e cliente regenerados; testes de tela verificam métricas, período e erro.
+
+## C6 — Histórico no PostgreSQL
+
+V10 bloqueia UPDATE e DELETE do histórico; exclusão só no contexto local da transação da retenção. RetencaoService exige autocommit desligado no PostgreSQL e desativa o contexto antes de retornar, sem ativação global. ADR 0007 descreve a garantia e seu limite contra administradores do banco. H2 mantém os testes funcionais e não simula o trigger.
+
+HistoricoPostgresTest executa no PostgreSQL real da CI: operações avulsas rejeitadas, UPDATE rejeitado mesmo com contexto, rollback sem perda, retenção anonimiza/apaga e DELETE posterior continua bloqueado. V1–V8 preservadas. A CI da C5 também aprovou o p95 de fila e dashboard com 100 mil chamados.

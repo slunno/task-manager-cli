@@ -19,3 +19,7 @@ Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente 
 - Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo, assinatura e limites de ZIP/Office; `ScannerAnexo` é um ponto de extensão com padrão sem varredura antivírus. Reduza tipos com `HELPDESK_ATTACHMENT_TYPES` quando necessário. Arquivos compactados aninhados são bloqueados, inclusive Office dentro de ZIP, por decisão conservadora.
 - Definir retenção e janela de backup com o responsável por privacidade. Testar restauração isolada e remoção física de anexos.
 - Executar verificação de dependências e teste de penetração no ambiente de homologação. A revisão de código não substitui esses controles operacionais.
+
+## Integridade do histórico
+
+Trigger da V10 rejeita UPDATE e DELETE avulsos. Exceção LGPD: contexto local da transação da retenção. O mecanismo previne alterações acidentais e não protege contra operadores com acesso SQL capaz de ativar o contexto ou desabilitar o trigger. Separe credenciais de migrations e aplicação e restrinja administração; ver ADR 0007.

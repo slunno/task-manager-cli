@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,7 @@ public class RetencaoService {
             (rs, i) -> rs.getLong(1),
             Timestamp.from(limite));
     if (!ids.isEmpty()) {
+      contextoRetencao(true);
       Long anonimoId = usuarioAnonimo(agora);
       for (Long id : ids) {
         List<String> chaves =
@@ -68,9 +70,27 @@ public class RetencaoService {
             Timestamp.from(agora),
             id);
       }
+      contextoRetencao(false);
     }
     jdbc.update("delete from notificacoes_outbox where criado_em < ?", Timestamp.from(limite));
     return ids.size();
+  }
+
+  private void contextoRetencao(boolean ativo) {
+    jdbc.execute(
+        (ConnectionCallback<Void>)
+            conexao -> {
+              if ("PostgreSQL".equals(conexao.getMetaData().getDatabaseProductName())) {
+                if (conexao.getAutoCommit())
+                  throw new IllegalStateException("Retenção exige transação ativa");
+                try (var comando =
+                    conexao.prepareStatement("select set_config('helpdesk.retencao', ?, true)")) {
+                  comando.setString(1, ativo ? "on" : "off");
+                  comando.execute();
+                }
+              }
+              return null;
+            });
   }
 
   public int limparObjetosPendentes() {

@@ -44,7 +44,7 @@ class PostgresMigrationTest {
 
   @Test
   void aplicaMigracoesEValidaMapeamento() {
-    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
+    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("10");
     assertThat(categorias.findByAtivaTrueOrderByNomeAsc()).hasSize(5);
   }
 
