@@ -132,3 +132,7 @@ Linha de base: backend `mvnw.cmd -B verify` aprovado (91 testes, cinco PostgreSQ
 ## R2 — Contêineres e saúde
 
 Confirmados nginx root e ausência de healthchecks dos serviços da aplicação. Frontend passa a usar nginx-unprivileged e porta interna 8080, preservando localhost:3000. Backend e frontend sem novas permissões/capabilities; healthchecks verificam a API e seu proxy, e MailHog responde por HTTP. Dependências aguardam serviços saudáveis. Curl é incluído na imagem Java exclusivamente para o healthcheck. MinIO permanece opcional, fora da dependência do perfil dev, sem nova sonda nesta rodada. O script de espera E2E continua como diagnóstico adicional; validação real dos contêineres fica na CI por ausência de Docker local.
+
+## R3 — CSP
+
+Confirmado `unsafe-inline` somente para estilos. Sem usos de estilos inline no código atual, removida a exceção e documentado o CSS estático de Tailwind. E2E verifica a política e erros de CSP no atendimento. Build e testes do frontend permanecem obrigatórios; evidência no navegador real depende do job Compose da CI. Não foram alteradas as regras de scripts ou relaxados os demais cabeçalhos.

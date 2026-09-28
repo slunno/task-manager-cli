@@ -14,6 +14,14 @@ test.describe.serial('Atendimento real, privacidade e conclusão', () => {
 
   async function entrar(page: Page, nome: string, email: string) {
     page.on('pageerror', (erro) => erros.push(erro.message))
+    page.on('console', (mensagem) => {
+      if (
+        mensagem.type() === 'error' &&
+        /Content Security Policy/i.test(mensagem.text())
+      ) {
+        erros.push('Violação de CSP no fluxo de atendimento')
+      }
+    })
     await page.goto('/login')
     await page.getByLabel('Nome', { exact: true }).fill(nome)
     await page.getByLabel('E-mail corporativo').fill(email)

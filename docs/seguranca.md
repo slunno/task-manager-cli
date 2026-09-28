@@ -2,7 +2,13 @@
 
 ## C2 — Configuração de produção
 
-Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente ou desativada interrompe a inicialização. Dev mantém MailHog sem autenticação e storage local. Nginx aplica CSP sem scripts inline, nosniff, Referrer-Policy e bloqueia câmera/microfone/geolocalização. A CSP admite estilos inline utilizados por componentes React, sem liberar scripts. HSTS é restrito a HTTPS e deve ser definido no proxy que termina TLS.
+Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente ou desativada interrompe a inicialização. Dev mantém MailHog sem autenticação e storage local. Nginx aplica CSP sem scripts ou estilos inline, nosniff, Referrer-Policy e bloqueia câmera/microfone/geolocalização. HSTS é restrito a HTTPS e deve ser definido no proxy que termina TLS.
+
+## Segunda rodada — proxy, contêineres e CSP
+
+O proxy publica somente health do Actuator; métricas e documentação retornam 404, mesmo quando o backend dev as disponibiliza. Backend e frontend executam sem root, com capabilities removidas e sem ganho de privilégios no Compose. As sondas HTTP verificam a aplicação e o proxy; dependências aguardam saúde antes de iniciar.
+
+A inspeção de `frontend/src` não encontrou atributos `style`, blocos de estilo inline ou alterações de `element.style`; Tailwind gera um arquivo CSS externo no build. O componente Radix usado atualmente é Slot, sem necessidade de posicionamento inline. Por isso `style-src` foi reduzido a `'self'`. Playwright verifica o cabeçalho e falha se encontrar erro de CSP durante o atendimento. Novos componentes com posicionamento dinâmico precisam de nova avaliação desta decisão antes de ampliar a política; não se libera script inline.
 
 ## Controles verificados
 

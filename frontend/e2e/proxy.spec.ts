@@ -5,6 +5,12 @@ test('proxy publica health e bloqueia métricas e documentação', async ({
 }) => {
   const health = await request.get('/actuator/health')
   expect(health.status()).toBe(200)
+  expect(health.headers()['content-security-policy']).toContain(
+    "style-src 'self';",
+  )
+  expect(health.headers()['content-security-policy']).not.toContain(
+    'unsafe-inline',
+  )
   expect(await health.json()).toMatchObject({ status: 'UP' })
   for (const path of [
     '/actuator',
