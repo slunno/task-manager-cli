@@ -1,5 +1,9 @@
 # Revisão de segurança E11
 
+## C2 — Configuração de produção
+
+Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente ou desativada interrompe a inicialização. Dev mantém MailHog sem autenticação e storage local. Nginx aplica CSP sem scripts inline, nosniff, Referrer-Policy e bloqueia câmera/microfone/geolocalização. A CSP admite estilos inline utilizados por componentes React, sem liberar scripts. HSTS é restrito a HTTPS e deve ser definido no proxy que termina TLS.
+
 ## Controles verificados
 
 - Sessão no servidor, cookie HttpOnly/Secure/SameSite, CSRF nas mutações e OIDC corporativo no perfil `prod`; login simulado limitado ao perfil `dev`.

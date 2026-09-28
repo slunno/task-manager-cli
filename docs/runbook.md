@@ -29,6 +29,12 @@ Abra `http://localhost:5173`. Na tela de login, use **Acessar prévia como agent
 
 ## SSO em produção
 
+Produção seleciona S3 obrigatoriamente e recusa storage local. As quatro variáveis `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_SECRET_KEY` e `HELPDESK_S3_BUCKET` devem ser não vazias; configure bucket privado antes de subir. A inicialização valida a configuração, sem testar a disponibilidade remota do bucket. Valide upload/download no teste operacional.
+
+SMTP usa `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTH`, `SMTP_STARTTLS_ENABLE` e `SMTP_STARTTLS_REQUIRED`. Em dev as credenciais podem estar vazias e as flags false para MailHog. Em prod as credenciais são obrigatórias e as três flags precisam ser true (padrão do perfil prod). Não reutilize as flags false do exemplo dev em produção. Há limites de tempo para conexão/leitura/escrita SMTP.
+
+O nginx inclui CSP, nosniff, Referrer-Policy e Permissions-Policy. HSTS só é enviado quando o nginx recebe HTTPS; no Compose HTTP ele é omitido. Se o TLS terminar em outro proxy, configure HSTS nesse proxy e restrinja o nginx à rede interna. Não confie em um cabeçalho de protocolo enviado por clientes externos sem um proxy confiável.
+
 1. Registre um cliente OIDC no Microsoft Entra ID ou Google Workspace. Configure a URL de retorno pública `https://SEU_DOMINIO/login/oauth2/code/corporativo` no provedor.
 2. Defina `SPRING_PROFILES_ACTIVE=prod`, `OIDC_ISSUER_URI`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ALLOWED_EMAIL_DOMAIN` e `OIDC_REDIRECT_URI={baseUrl}/login/oauth2/code/{registrationId}` no ambiente ou secret manager. Defina também credenciais de banco e SMTP.
 3. Sirva frontend e API sob a mesma origem HTTPS. O proxy deve encaminhar `/api/`, `/oauth2/authorization/` e `/login/oauth2/code/` ao backend, com cabeçalhos de host/protocolo corretos. O proxy local em `frontend/nginx.conf` é uma referência para isso.

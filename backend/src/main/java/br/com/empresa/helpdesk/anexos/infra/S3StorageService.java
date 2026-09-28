@@ -22,9 +22,18 @@ public class S3StorageService implements StorageService {
       @Value("${helpdesk.storage.s3.access-key}") String accessKey,
       @Value("${helpdesk.storage.s3.secret-key}") String secretKey,
       @Value("${helpdesk.storage.s3.bucket}") String bucket) {
+    exigir(endpoint, "HELPDESK_S3_ENDPOINT");
+    exigir(accessKey, "HELPDESK_S3_ACCESS_KEY");
+    exigir(secretKey, "HELPDESK_S3_SECRET_KEY");
+    exigir(bucket, "HELPDESK_S3_BUCKET");
     this.client =
         MinioClient.builder().endpoint(endpoint).credentials(accessKey, secretKey).build();
     this.bucket = bucket;
+  }
+
+  private static void exigir(String valor, String variavel) {
+    if (valor == null || valor.isBlank())
+      throw new IllegalStateException("Configuração S3 obrigatória: " + variavel);
   }
 
   private String chaveSegura(String chave) {

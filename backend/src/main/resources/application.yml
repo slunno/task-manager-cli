@@ -21,6 +21,15 @@ spring:
   mail:
     host: ${SMTP_HOST}
     port: ${SMTP_PORT:1025}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:false}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS_ENABLE:false}
+      mail.smtp.starttls.required: ${SMTP_STARTTLS_REQUIRED:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
   servlet:
     multipart:
       max-file-size: ${HELPDESK_MAX_ATTACHMENT_SIZE:10MB}
@@ -51,6 +60,14 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 helpdesk:
+  storage:
+    mode: ${HELPDESK_STORAGE_MODE:local}
+    local-directory: ${HELPDESK_STORAGE_LOCAL_DIRECTORY:./data/anexos}
+    s3:
+      endpoint: ${HELPDESK_S3_ENDPOINT:}
+      access-key: ${HELPDESK_S3_ACCESS_KEY:}
+      secret-key: ${HELPDESK_S3_SECRET_KEY:}
+      bucket: ${HELPDESK_S3_BUCKET:}
   auth:
     mode: disabled
   mail:
