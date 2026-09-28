@@ -40,10 +40,11 @@ class PostgresMigrationTest {
   @Autowired private UsuarioRepository usuarios;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private ChamadoService chamados;
+  @Autowired private br.com.empresa.helpdesk.sla.application.DashboardService dashboard;
 
   @Test
   void aplicaMigracoesEValidaMapeamento() {
-    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
+    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("9");
     assertThat(categorias.findByAtivaTrueOrderByNomeAsc()).hasSize(5);
   }
 
@@ -62,15 +63,23 @@ class PostgresMigrationTest {
         new FiltroFila(
             StatusChamado.ABERTO, null, null, null, null, null, null, null, false, false, false);
     ArrayList<Double> amostras = new ArrayList<>();
+    ArrayList<Double> amostrasDashboard = new ArrayList<>();
     for (int i = 0; i < 40; i++) {
       long inicio = System.nanoTime();
       var pagina = chamados.fila(agente, filtro, 0, 10, "criadoEm,desc");
       double milissegundos = (System.nanoTime() - inicio) / 1_000_000.0;
       assertThat(pagina.content()).hasSize(10);
       if (i >= 10) amostras.add(milissegundos);
+      inicio = System.nanoTime();
+      assertThat(dashboard.consultar().totalChamados()).isEqualTo(100000);
+      if (i >= 10) amostrasDashboard.add((System.nanoTime() - inicio) / 1_000_000.0);
     }
     Collections.sort(amostras);
     double p95 = amostras.get((int) Math.ceil(amostras.size() * 0.95) - 1);
     assertThat(p95).as("p95 da fila com 100 mil chamados (ms)").isLessThan(300.0);
+    Collections.sort(amostrasDashboard);
+    assertThat(amostrasDashboard.get((int) Math.ceil(amostrasDashboard.size() * 0.95) - 1))
+        .as("p95 do dashboard com 100 mil chamados (ms)")
+        .isLessThan(300.0);
   }
 }

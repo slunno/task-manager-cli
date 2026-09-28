@@ -67,4 +67,8 @@ public class SlaService {
             jdbc.query("select data from feriados", (rs, i) -> rs.getDate(1).toLocalDate()));
     return new CalendarioUtil(ZONA, janelas, feriados);
   }
+
+  public void registrarResolucao(Chamado chamado, Instant agora) {
+    chamado.registrarTempoResolucao(calendario().minutosUteisEntre(chamado.getCriadoEm(), agora));
+  }
 }

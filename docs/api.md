@@ -119,3 +119,6 @@ O intervalo do relatório é inclusivo nas datas informadas, usa America/Sao_Pau
 | GET | /actuator/metrics | TI_ADMIN | Métricas Micrometer de outbox, SLA e retenção |
 
 O setor é opcional no usuário. A associação a um setor novo exige setor ativo; um setor inativo pode continuar associado a usuários existentes para preservar o histórico. O backend retorna `X-Request-ID` em todas as respostas, aceitando somente identificadores seguros enviados pelo cliente.
+# Dashboard por período
+
+`GET /api/v1/ti/dashboard?desde=YYYY-MM-DD&ate=YYYY-MM-DD` aceita datas inclusivas em America/Sao_Paulo. Sem datas, usa os últimos 30 dias; exige ambas quando informado e limita a 366 dias. Todos os indicadores usam chamados **criados** nesse período. Inclui `porCategoria`, `percentualSlaCumprido` (nulo sem resolvidos), `resolvidos`, `resolvidosSemTempoUtil` e média em horas úteis. Resoluções antigas sem medição ficam fora da média e são contadas explicitamente. Ver ADR 0008.

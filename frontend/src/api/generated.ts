@@ -1085,21 +1085,34 @@ export interface components {
     }
     DashboardResponse: {
       /** Format: int64 */
-      totalChamados?: number
+      totalChamados: number
       /** Format: int64 */
-      emAberto?: number
+      emAberto: number
       /** Format: int64 */
-      vencidos?: number
+      vencidos: number
       /** Format: int64 */
-      vencendo?: number
+      vencendo: number
       /** Format: double */
-      tempoMedioResolucaoHoras?: number
-      porStatus?: {
+      tempoMedioResolucaoHoras: number | null
+      porStatus: {
         [key: string]: number
       }
-      porPrioridade?: {
+      porPrioridade: {
         [key: string]: number
       }
+      porCategoria: {
+        [key: string]: number
+      }
+      /** Format: double */
+      percentualSlaCumprido: number | null
+      /** Format: int64 */
+      resolvidos: number
+      /** Format: int64 */
+      resolvidosSemTempoUtil: number
+      /** Format: date */
+      desde: string
+      /** Format: date */
+      ate: string
     }
     PaginaResponseUsuarioAdminResponse: {
       content: components['schemas']['UsuarioAdminResponse'][]
@@ -2209,7 +2222,10 @@ export interface operations {
   }
   consultar_1: {
     parameters: {
-      query?: never
+      query?: {
+        desde?: string
+        ate?: string
+      }
       header?: never
       path?: never
       cookie?: never

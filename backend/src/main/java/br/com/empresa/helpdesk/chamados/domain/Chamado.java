@@ -87,6 +87,9 @@ public class Chamado {
   @Column(name = "chamado_principal_id")
   private Long chamadoPrincipalId;
 
+  @Column(name = "resolucao_minutos_uteis")
+  private Long resolucaoMinutosUteis;
+
   @Version private Long version;
 
   protected Chamado() {}
@@ -136,6 +139,17 @@ public class Chamado {
 
   public Long getId() {
     return id;
+  }
+
+  public Long getResolucaoMinutosUteis() {
+    return resolucaoMinutosUteis;
+  }
+
+  public void registrarTempoResolucao(long minutos) {
+    if (status != StatusChamado.RESOLVIDO || minutos < 0)
+      throw new IllegalArgumentException(
+          "Tempo útil exige chamado resolvido e minutos não negativos");
+    resolucaoMinutosUteis = minutos;
   }
 
   public Long getChamadoPrincipalId() {
@@ -303,6 +317,7 @@ public class Chamado {
     status = StatusChamado.ABERTO;
     responsavelId = null;
     resolvidoEm = null;
+    resolucaoMinutosUteis = null;
     fechadoEm = null;
     primeiraRespostaEm = null;
     solucao = null;

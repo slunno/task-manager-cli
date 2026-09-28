@@ -1227,6 +1227,20 @@
       "get": {
         "tags": ["dashboard-controller"],
         "operationId": "consultar_1",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "ate",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "date" }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2121,7 +2135,10 @@
           "emAberto": { "type": "integer", "format": "int64" },
           "vencidos": { "type": "integer", "format": "int64" },
           "vencendo": { "type": "integer", "format": "int64" },
-          "tempoMedioResolucaoHoras": { "type": "number", "format": "double" },
+          "tempoMedioResolucaoHoras": {
+            "type": ["number", "null"],
+            "format": "double"
+          },
           "porStatus": {
             "type": "object",
             "additionalProperties": { "type": "integer", "format": "int64" }
@@ -2129,8 +2146,35 @@
           "porPrioridade": {
             "type": "object",
             "additionalProperties": { "type": "integer", "format": "int64" }
-          }
-        }
+          },
+          "porCategoria": {
+            "type": "object",
+            "additionalProperties": { "type": "integer", "format": "int64" }
+          },
+          "percentualSlaCumprido": {
+            "type": ["number", "null"],
+            "format": "double"
+          },
+          "resolvidos": { "type": "integer", "format": "int64" },
+          "resolvidosSemTempoUtil": { "type": "integer", "format": "int64" },
+          "desde": { "type": "string", "format": "date" },
+          "ate": { "type": "string", "format": "date" }
+        },
+        "required": [
+          "ate",
+          "desde",
+          "emAberto",
+          "percentualSlaCumprido",
+          "porCategoria",
+          "porPrioridade",
+          "porStatus",
+          "resolvidos",
+          "resolvidosSemTempoUtil",
+          "tempoMedioResolucaoHoras",
+          "totalChamados",
+          "vencendo",
+          "vencidos"
+        ]
       },
       "PaginaResponseUsuarioAdminResponse": {
         "type": "object",

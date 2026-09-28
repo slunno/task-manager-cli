@@ -1,23 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router'
 import { AreaPage } from '../auth/AreaPage'
+import { useState } from 'react'
+import { request } from '../../api/auth'
+import type { components } from '../../api/generated'
 
-type Indicadores = {
-  totalChamados: number
-  emAberto: number
-  vencidos: number
-  vencendo: number
-  tempoMedioResolucaoHoras: number | null
-  porStatus: Record<string, number>
-  porPrioridade: Record<string, number>
+type Indicadores = components['schemas']['DashboardResponse']
+
+function carregarIndicadores(desde: string, ate: string): Promise<Indicadores> {
+  return request(`/api/v1/ti/dashboard?${new URLSearchParams({ desde, ate })}`)
 }
 
-async function carregarIndicadores(): Promise<Indicadores> {
-  const resposta = await fetch('/api/v1/ti/dashboard', {
-    credentials: 'same-origin',
-  })
-  if (!resposta.ok) throw new Error('Não foi possível carregar os indicadores.')
-  return (await resposta.json()) as Indicadores
+function dataLocal(data: Date) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(data)
 }
 
 const nomes: Record<string, string> = {
@@ -33,16 +33,52 @@ const nomes: Record<string, string> = {
 }
 
 export function DashboardTiPage() {
+  const [desde, setDesde] = useState(() =>
+    dataLocal(new Date(Date.now() - 29 * 86400000)),
+  )
+  const [ate, setAte] = useState(() => dataLocal(new Date()))
+  const [periodo, setPeriodo] = useState({ desde, ate })
   const consulta = useQuery({
-    queryKey: ['dashboard-ti'],
-    queryFn: carregarIndicadores,
+    queryKey: ['dashboard-ti', periodo],
+    queryFn: () => carregarIndicadores(periodo.desde, periodo.ate),
     refetchInterval: 60_000,
   })
   return (
     <AreaPage
       titulo="Dashboard da TI"
-      descricao="Visão atual da operação e dos prazos de atendimento."
+      descricao="Indicadores dos chamados abertos no período escolhido."
     >
+      <form
+        className="mt-8 flex flex-wrap items-end gap-4 rounded-xl border bg-white p-5"
+        onSubmit={(evento) => {
+          evento.preventDefault()
+          setPeriodo({ desde, ate })
+        }}
+      >
+        <label className="text-sm font-semibold">
+          De
+          <input
+            required
+            type="date"
+            value={desde}
+            onChange={(e) => setDesde(e.target.value)}
+            className="mt-1 block rounded-md border p-2"
+          />
+        </label>
+        <label className="text-sm font-semibold">
+          Até
+          <input
+            required
+            type="date"
+            value={ate}
+            onChange={(e) => setAte(e.target.value)}
+            className="mt-1 block rounded-md border p-2"
+          />
+        </label>
+        <button className="rounded-lg bg-ocean px-4 py-2 font-semibold text-white">
+          Aplicar período
+        </button>
+      </form>
       {consulta.isPending && (
         <p role="status" className="mt-8">
           Carregando indicadores…
@@ -53,7 +89,7 @@ export function DashboardTiPage() {
           role="alert"
           className="mt-8 rounded-xl bg-red-50 p-5 text-red-800"
         >
-          Não foi possível carregar os indicadores.{' '}
+          {consulta.error.message}{' '}
           <button
             className="font-semibold underline"
             onClick={() => void consulta.refetch()}
@@ -64,12 +100,18 @@ export function DashboardTiPage() {
       )}
       {consulta.data && (
         <>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {[
               ['Total', consulta.data.totalChamados],
               ['Em aberto', consulta.data.emAberto],
               ['Vencendo em 1 hora', consulta.data.vencendo],
               ['Vencidos', consulta.data.vencidos],
+              [
+                'SLA cumprido',
+                consulta.data.percentualSlaCumprido == null
+                  ? 'Sem resolvidos'
+                  : `${consulta.data.percentualSlaCumprido.toFixed(1)}%`,
+              ],
             ].map(([rotulo, valor]) => (
               <div
                 key={rotulo}
@@ -80,7 +122,7 @@ export function DashboardTiPage() {
               </div>
             ))}
           </div>
-          <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <div className="mt-5 grid gap-5 md:grid-cols-3">
             <section className="rounded-2xl border border-slate-200 bg-white p-6">
               <h2 className="font-semibold">Por status</h2>
               <ul className="mt-4 space-y-3">
@@ -110,8 +152,30 @@ export function DashboardTiPage() {
                 Tempo médio até a resolução:{' '}
                 {consulta.data.tempoMedioResolucaoHoras == null
                   ? 'sem dados'
-                  : `${consulta.data.tempoMedioResolucaoHoras.toFixed(1)} horas corridas`}
+                  : `${consulta.data.tempoMedioResolucaoHoras.toFixed(1)} horas úteis`}
               </p>
+              <p className="mt-2 text-sm text-slate-600">
+                Média em expediente, incluindo a espera pelo solicitante.
+              </p>
+              {consulta.data.resolvidosSemTempoUtil > 0 && (
+                <p className="mt-2 text-sm text-amber-800">
+                  {consulta.data.resolvidosSemTempoUtil} resoluções sem medição
+                  de horas úteis não entram na média.
+                </p>
+              )}
+            </section>
+            <section className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="font-semibold">Por categoria</h2>
+              <ul className="mt-4 space-y-3">
+                {Object.entries(consulta.data.porCategoria).map(
+                  ([categoria, total]) => (
+                    <li key={categoria} className="flex justify-between gap-3">
+                      <span>{categoria}</span>
+                      <strong>{total}</strong>
+                    </li>
+                  ),
+                )}
+              </ul>
             </section>
           </div>
           <Link

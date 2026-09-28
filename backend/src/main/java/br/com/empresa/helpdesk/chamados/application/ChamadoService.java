@@ -306,6 +306,7 @@ public class ChamadoService {
     if (statusAnterior != chamado.getStatus()) {
       if (chamado.getStatus() == StatusChamado.AGUARDANDO_USUARIO) chamado.pausarSla(agora);
       else if (statusAnterior == StatusChamado.AGUARDANDO_USUARIO) sla.retomar(chamado, agora);
+      if (chamado.getStatus() == StatusChamado.RESOLVIDO) sla.registrarResolucao(chamado, agora);
     }
     if (anterior.equals(Estado.de(chamado))) {
       throw new RequisicaoInvalidaException("Nenhuma alteração informada");
