@@ -208,9 +208,18 @@ test.describe.serial('Atendimento real, privacidade e conclusão', () => {
       .getByRole('button', { name: 'Reabrir chamado', exact: true })
       .click()
     await expect(
-      solicitante.getByText('Em atendimento', { exact: true }).first(),
+      solicitante.getByText('Aberto', { exact: true }).first(),
     ).toBeVisible()
+    await expect(
+      solicitante.getByRole('button', { name: 'Reabrir chamado', exact: true }),
+    ).toHaveCount(0)
     await agente.reload()
+    await agente
+      .getByRole('button', { name: 'Assumir chamado', exact: true })
+      .click()
+    await expect(
+      agente.getByRole('button', { name: 'Assumir chamado', exact: true }),
+    ).toHaveCount(0)
     await resolver()
     await solicitante.reload()
     await solicitante.getByLabel('Nota', { exact: true }).selectOption('4')
