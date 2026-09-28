@@ -222,7 +222,9 @@ test.describe.serial('Atendimento real, privacidade e conclusão', () => {
     ).toHaveCount(0)
     await resolver()
     await solicitante.reload()
-    await solicitante.getByLabel('Nota', { exact: true }).selectOption('4')
+    await solicitante
+      .getByRole('combobox', { name: 'Nota', exact: true })
+      .selectOption('4')
     await solicitante
       .getByLabel('Comentário opcional')
       .fill('Avaliação fictícia do atendimento E2E')
