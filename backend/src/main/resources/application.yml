@@ -60,6 +60,8 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 helpdesk:
+  anexos:
+    tipos-permitidos: ${HELPDESK_ATTACHMENT_TYPES:pdf,png,jpg,jpeg,txt,gif,webp,csv,log,docx,xlsx,zip}
   storage:
     mode: ${HELPDESK_STORAGE_MODE:local}
     local-directory: ${HELPDESK_STORAGE_LOCAL_DIRECTORY:./data/anexos}

@@ -62,7 +62,9 @@ O solicitante só acessa os próprios chamados, inclusive nos endpoints de conve
 
 A primeira mensagem pública da TI marca primeira_resposta_em uma única vez. Mensagem pública do solicitante em AGUARDANDO_USUARIO muda o chamado para EM_ATENDIMENTO e registra a transição no histórico. A paginação aceita page >= 0 e size de 1 a 100.
 
-Arquivos aceitos: PDF, PNG, JPG/JPEG e TXT em UTF-8, até 10 MB. Extensão, MIME declarado e assinatura/conteúdo precisam concordar. A chave de armazenamento é um UUID; o nome original não entra no caminho. Erros de upload acima do limite retornam 413. O servidor não divulga chave nem URL pública.
+Arquivos aceitos por padrão: PDF, PNG, JPG/JPEG, GIF, WebP, TXT/CSV/LOG em UTF-8, DOCX, XLSX e ZIP, até 10 MB. Extensão, MIME declarado e assinatura/conteúdo precisam concordar. `HELPDESK_ATTACHMENT_TYPES` pode reduzir a lista, mas não habilitar tipos desconhecidos/executáveis. ZIP/Office exigem diretório central íntegro, até 1.000 entradas, 20 MB por entrada, 50 MB descompactados e proporção máxima de 100 vezes após 1 MB. Caminhos perigosos, arquivos executáveis/scripts, macros identificáveis, links simbólicos e compactados aninhados são rejeitados. Office exige conteúdo principal, relacionamentos e Content Types corretos; XML não permite DTD/entidades externas. CSV/LOG são validados como texto UTF-8, sem presumir que texto tenha assinatura binária.
+
+`ScannerAnexo` permite plugar antivírus antes da gravação. A implementação padrão não faz varredura; nenhum ClamAV foi integrado. A chave de armazenamento é um UUID; o nome original não entra no caminho. Erros de upload acima do limite retornam 413. O servidor não divulga chave nem URL pública; downloads permanecem `attachment` e `nosniff`.
 
 ## Notificações e operação — E5 a E8
 

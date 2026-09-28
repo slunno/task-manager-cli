@@ -49,3 +49,9 @@ Consultas de resolução incluem chamados sem responsável; consulta separada de
 Envio MIME com HTML escapado e texto alternativo, status, número e link; resolução aponta para `#avaliacao`. Nenhuma descrição, solução ou nota interna entra no payload; alertas SLA usam título genérico. Não foi adicionada biblioteca de template: o escape usa `HtmlUtils` do Spring. A entrega SMTP mantém a semântica documentada de pelo menos uma tentativa, podendo repetir se houver queda após envio e antes do commit; a deduplicação impede reenfileirar a cada execução do alerta, sem prometer exatamente uma entrega SMTP.
 
 Validação: testes com relógio fixo para ambos os prazos, sem responsável, configuração de destinatários, execuções consecutivas sem duplicatas, MIME HTML/texto e ausência de vazamento; consulta de banco testa chamados respondidos, pausados e concluídos.
+
+## C4 — Anexos
+
+Adicionados GIF, WebP, CSV, LOG, DOCX, XLSX e ZIP com validação de conteúdo e MIME, mantendo os formatos antigos. Allowlist configurável só aceita tipos suportados. Texto usa UTF-8 e restrição de caracteres de controle; não há assinatura binária para CSV/LOG. ZIP valida diretório central, limites de 1.000 entradas/20 MB por entrada/50 MB total/proporção de 100 vezes acima de 1 MB, caminhos perigosos, scripts/executáveis, symlinks e compactação aninhada. Office verifica componentes obrigatórios e tipo principal, sem DTD/entidades externas. A decisão conservadora bloqueia Office dentro de ZIP e macros identificáveis.
+
+`ScannerAnexo` é chamado antes da gravação; uma implementação externa pode rejeitar. O padrão não faz antivírus, conforme escopo. Downloads mantêm attachment/nosniff. Testes cobrem cada novo formato válido/inválido na API, retorno 400, download idêntico, ZIP malicioso e scanner antes do storage. Nenhuma dependência adicional foi necessária.

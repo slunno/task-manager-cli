@@ -32,18 +32,24 @@ public class AnexoService {
   private final ChamadoService chamados;
   private final StorageService storage;
   private final Clock clock;
+  private final ConteudoAnexo conteudo;
+  private final ScannerAnexo scanner;
 
   public AnexoService(
       AnexoRepository repository,
       ComentarioService comentarios,
       ChamadoService chamados,
       StorageService storage,
-      Clock clock) {
+      Clock clock,
+      ConteudoAnexo conteudo,
+      ScannerAnexo scanner) {
     this.repository = repository;
     this.comentarios = comentarios;
     this.chamados = chamados;
     this.storage = storage;
     this.clock = clock;
+    this.conteudo = conteudo;
+    this.scanner = scanner;
   }
 
   @Transactional
@@ -72,7 +78,8 @@ public class AnexoService {
     } catch (IOException ex) {
       throw new RequisicaoInvalidaException("Não foi possível ler o anexo");
     }
-    String mime = ConteudoAnexo.validar(dados, arquivo.getContentType(), nome);
+    String mime = conteudo.validar(dados, arquivo.getContentType(), nome);
+    scanner.verificar(dados, mime);
     String chave = UUID.randomUUID().toString();
     storage.gravar(chave, dados, mime);
     TransactionSynchronizationManager.registerSynchronization(

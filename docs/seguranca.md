@@ -16,6 +16,6 @@ Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente 
 ## Riscos e validação antes de produção
 
 - Validar configuração do IdP, domínio autorizado, proxy HTTPS, política de sessão, bucket privado, SMTP e segredos no ambiente de destino.
-- Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo e assinatura, mas não executa varredura antivírus.
+- Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo, assinatura e limites de ZIP/Office; `ScannerAnexo` é um ponto de extensão com padrão sem varredura antivírus. Reduza tipos com `HELPDESK_ATTACHMENT_TYPES` quando necessário. Arquivos compactados aninhados são bloqueados, inclusive Office dentro de ZIP, por decisão conservadora.
 - Definir retenção e janela de backup com o responsável por privacidade. Testar restauração isolada e remoção física de anexos.
 - Executar verificação de dependências e teste de penetração no ambiente de homologação. A revisão de código não substitui esses controles operacionais.

@@ -12,7 +12,8 @@ import { dataHora } from '../../lib/dataHora'
 import { LinhaTempoPublica } from './LinhaTempoPublica'
 import { listarRespostas } from '../../api/conhecimento'
 
-const tiposPermitidos = 'application/pdf,image/png,image/jpeg,text/plain'
+const tiposPermitidos =
+  '.pdf,.png,.jpg,.jpeg,.txt,.gif,.webp,.csv,.log,.docx,.xlsx,.zip'
 const limite = 10 * 1024 * 1024
 
 export function InteracoesChamadoPanel({
@@ -86,8 +87,9 @@ export function InteracoesChamadoPanel({
       setErroArquivo('Escolha um arquivo de até 10 MB.')
       return
     }
-    if (!tiposPermitidos.split(',').includes(arquivo.type)) {
-      setErroArquivo('Use PDF, PNG, JPG ou texto simples.')
+    const extensao = '.' + arquivo.name.split('.').pop()?.toLowerCase()
+    if (!tiposPermitidos.split(',').includes(extensao)) {
+      setErroArquivo('Use PDF, imagens, TXT, CSV, LOG, DOCX, XLSX ou ZIP.')
       return
     }
     setErroArquivo('')
@@ -266,7 +268,8 @@ export function InteracoesChamadoPanel({
         <CardHeader>
           <h2 className="text-xl font-semibold">Anexos</h2>
           <p className="text-sm text-slate-600">
-            PDF, PNG, JPG ou texto simples · até 10 MB.
+            PDF, PNG, JPG, GIF, WebP, TXT, CSV, LOG, DOCX, XLSX ou ZIP · até 10
+            MB.
           </p>
         </CardHeader>
         <CardContent>
