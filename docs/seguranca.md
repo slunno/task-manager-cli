@@ -23,3 +23,15 @@ Prod exige S3, credenciais SMTP e STARTTLS obrigatório; configuração ausente 
 ## Integridade do histórico
 
 Trigger da V10 rejeita UPDATE e DELETE avulsos. Exceção LGPD: contexto local da transação da retenção. O mecanismo previne alterações acidentais e não protege contra operadores com acesso SQL capaz de ativar o contexto ou desabilitar o trigger. Separe credenciais de migrations e aplicação e restrinja administração; ver ADR 0007.
+
+## Destinos, conteúdo e configuração
+
+Produção exige `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_SECRET_KEY`, `HELPDESK_S3_BUCKET`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_AUTH=true`, `SMTP_STARTTLS_ENABLE=true` e `SMTP_STARTTLS_REQUIRED=true`, além de banco e OIDC descritos no runbook. Endpoint/bucket S3 devem usar transporte seguro e ACL privada no ambiente de destino. Valores pertencem ao gerenciador de segredos; o exemplo contém somente configurações de dev.
+
+`HELPDESK_MAIL_TI_MODE` aceita `usuarios` ou `lista`; a lista validada fica em `HELPDESK_MAIL_TI_ADDRESSES`. A configuração define quem recebe informação operacional e deve passar por revisão do dono. Templates escapam conteúdo dinâmico e têm alternativa de texto; descrição, solução e notas internas não são incluídas. Alertas SLA usam título genérico. Não há garantia de entrega exatamente uma vez após falha entre SMTP e confirmação da outbox.
+
+`HELPDESK_ATTACHMENT_TYPES` só habilita formatos suportados. A proteção de ZIP limita descompactação/entradas e bloqueia conteúdo executável identificável, macros e arquivos compactados dentro de compactados; não é uma garantia de ausência de malware. O scanner padrão é uma extensão sem antivírus. Conteúdo é sempre baixado como attachment/nosniff.
+
+## Evidência automatizada
+
+Testes de produção usam a configuração real e verificam S3 obrigatório, ausência de fallback e SMTP seguro. E2E verifica CSP do build nginx, ausência de erro JavaScript, CSRF, download e isolamento de titularidade/notas. Testes PostgreSQL verificam imutabilidade e exceção de retenção. [Matriz de autorização](testes-autorizacao.md) e [qualidade](qualidade.md) registram cenários e limites.

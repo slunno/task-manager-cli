@@ -12,7 +12,7 @@ As portas do Compose ficam ligadas a `127.0.0.1`, pois o perfil `dev` permite si
 
 ### Prévia visual sem Docker
 
-Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas básicas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui três chamados fictícios. A prévia cobre até E8; as funções E9–E11 exigem o backend real. Cálculo real de SLA em horas úteis, envio SMTP, autorização e persistência precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
+Quando Docker ou o backend Java não estiverem disponíveis, a API simulada permite navegar pelas telas básicas. Ela escuta apenas em `127.0.0.1`, guarda dados somente na memória e inclui três chamados fictícios. A prévia cobre telas básicas até E8; E9–E11 e as correções C2–C7 exigem o backend real. O dashboard corrigido exige a API real e não está disponível na prévia. Cálculo real de SLA em horas úteis, envio SMTP, autorização e persistência precisam do backend Java para verificação funcional. Não representa uma validação da integração com PostgreSQL, segurança ou SSO.
 
 Em dois terminais PowerShell, dentro de `frontend/`:
 
@@ -81,7 +81,7 @@ O volume `postgres_data` guarda dados locais. Para backup em ambiente real, exec
 4. Publique o frontend da mesma revisão e faça um teste guiado: login, abertura, fila, comentário, anexo, resolução, relatório e logout. Retire a manutenção após confirmar as métricas e reative o job. Não é prometido deploy sem indisponibilidade.
 5. Para voltar atrás, interrompa escrita, restaure conjuntamente banco e objetos do backup anterior e publique as imagens anteriores. Não edite uma migration já aplicada; adicione uma nova migration corretiva. Registre a janela de perda de dados entre backup e falha e comunique os responsáveis.
 
-O pipeline executa testes, lint e build. O teste de PostgreSQL com Testcontainers inclui massa de 100 mil chamados e verifica p95 da fila abaixo de 300 ms no ambiente de CI. Esse valor depende do hardware e da carga; meça novamente no ambiente de destino antes de assumir a mesma latência em produção.
+O pipeline executa testes, lint e build. O teste de PostgreSQL com Testcontainers inclui massa de 100 mil chamados e verifica p95 da fila e do dashboard abaixo de 300 ms no ambiente de CI. Esse valor depende do hardware e da carga; meça novamente no ambiente de destino antes de assumir a mesma latência em produção.
 
 ## Armazenamento de anexos
 
@@ -102,10 +102,32 @@ O SLA considera America/Sao_Paulo, janelas de expediente e feriados administrado
 `HELPDESK_MAIL_TI_MODE=usuarios` mantém o envio à TI ativa. `lista` usa `HELPDESK_MAIL_TI_ADDRESSES`, com um ou mais endereços separados por vírgula; configuração vazia/inválida impede a inicialização. O mesmo destino recebe novos chamados, reaberturas, comentários do solicitante sem responsável e alertas sem responsável ativo. Chamados atribuídos notificam o responsável ativo. E-mails têm HTML escapado e alternativa em texto, status e link; a resolução inclui `#avaliacao`. Não incluem descrição, solução nem notas internas; alertas de SLA usam título genérico.
 
 `HELPDESK_REOPEN_DAYS` (padrão 7) controla o limite de reabertura de um RESOLVIDO; `HELPDESK_AUTOCLOSE_DAYS` (padrão 3) controla o fechamento automático. O job roda a cada hora e processa até 100 chamados por execução. Para validar localmente, resolva um chamado, avalie com o solicitante e reabra; a avaliação anterior é apagada. Um chamado FECHADO permanece fechado.
-# Indicadores de resolução
+
+## Indicadores de resolução
 
 A V9 adiciona a medição incremental de minutos úteis na resolução. O calendário atual é aplicado pelo `CalendarioUtil`, incluindo a espera pelo solicitante; reabrir limpa a medição até a próxima resolução. Não há backfill de resoluções antigas porque o calendário histórico não foi versionado. O dashboard informa quantas não têm medição. Filtra por data de criação (últimos 30 dias por padrão), com máximo de 366 dias. Ver ADR 0008.
 
 ## Histórico e retenção
 
 A V10 protege historico_chamado contra UPDATE e DELETE direto. RetencaoService usa configuração PostgreSQL local à transação apenas durante o lote e desativa antes de retornar. O usuário de banco não deve ter privilégios de dono/superusuário; administradores podem contornar triggers. Consulte ADR 0007. Não use SET global para manutenção. Rollback preserva o histórico; a limpeza de objetos continua na fila de remoção após a anonimização.
+
+
+
+## Verificação de qualidade e E2E
+
+Consulte [qualidade](qualidade.md) para o escopo do gate, relatório e dados fictícios. A CI executa três jobs: backend (inclui PostgreSQL, Flyway V1–V10, histórico e desempenho), frontend (contrato gerado, lint, 19 testes, build, audit) e e2e (Compose dev com nginx de produção e quatro cenários Playwright). O HTML JaCoCo e relatório Playwright ficam nos artefatos da execução.
+
+Para reproduzir E2E em um banco local **descartável**, após subir os quatro serviços postgres/mailhog/backend/frontend e verificar saúde, prepare a seed:
+
+```powershell
+Get-Content frontend/e2e/seed.sql | docker compose exec -T postgres psql -U $env:HELPDESK_DB_USER -d helpdesk -v ON_ERROR_STOP=1
+cd frontend
+npx playwright install chromium
+npm run test:e2e
+```
+
+No Linux, use `docker compose exec -T postgres psql -U "$HELPDESK_DB_USER" -d helpdesk -v ON_ERROR_STOP=1 < frontend/e2e/seed.sql`. As variáveis usadas pela CI são fictícias e próprias de volumes descartáveis. Nunca use a seed no banco de produção. `HELPDESK_E2E_URL` permite mudar o endereço do portal; o teste de SMTP usa MailHog local na porta 8025. A suíte não substitui o teste operacional do provedor OIDC, S3 e SMTP TLS reais.
+
+## Renomeio do repositório
+
+O proprietário deve renomear no GitHub e copiar a nova URL de clone para `git remote set-url origin NOVA_URL`. Atualize integrações, políticas de branch e favoritos. Não renomeie `legacy/task-manager-cli/` ao fazer isso; os links relativos e builds do helpdesk continuam válidos. Nenhuma alteração de histórico Git é necessária.

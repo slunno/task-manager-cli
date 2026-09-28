@@ -2,6 +2,8 @@
 
 Monorepo do helpdesk em português para uma organização de 200 a 500 pessoas. A entrega segue o plano E0–E11 do prompt de produto. **E0–E11 implementadas.** A ativação em produção depende da configuração do SSO, segredos, infraestrutura e validação operacional descritos no runbook.
 
+A revisão C0–C8 está registrada no [relatório de auditoria](docs/auditoria-correcoes.md). Inclui configuração obrigatória de produção, alertas dos dois prazos de SLA, e-mails HTML, anexos adicionais com validação de ZIP/Office, dashboard em horas úteis, histórico protegido no PostgreSQL e testes E2E reais. Consulte [qualidade e testes](docs/qualidade.md) para cobertura, CI e execução dos cenários.
+
 ## Estrutura
 
 - `backend/`: Java 21, Spring Boot 3.5, Maven, PostgreSQL, Flyway e Spring Security.
@@ -29,3 +31,11 @@ Consulte [o runbook](docs/runbook.md) para variáveis de ambiente, Compose, SSO 
 - **E11:** setores e vínculo de usuários para relatórios, retenção configurável, métricas operacionais, logs JSON com identificador de requisição, índices e teste de desempenho com 100 mil chamados, revisão de segurança e runbook de implantação/restauração.
 
 A segurança é aplicada no backend. Os guardas de rota do frontend organizam a navegação, mas não substituem a autorização da API.
+
+## Verificar a entrega
+
+Backend: `cd backend` e `./mvnw verify` (`mvnw.cmd verify` no Windows). Frontend: `cd frontend`, `npm ci`, `npm run lint`, `npm test`, `npm run build`. Com Docker, a suíte backend executa os testes PostgreSQL/Flyway/trigger e a massa de 100 mil chamados; sem Docker, esses cinco testes são omitidos explicitamente. O `verify` exige 80% de linhas no conjunto dos pacotes domain/application e aplica Spotless. A CI também executa os quatro cenários Playwright com Compose e publica relatórios.
+
+## Nome do repositório
+
+O dono pode renomear o repositório no GitHub. Os links desta documentação são relativos, e os comandos partem da raiz do checkout, independente do nome da pasta. Após o renomeio, atualize a URL do remote, integrações e favoritos. O caminho `legacy/task-manager-cli/` é o nome real do código preservado e continua fora dos builds; não depende do nome externo do repositório.

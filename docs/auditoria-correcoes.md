@@ -55,7 +55,8 @@ Validação: testes com relógio fixo para ambos os prazos, sem responsável, co
 Adicionados GIF, WebP, CSV, LOG, DOCX, XLSX e ZIP com validação de conteúdo e MIME, mantendo os formatos antigos. Allowlist configurável só aceita tipos suportados. Texto usa UTF-8 e restrição de caracteres de controle; não há assinatura binária para CSV/LOG. ZIP valida diretório central, limites de 1.000 entradas/20 MB por entrada/50 MB total/proporção de 100 vezes acima de 1 MB, caminhos perigosos, scripts/executáveis, symlinks e compactação aninhada. Office verifica componentes obrigatórios e tipo principal, sem DTD/entidades externas. A decisão conservadora bloqueia Office dentro de ZIP e macros identificáveis.
 
 `ScannerAnexo` é chamado antes da gravação; uma implementação externa pode rejeitar. O padrão não faz antivírus, conforme escopo. Downloads mantêm attachment/nosniff. Testes cobrem cada novo formato válido/inválido na API, retorno 400, download idêntico, ZIP malicioso e scanner antes do storage. Nenhuma dependência adicional foi necessária.
-# C5 — Dashboard
+
+## C5 — Dashboard
 
 Agregações no banco com período inclusivo por criação, 30 dias por padrão, categorias e percentual de resolvidos dentro do prazo. Média calculada sobre minutos úteis persistidos ao resolver, reutilizando CalendarioUtil; reabertura limpa a medição. Registros antigos sem medição não recebem estimativa falsa e são informados na resposta/tela. ADR 0008 registra a decisão e inclusão da espera pelo solicitante.
 
@@ -74,3 +75,49 @@ JaCoCo 0.8.15 instalado por necessidade de medição/gate: resultado inicial 85,
 Os dez testes originais do frontend foram preservados por funcionalidade. Novos testes de dashboard/admin/relatórios/fila/detalhe elevam a suíte a 19. Playwright 1.63.0 foi adicionado somente em desenvolvimento, com quatro fluxos serializados no Compose real, upload/download, CSRF, headers nginx e entrega HTML/texto no MailHog. CI publica relatório/capturas e cobre PostgreSQL sem skips. A avaliação ocorre após a nova resolução, preservando a regra existente.
 
 A primeira CI da C6 detectou uma asserção que buscava o texto no wrapper Spring; o trigger já bloqueava a operação. O teste foi corrigido para verificar a causa PostgreSQL no commit e640103; CI aprovada sem alterar o trigger.
+
+## C8 — Fechamento e pendências operacionais
+
+### Itens tratados
+
+| Item | Resultado | Evidência principal |
+| --- | --- | --- |
+| A1 | .idea retirada do índice, mantida no disco; somente .env.example versionado | C1 e verificação final do índice |
+| A2 | Prod exige S3; configuração ausente e override local são rejeitados | ConfiguracaoProducaoTest |
+| A3 | SMTP com credenciais/auth/STARTTLS obrigatório em prod e defaults MailHog em dev | Testes de contexto; variáveis no runbook/.env.example |
+| A4 | Alertas para primeira resposta/resolução, inclusive sem responsável ativo | Clock fixo, consultas de banco e deduplicação |
+| A5 | JaCoCo, gate 80%, frontend organizado e E2E real no Compose | docs/qualidade.md e CI |
+| M1/M2 | Destino configurável de TI, inclusive comentário sem responsável | DestinatariosTi e testes de eventos |
+| M3 | Novos formatos, limites ZIP/Office, allowlist e interface ScannerAnexo | Validador, testes de tipos e download |
+| M4 | % SLA, categorias, horas úteis incrementais e período | V9, ADR 0008, teste controlado e p95 com 100 mil |
+| M5 | MIME HTML escapado + alternativa texto, sem descrição/solução/notas | Teste MIME e MailHog no E2E |
+| M6 | Trigger rejeita alteração/exclusão avulsa; retenção transacional preservada | V10, ADR 0007, PostgreSQL na CI |
+| M7 | CSP, nosniff único no proxy, Referrer/Permissions e HSTS somente HTTPS | nginx de produção no Compose e E2E |
+
+### Decisões e limites
+
+- ADR [0007](adr/0007-historico-imutavel.md): histórico imutável no banco com exclusão limitada ao contexto transacional da retenção; não protege contra administrador SQL com privilégios capazes de contornar o trigger.
+- ADR [0008](adr/0008-dashboard-horas-uteis.md): cálculo incremental com CalendarioUtil. Período usa **criação** do chamado, média inclui espera durante expediente e usa a última resolução após reabertura.
+- V9 ficou com o dashboard da C5 e V10 com histórico da C6 para respeitar a ordem de execução. Nenhuma migration V1–V8 foi editada; legacy permaneceu intacto.
+- Resolvidos antigos sem medição útil são excluídos somente da média e contados explicitamente. Não foi reconstruído um calendário histórico que não existe.
+- Cobertura inicial local: 85,16%; com PostgreSQL na CI: 85,71% (1.404/1.638 linhas). Gate de 80% no conjunto domain/application; cobertura por pacote/ramo tem lacunas registradas em qualidade.md.
+- Spotless continua como gate Java; configuração órfã da IDE retirada. Não foi acrescentado Checkstyle redundante.
+- A primeira execução E2E detectou nosniff duplicado entre backend/nginx; o proxy passou a emitir uma única cópia, sem alterar a proteção do backend direto. O teste de reabertura foi ajustado para ABERTO/sem responsável, seguido de nova ação de assumir, conforme a regra de domínio existente. A seleção da nota passou a usar o nome acessível do combobox confirmado na captura, sem alteração da regra de avaliação.
+- Prévia em memória permanece uma demonstração parcial; auditoria e E2E usam backend real. Recursos externos e segurança não são validados por essa prévia.
+
+### Não executado e passos do dono
+
+1. **H1 — renomeio GitHub:** ação manual do dono. Documentação usa links relativos e comandos partindo da raiz. Após renomear, atualizar origin, integrações e favoritos; manter a pasta real legacy/task-manager-cli.
+2. **Credenciais:** a inspeção atual de dataSources.xml mostrou URL externa, sem usuário/senha ou credencial embutida identificável; nenhum valor foi reproduzido. O arquivo permanece no histórico, que não foi reescrito. Rotacionar qualquer credencial que o dono saiba ter sido exposta anteriormente/fora desse arquivo.
+3. **Produção:** fornecer segredos OIDC/banco/S3/SMTP, bucket privado e TLS no proxy, revisar domínio de identidade e destinatários TI. Validar login real, upload/download S3, SMTP com TLS e HSTS no endpoint HTTPS. Os testes de contexto confirmam configuração/seleção do bean, sem provar conectividade remota.
+4. **Operação:** separar dono das migrations e usuário da aplicação, configurar backups protegidos e realizar restauração isolada; aprovar o prazo de retenção com o responsável por dados.
+5. **Antivírus:** ScannerAnexo padrão não escaneia malware; integração ClamAV ficou fora de escopo por solicitação expressa. ZIP/Office têm validação estrutural e limites, não garantia de ausência de malware.
+6. **Entrega SMTP:** outbox evita reenfileirar o mesmo alerta, mas uma queda após envio e antes de confirmar pode repetir a entrega. Validar monitoramento operacional; não foi prometido exatamente uma vez.
+
+Nenhuma funcionalidade da seção “fora de escopo” foi acrescentada: e-mail de entrada, sincronização de diretório, notificações internas, ações em massa, observadores/menções, busca completa, escalonamento, relatórios por agente, WhatsApp e novas plataformas de observabilidade/deploy continuam backlog, sem compromisso nesta correção.
+
+### Validação de encerramento
+
+Em 28/09/2026, a revisão de código e3c6459 passou na execução CI 36420445251: backend **80 testes, zero falhas/erros/skips**, gate e Spotless aprovados; frontend **19 testes**, lint, contrato gerado, build e audit aprovados; **4 E2E aprovados em 32,2 s** no Compose real. Relatórios JaCoCo e Playwright publicados. Os testes de desempenho mantiveram o p95 de fila/dashboard abaixo de 300 ms com 100 mil chamados no runner; isso não garante a mesma latência em produção.
+
+O fechamento C8 altera documentação, preservando o código validado na C7. README, API, runbook, segurança, matriz de autorização, qualidade e este relatório foram revisados; links locais e diff verificados. Os commits C0–C7 e os ajustes de verificação permanecem no histórico normal. O commit C8 registra a conclusão e os passos manuais acima.

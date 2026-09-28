@@ -26,3 +26,23 @@ Na E11, `GestaoIntegrationTest` cobre acesso administrativo a setores, associaç
 | TI_ADMIN | 200 | 200 | 200 | 200 | 200 |
 
 `OperacaoTiIntegrationTest` verifica filtros, paginação, isolamento da fila, busca restrita à TI, CSRF, promoção de perfil durante a sessão, conflito de versão, impossibilidade de assumir chamado já atribuído, transições inválidas, solução obrigatória e o histórico gravado. `ChamadoTransicoesTest` exercita as regras do domínio. A versão do JPA é testada com duas cópias da mesma entidade.
+
+## Conversa, anexos e conclusão
+
+| Recurso | Funcionário dono | Funcionário alheio | TI agente/admin |
+| --- | --- | --- | --- |
+| Mensagens públicas/timeline | 200 | 404 | 200 |
+| Listagem de comentários/anexos internos | Filtrados no banco | 404 | Incluídos |
+| Download de anexo interno | 404 | 404 | 200 |
+| Criar nota/anexo interno | 403 | 404 no acesso ao chamado | Permitido com CSRF em chamado ativo |
+| Histórico completo | 403 | 403 | 200 |
+| Reabrir/avaliar | Só o solicitante; status/prazo/version validados | 404 | Leitura da avaliação permitida; não cria em nome do solicitante |
+| Mutação sem CSRF válido | 403 | 403 | 403 |
+
+OperacaoTiIntegrationTest e ConclusaoIntegrationTest mantêm os controles de visibilidade, transições e titularidade. AnexosTiposIntegrationTest verifica upload/download real de cada formato novo e rejeição de conteúdo inválido; ConteudoAnexoTest cobre ZIP malicioso e scanner antes da gravação. ConfiguracaoProducaoTest cobre inicialização segura. NotificacaoSlaTest e SlaAlertasConsultaTest usam relógio fixo para prazos, pausa/resposta e deduplicação. DashboardServiceTest usa expediente/fim de semana/feriado e período controlados.
+
+HistoricoPostgresTest confirma UPDATE/DELETE avulsos negados pelo banco, UPDATE também no contexto de retenção, rollback, anonimização/exclusão legítima e bloqueio após a desativação do contexto. PostgreSQL da CI executa os cinco testes de containers sem skips, incluindo Flyway V1–V10 e p95 da fila/dashboard com 100 mil chamados.
+
+Os quatro testes Playwright em frontend/e2e/helpdesk.spec.ts percorrem o atendimento com sessões distintas de funcionário/TI/outro funcionário, na API real do Compose. Verificam também a resposta HTTP 404 sem conteúdo para o chamado, a timeline e os anexos de outra pessoa. A tela da avaliação é usada após uma segunda resolução, pois reabrir remove a conclusão anterior. HTML/texto no MailHog e download com attachment/nosniff têm verificação de integração no navegador. Dados, textos e destinatários são fictícios.
+
+O gate JaCoCo mede linhas do conjunto domain/application (80% mínimo), sem afirmar cobertura de todos os ramos ou de cada pacote isoladamente. Relatórios e execução estão em [qualidade](qualidade.md); autenticação corporativa e serviços externos de produção ainda exigem validação no ambiente de destino.

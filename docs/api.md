@@ -70,7 +70,7 @@ Arquivos aceitos por padrão: PDF, PNG, JPG/JPEG, GIF, WebP, TXT/CSV/LOG em UTF-
 
 | Método | Caminho | Acesso | Resultado |
 | --- | --- | --- | --- |
-| GET | /api/v1/ti/dashboard | TI_AGENTE, TI_ADMIN | Contagens por status/prioridade, vencidos, vencendo em 1 hora e tempo médio de resolução |
+| GET | /api/v1/ti/dashboard?desde=&ate= | TI_AGENTE, TI_ADMIN | Contagens por status/prioridade/categoria, vencidos/vencendo, % SLA e média em horas úteis; período padrão 30 dias |
 | GET | /api/v1/ti/admin/usuarios | TI_ADMIN | Usuários paginados, inclusive inativos |
 | PATCH | /api/v1/ti/admin/usuarios/{id} | TI_ADMIN + CSRF | Altera nome, e-mail, perfil e acesso |
 | POST | /api/v1/ti/admin/usuarios/importacao | TI_ADMIN + CSRF | multipart `arquivo` CSV; relatório por linha |
@@ -82,7 +82,7 @@ Arquivos aceitos por padrão: PDF, PNG, JPG/JPEG, GIF, WebP, TXT/CSV/LOG em UTF-
 | POST | /api/v1/chamados/{id}/reabertura | solicitante + CSRF | Reabre RESOLVIDO com `{ "version": N }` dentro do prazo configurado |
 | GET/POST | /api/v1/chamados/{id}/avaliacao | dono ou TI para leitura; solicitante + CSRF para criação | Nota 1–5 e comentário opcional de até 1.000 caracteres |
 
-O SLA usa o fuso America/Sao_Paulo, expediente e feriados cadastrados; pausa em AGUARDANDO_USUARIO e retoma após resposta. A alteração de política/calendário afeta novos prazos calculados. Alertas de resolução próxima entram na outbox com chave de deduplicação. A outbox e o fechamento automático usam jobs com ShedLock. O fechamento de RESOLVIDO ocorre após 3 dias por padrão; o limite para reabrir é de 7 dias por padrão, porém um chamado FECHADO não pode ser reaberto. As duas durações são configuráveis por ambiente. Ao reabrir, a avaliação anterior é removida para permitir uma nova avaliação após a próxima resolução.
+O SLA usa o fuso America/Sao_Paulo, expediente e feriados cadastrados; pausa em AGUARDANDO_USUARIO e retoma após resposta. A alteração de política/calendário afeta novos prazos calculados. Alertas de resolução e de primeira resposta sem resposta registrada entram na outbox na última hora, incluindo chamados sem responsável ativo, com deduplicação por chamado, tipo, prazo e destinatário. A outbox e o fechamento automático usam jobs com ShedLock. O fechamento de RESOLVIDO ocorre após 3 dias por padrão; o limite para reabrir é de 7 dias por padrão, porém um chamado FECHADO não pode ser reaberto. As duas durações são configuráveis por ambiente. Ao reabrir, a avaliação anterior é removida para permitir uma nova avaliação após a próxima resolução.
 
 ## Conhecimento e produtividade — E9
 
@@ -119,6 +119,7 @@ O intervalo do relatório é inclusivo nas datas informadas, usa America/Sao_Pau
 | GET | /actuator/metrics | TI_ADMIN | Métricas Micrometer de outbox, SLA e retenção |
 
 O setor é opcional no usuário. A associação a um setor novo exige setor ativo; um setor inativo pode continuar associado a usuários existentes para preservar o histórico. O backend retorna `X-Request-ID` em todas as respostas, aceitando somente identificadores seguros enviados pelo cliente.
-# Dashboard por período
+
+## Dashboard por período
 
 `GET /api/v1/ti/dashboard?desde=YYYY-MM-DD&ate=YYYY-MM-DD` aceita datas inclusivas em America/Sao_Paulo. Sem datas, usa os últimos 30 dias; exige ambas quando informado e limita a 366 dias. Todos os indicadores usam chamados **criados** nesse período. Inclui `porCategoria`, `percentualSlaCumprido` (nulo sem resolvidos), `resolvidos`, `resolvidosSemTempoUtil` e média em horas úteis. Resoluções antigas sem medição ficam fora da média e são contadas explicitamente. Ver ADR 0008.
