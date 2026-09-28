@@ -121,35 +121,40 @@ Nenhuma funcionalidade da seção “fora de escopo” foi acrescentada: e-mail 
 Em 28/09/2026, a revisão de código e3c6459 passou na execução CI 36420445251: backend **80 testes, zero falhas/erros/skips**, gate e Spotless aprovados; frontend **19 testes**, lint, contrato gerado, build e audit aprovados; **4 E2E aprovados em 32,2 s** no Compose real. Relatórios JaCoCo e Playwright publicados. Os testes de desempenho mantiveram o p95 de fila/dashboard abaixo de 300 ms com 100 mil chamados no runner; isso não garante a mesma latência em produção.
 
 O fechamento C8 altera documentação, preservando o código validado na C7. README, API, runbook, segurança, matriz de autorização, qualidade e este relatório foram revisados; links locais e diff verificados. Os commits C0–C7 e os ajustes de verificação permanecem no histórico normal. O commit C8 registra a conclusão e os passos manuais acima.
-# Segunda rodada
+## Segunda rodada
 
-## R1 — Superfície do proxy
+### R1 — Superfície do proxy
 
 Confirmado o encaminhamento público de Actuator e Swagger. O nginx agora publica somente `/actuator/health` e seus subcaminhos; demais rotas Actuator, API docs e Swagger retornam 404 sem encaminhamento nem fallback da SPA. Um cenário Playwright verifica health e os bloqueios usando o nginx real do Compose. A execução local do E2E depende de Docker; os testes e o build de referência são registrados junto às evidências desta rodada. A branch `codex/c7-validacao` não foi mesclada.
 
 Linha de base: backend `mvnw.cmd -B verify` aprovado (91 testes, cinco PostgreSQL omitidos sem Docker). Frontend `npm ci`, lint e build aprovados; dois testes não encontraram elementos assíncronos na execução simultânea com o backend. Repetição isolada da mesma suíte: 20/20 aprovados, sem mudanças nos testes para ocultar as falhas.
 
-## R2 — Contêineres e saúde
+### R2 — Contêineres e saúde
 
 Confirmados nginx root e ausência de healthchecks dos serviços da aplicação. Frontend passa a usar nginx-unprivileged e porta interna 8080, preservando localhost:3000. Backend e frontend sem novas permissões/capabilities; healthchecks verificam a API e seu proxy, e MailHog responde por HTTP. Dependências aguardam serviços saudáveis. Curl é incluído na imagem Java exclusivamente para o healthcheck. MinIO permanece opcional, fora da dependência do perfil dev, sem nova sonda nesta rodada. O script de espera E2E continua como diagnóstico adicional; validação real dos contêineres fica na CI por ausência de Docker local.
 
-## R3 — CSP
+### R3 — CSP
 
 Confirmado `unsafe-inline` somente para estilos. Sem usos de estilos inline no código atual, removida a exceção e documentado o CSS estático de Tailwind. E2E verifica a política e erros de CSP no atendimento. Build e testes do frontend permanecem obrigatórios; evidência no navegador real depende do job Compose da CI. Não foram alteradas as regras de scripts ou relaxados os demais cabeçalhos.
 
-## R4 — Limitação de taxa
+### R4 — Limitação de taxa
 
 Confirmada ausência de limites. Adicionado filtro em memória com janela fixa e chaves limitadas, após CSRF e antes dos handlers de login OIDC. Login usa IP; mutações sensíveis usam usuário autenticado. Recusa 429 Problem Details/Retry-After, parâmetros configuráveis e perfil test desligado. Testes dedicados verificam cotas, usuários distintos, expiração, capacidade e concorrência. Substituído tratamento genérico de forwarded headers pela confiança explícita do Tomcat, vazia por padrão; nginx não preserva X-Forwarded-For recebido do visitante. Não foram criadas dependências, endpoints ou mudanças de contratos OpenAPI. O limite por instância e as fronteiras da janela ficam documentados.
 
-## R5 — Dependências e análise de segurança
+### R5 — Dependências e análise de segurança
 
 Confirmada ausência das automações. Dependabot semanal e agrupado cobre Maven, npm, Actions e Docker. Workflow separado executa CodeQL Java/Kotlin com build explícito e JavaScript/TypeScript sem build, com permissões mínimas; Trivy constrói e analisa as duas imagens, publicando relatórios HIGH/CRITICAL inclusive sem correção disponível. Trivy é consultivo durante a triagem inicial, com status de falha e artefatos preservados, sem exclusões silenciosas ou alegação de ausência de vulnerabilidades. Torná-lo bloqueante exige tratar os resultados reais; CodeQL não foi tornado consultivo por antecipação. Não há credenciais de runtime nos builds.
 
-## R6 — Cobertura de ramos e regras críticas
+### R6 — Cobertura de ramos e regras críticas
 
 Medidos 58,72% de ramos antes de alterar o gate, adotado mínimo conservador de 55% e mantidos 80% de linhas. Novos testes cobrem conflito/desativação/vínculo de setores, validação/edição de avisos, privacidade e autoria de artigos, domínio e inatividade OIDC e impedimento de elevação de perfil por claims. A confiança de forwarded headers é verificada na valve real do Tomcat com requisições simuladas. O primeiro teste com servidor HTTP local falhou por socket Unix do JDK Windows; substituído pela verificação da valve, sem desabilitar a proteção nem o teste de confiança. Verify final aprovado com 110 testes (cinco PostgreSQL omitidos localmente), 88,10% de linhas e 60,89% de ramos. Não foram alteradas classes de negócio para aumentar números nem excluídos pacotes do gate.
 
-## R7 — Higiene remota e ações do dono
+### R7 — Higiene remota e ações do dono
 
 Confirmado por `git rev-list --left-right --count origin/master...origin/codex/c7-validacao` que a branch antiga está atrás de master e não tem commits exclusivos. Não foi mesclada, apagada nem usada como base. O dono pode removê-la após conferir que não há trabalho pendente; utilizar seu estado antigo como base de uma entrega pode reintroduzir código/documentação desatualizados. Permanecem ações manuais: renomear o repositório e atualizar integrações/remotes; conferir Actions no último commit; rotacionar credenciais que tenham sido expostas. Nenhum histórico foi reescrito e `legacy/` e migrations V1–V10 foram preservados.
 
+### R8 — Fechamento, decisões e riscos restantes
+
+Atualizados segurança, runbook, qualidade, README e `.env.example`. CI agora verifica também o UID dos contêineres. R1–R5 tiveram CI de backend/frontend/E2E aprovada; CodeQL Java/TypeScript executou com sucesso. Relatórios Trivy foram gerados e examinados: 38 HIGH no frontend e quatro CRITICAL/duas HIGH no backend, sem supressões. A remediação desses achados é um incremento posterior, não um falso positivo presumido. Trivy permanece consultivo e a necessidade de triagem está explícita em segurança. Corrigida a política Dependabot para evitar migração automática major de Spring Boot/Springdoc após erro real na primeira execução.
+
+Não implementados: healthcheck do MinIO opcional, proteção de taxa distribuída, cobertura exaustiva de todas as lacunas e itens fora de escopo do prompt. Motivos: MinIO não é dependência dev; taxa foi solicitada por instância; testes priorizam regras de risco sem inflar métricas; funcionalidades de backlog permanecem fora desta rodada. SMTP de produção segue exigindo autenticação e STARTTLS; nenhuma exceção para relay interno foi adicionada. OpenAPI não mudou, pois não foram adicionados endpoints ou DTOs nesta rodada. Os arquivos de ambiente locais não foram incluídos em commits.

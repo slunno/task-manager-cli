@@ -72,6 +72,10 @@ jobs:
       - name: Subir Compose dev com API e banco reais
         run: docker compose up -d --build postgres mailhog backend frontend
       - run: node .github/scripts/wait-compose.mjs
+      - name: Confirmar execução sem root
+        run: |
+          test "$(docker compose exec -T backend id -u)" -ne 0
+          test "$(docker compose exec -T frontend id -u)" -ne 0
       - name: Preparar agente fictício de TI
         run: docker compose exec -T postgres psql -U "$HELPDESK_DB_USER" -d helpdesk -v ON_ERROR_STOP=1 < frontend/e2e/seed.sql
       - run: npm run test:e2e

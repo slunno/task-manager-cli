@@ -48,4 +48,12 @@ Produção exige `HELPDESK_S3_ENDPOINT`, `HELPDESK_S3_ACCESS_KEY`, `HELPDESK_S3_
 
 ## Evidência automatizada
 
+### Triagem inicial das imagens — R5
+
+Na execução [Segurança de 452eb45](https://github.com/slunno/task-manager-cli/actions/runs/36469333288), CodeQL Java e TypeScript concluíram com sucesso. Trivy executou e sinalizou 38 ocorrências HIGH no frontend (pacotes Alpine, incluindo c-ares, curl/libcurl, OpenSSL, expat, libuuid e libxml2) e quatro CRITICAL/duas HIGH no backend (Tomcat, Bouncy Castle e PostgreSQL JDBC). São ocorrências do scanner, não uma conclusão de explorabilidade no portal; não foram classificadas como falsos positivos nem suprimidas.
+
+Os relatórios JSON das duas imagens foram publicados e lidos. Versões de correção indicadas: Tomcat 10.1.58 ou superior na série 10.1; bcprov-jdk18on 1.85; PostgreSQL JDBC 42.7.12 ou superior. A atualização coordenada das dependências transitivas e das bases, seguida de nova varredura e regressão, permanece pendente de um incremento de remediação. A etapa de scan preserva exit code 1 e relatórios, mas é consultiva nesta rodada; sua execução não significa que as imagens estejam livres de vulnerabilidades. Não há arquivo de ignore de CVEs.
+
+A primeira execução do Dependabot Maven tentou uma migração major para Spring Boot 4 e produziu erro de versões de Testcontainers no POM temporário. Majors de Spring Boot/Springdoc foram reservadas para migração manual, mantendo updates compatíveis semanais; nenhuma PR dessa migração foi mesclada.
+
 Testes de produção usam a configuração real e verificam S3 obrigatório, ausência de fallback e SMTP seguro. E2E verifica CSP do build nginx, ausência de erro JavaScript, CSRF, download e isolamento de titularidade/notas. Testes PostgreSQL verificam imutabilidade e exceção de retenção. [Matriz de autorização](testes-autorizacao.md) e [qualidade](qualidade.md) registram cenários e limites.

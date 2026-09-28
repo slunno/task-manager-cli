@@ -6,6 +6,12 @@ updates:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    # Spring Boot 4 / Springdoc 3 exigem migração coordenada, fora desta rodada.
+    ignore:
+      - dependency-name: 'org.springframework.boot:*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'org.springdoc:*'
+        update-types: ['version-update:semver-major']
     groups:
       maven:
         patterns: ['*']

@@ -1,5 +1,19 @@
 # Runbook
 
+## Operação após a segunda rodada
+
+O frontend escuta na porta interna 8080 e mantém `http://localhost:3000` no Compose. PostgreSQL, MailHog, backend e frontend têm healthchecks; backend aguarda banco/e-mail saudáveis e frontend aguarda backend. Use `docker compose ps` e `/actuator/health` para verificar saúde. O script de espera da CI continua para diagnóstico da API/proxy. MinIO é opcional no perfil dev e não faz parte da sequência de dependências.
+
+O proxy não publica métricas nem Swagger: `/actuator/metrics`, `/v3/api-docs` e `/swagger-ui` retornam 404. Consulte Swagger diretamente no backend local dev, vinculado a localhost, se necessário. Em produção a documentação segue desabilitada; métricas internas continuam exigindo TI_ADMIN.
+
+Limites por minuto: 30 logins, 30 chamados, 60 comentários, 30 anexos. Ajuste `HELPDESK_RATE_LIMIT_*` no ambiente, sem desativar CSRF. Em 429, respeite `Retry-After`. O estado é em memória por instância; reinício zera as cotas. Não registre dados do solicitante para investigar rejeições.
+
+Para encaminhamento de IP/protocolo, configure `HELPDESK_TRUSTED_PROXY_REGEX` com uma regex Java restrita aos IPs reais dos proxies e bloqueie o acesso externo direto ao backend. Vazio significa nenhum proxy confiável. O nginx sobrescreve X-Forwarded-For e remove Forwarded recebidos do cliente. Não use `.*` nem confie em toda a Internet. Sem confiança configurada, a cota anônima é compartilhada por visitantes do mesmo proxy. OIDC usa o callback absoluto de `OIDC_REDIRECT_URI`.
+
+Confira os workflows **CI** e **Segurança** no último commit: CodeQL analisa Java e TypeScript; os artefatos `trivy-backend` e `trivy-frontend` têm retenção de 14 dias. Trivy é consultivo durante a triagem inicial, mas uma falha de scan deve ser investigada. Dependabot agrupa atualizações semanais; majors de Spring Boot/Springdoc requerem migração coordenada e não são propostas nesta configuração. PRs de atualização precisam passar pela mesma CI antes de mesclar.
+
+SMTP de produção continua exigindo autenticação e STARTTLS obrigatório. Relay interno sem autenticação não é compatível com esse perfil; uma eventual exceção precisa de decisão explícita e análise da rede, não de alteração silenciosa das proteções.
+
 ## Subir localmente
 
 1. Instale Java 21, Node 24 e Docker Compose.

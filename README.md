@@ -38,7 +38,13 @@ A segurança é aplicada no backend. Os guardas de rota do frontend organizam a 
 
 ## Verificar a entrega
 
-Backend: `cd backend` e `./mvnw verify` (`mvnw.cmd verify` no Windows). Frontend: `cd frontend`, `npm ci`, `npm run lint`, `npm test`, `npm run build`. Com Docker, a suíte backend executa os testes PostgreSQL/Flyway/trigger e a massa de 100 mil chamados; sem Docker, esses cinco testes são omitidos explicitamente. O `verify` exige 80% de linhas no conjunto dos pacotes domain/application e aplica Spotless. A CI também executa os quatro cenários Playwright com Compose e publica relatórios.
+Backend: `cd backend` e `./mvnw verify` (`mvnw.cmd verify` no Windows). Frontend: `cd frontend`, `npm ci`, `npm run lint`, `npm test`, `npm run build`. Com Docker, a suíte backend executa os testes PostgreSQL/Flyway/trigger e a massa de 100 mil chamados; sem Docker, esses cinco testes são omitidos explicitamente. O `verify` exige 80% de linhas e 55% de ramos no conjunto dos pacotes domain/application e aplica Spotless. A CI também executa os cinco cenários Playwright com Compose e publica relatórios.
+
+## Segunda rodada de segurança e qualidade
+
+O nginx publica somente health, executa sem root e usa CSP sem scripts ou estilos inline. Compose aguarda healthchecks de banco/e-mail/backend e a CI verifica que backend e frontend não rodam como root. Login, criação, comentários e uploads têm limites configuráveis, com 429 e Retry-After; proxies são confiáveis somente mediante configuração explícita.
+
+Dependabot semanal, CodeQL Java/TypeScript e Trivy das duas imagens complementam a CI existente. Trivy é inicialmente consultivo e publica achados para triagem. JaCoCo mantém 80% de linhas e passa a exigir 55% de ramos em domain/application. Consulte [a auditoria](docs/auditoria-correcoes.md), [a segurança](docs/seguranca.md), [a qualidade](docs/qualidade.md) e [o runbook](docs/runbook.md) para evidências, parâmetros e limites.
 
 ## Nome do repositório
 
