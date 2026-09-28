@@ -126,3 +126,9 @@ O fechamento C8 altera documentação, preservando o código validado na C7. REA
 ## R1 — Superfície do proxy
 
 Confirmado o encaminhamento público de Actuator e Swagger. O nginx agora publica somente `/actuator/health` e seus subcaminhos; demais rotas Actuator, API docs e Swagger retornam 404 sem encaminhamento nem fallback da SPA. Um cenário Playwright verifica health e os bloqueios usando o nginx real do Compose. A execução local do E2E depende de Docker; os testes e o build de referência são registrados junto às evidências desta rodada. A branch `codex/c7-validacao` não foi mesclada.
+
+Linha de base: backend `mvnw.cmd -B verify` aprovado (91 testes, cinco PostgreSQL omitidos sem Docker). Frontend `npm ci`, lint e build aprovados; dois testes não encontraram elementos assíncronos na execução simultânea com o backend. Repetição isolada da mesma suíte: 20/20 aprovados, sem mudanças nos testes para ocultar as falhas.
+
+## R2 — Contêineres e saúde
+
+Confirmados nginx root e ausência de healthchecks dos serviços da aplicação. Frontend passa a usar nginx-unprivileged e porta interna 8080, preservando localhost:3000. Backend e frontend sem novas permissões/capabilities; healthchecks verificam a API e seu proxy, e MailHog responde por HTTP. Dependências aguardam serviços saudáveis. Curl é incluído na imagem Java exclusivamente para o healthcheck. MinIO permanece opcional, fora da dependência do perfil dev, sem nova sonda nesta rodada. O script de espera E2E continua como diagnóstico adicional; validação real dos contêineres fica na CI por ausência de Docker local.

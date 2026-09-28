@@ -29,6 +29,11 @@ services:
 
   mailhog:
     image: mailhog/mailhog:v1.0.1
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8025/api/v2/messages"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     ports:
       - "127.0.0.1:1025:1025"
       - "127.0.0.1:8025:8025"
@@ -49,11 +54,21 @@ services:
       HELPDESK_STORAGE_LOCAL_DIRECTORY: /app/data/anexos
     volumes:
       - attachments_data:/app/data/anexos
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     depends_on:
       postgres:
         condition: service_healthy
       mailhog:
-        condition: service_started
+        condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -63,9 +78,18 @@ services:
       dockerfile: frontend/Dockerfile
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     ports:
-      - "127.0.0.1:3000:80"
+      - "127.0.0.1:3000:8080"
 
 volumes:
   postgres_data:

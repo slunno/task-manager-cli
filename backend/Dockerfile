@@ -7,7 +7,8 @@ RUN mvn -B -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-RUN groupadd -r helpdesk && useradd -r -g helpdesk helpdesk && mkdir -p /app/data/anexos && chown -R helpdesk:helpdesk /app/data
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r helpdesk && useradd -r -g helpdesk helpdesk && mkdir -p /app/data/anexos && chown -R helpdesk:helpdesk /app/data
 COPY --from=build /workspace/target/helpdesk-backend-0.1.0-SNAPSHOT.jar app.jar
 USER helpdesk
 EXPOSE 8080
