@@ -21,6 +21,7 @@ uploads/
 .idea/
 *.iml
 .vscode/
+.vercel/
 .DS_Store
 *.tsbuildinfo
 **/playwright-report/

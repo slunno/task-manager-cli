@@ -1,0 +1,14 @@
+.git
+.idea
+.env
+.env.*
+**/.env
+**/.env.*
+**/node_modules
+**/target
+**/dist
+**/test-results
+**/playwright-report
+data
+uploads
+legacy

@@ -44,21 +44,21 @@ export function LoginPage() {
       <div className="grid w-full max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl md:grid-cols-2">
         <section className="bg-ink p-8 text-white sm:p-10">
           <span className="inline-grid h-11 w-11 place-items-center rounded-xl bg-ocean font-bold">
-            TI
+            L
           </span>
           <p className="mt-16 text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200">
-            Portal interno
+            Lumeo · Conexões que resolvem
           </p>
           <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">
-            A ajuda de TI em um só lugar.
+            Menos interrupções. Mais movimento.
           </h1>
           <p className="mt-5 leading-7 text-slate-300">
-            Entre para acompanhar seus pedidos e conversar com a equipe de
-            atendimento.
+            Seu trabalho merece seguir em frente. Conecte-se à equipe de TI,
+            acompanhe cada solução e volte ao que importa.
           </p>
         </section>
         <section className="p-8 sm:p-10">
-          <h2 className="text-2xl font-bold">Acessar o portal</h2>
+          <h2 className="text-2xl font-bold">Entrar no Lumeo</h2>
           <p className="mt-2 text-sm text-slate-600">
             Sua conta determina os recursos disponíveis.
           </p>

@@ -49,9 +49,9 @@ export function AreaPage({
               aria-hidden="true"
               className="grid h-10 w-10 place-items-center rounded-xl bg-ocean text-white"
             >
-              TI
+              L
             </span>
-            Portal de chamados
+            Lumeo
           </Link>
           <div className="flex items-center gap-4 text-sm">
             <span className="hidden text-slate-600 sm:inline">
