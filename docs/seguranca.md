@@ -21,6 +21,14 @@ A inspeção de `frontend/src` não encontrou atributos `style`, blocos de estil
 
 ## Riscos e validação antes de produção
 
+### Limitação de taxa e proxies
+
+Janela fixa em memória, separada por operação: login (incluindo senha/dev e início/callback OIDC) usa IP; criação de chamado, comentário e anexo usam identidade autenticada, ou IP se anônimo. Valores por minuto: 30 logins, 30 chamados, 60 comentários, 30 uploads. Configuráveis por `HELPDESK_RATE_LIMIT_*`; recusa com 429 Problem Details e `Retry-After`. O armazenamento é limitado a 10.000 chaves e remove entradas expiradas. Nenhum IP, identidade ou corpo é registrado pelo limitador. Não há biblioteca nova.
+
+O limite é por instância e reinicia com o processo; não constitui proteção distribuída contra DDoS. Até duas cotas podem ser usadas na fronteira de janelas fixas. O perfil `test` desabilita o filtro; testes dedicados verificam concorrência, isolamento e expiração. Em múltiplas instâncias, adotar proteção de borda/limite compartilhado é backlog.
+
+Tomcat trata forwarded headers somente se o IP do par corresponder a `HELPDESK_TRUSTED_PROXY_REGEX` (vazio por padrão). Não use regex abrangente. O nginx substitui `X-Forwarded-For` pelo IP do cliente e remove `Forwarded`; uma cadeia com outro terminador TLS requer configuração explícita de confiança e cabeçalhos em cada salto. Sem confiança configurada, usuários anônimos atrás do nginx compartilham a cota do proxy; usuários autenticados continuam separados. O backend deve ser inacessível diretamente fora da rede autorizada. O redirecionamento OIDC de produção permanece uma URL absoluta configurada.
+
 - Validar configuração do IdP, domínio autorizado, proxy HTTPS, política de sessão, bucket privado, SMTP e segredos no ambiente de destino.
 - Testar anexos com arquivos de tipos permitidos e proibidos e revisar o antivírus corporativo na borda de entrada. O portal valida tipo, assinatura e limites de ZIP/Office; `ScannerAnexo` é um ponto de extensão com padrão sem varredura antivírus. Reduza tipos com `HELPDESK_ATTACHMENT_TYPES` quando necessário. Nomes/extensões de compactados aninhados conhecidos são bloqueados, inclusive Office dentro de ZIP, por decisão conservadora. Arquivos renomeados podem escapar dessa identificação e exigem scanner externo.
 - Definir retenção e janela de backup com o responsável por privacidade. Testar restauração isolada e remoção física de anexos.

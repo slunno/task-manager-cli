@@ -36,7 +36,11 @@ spring:
       max-request-size: 11MB
 server:
   port: ${PORT:8080}
-  forward-headers-strategy: framework
+  forward-headers-strategy: native
+  tomcat:
+    remoteip:
+      # Sem proxies confiáveis por padrão: cabeçalhos enviados pelo cliente não alteram o IP.
+      internal-proxies: ${HELPDESK_TRUSTED_PROXY_REGEX:}
   servlet:
     session:
       timeout: 8h
@@ -60,6 +64,14 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 helpdesk:
+  rate-limit:
+    enabled: ${HELPDESK_RATE_LIMIT_ENABLED:true}
+    window: ${HELPDESK_RATE_LIMIT_WINDOW:1m}
+    login: ${HELPDESK_RATE_LIMIT_LOGIN:30}
+    chamados: ${HELPDESK_RATE_LIMIT_CHAMADOS:30}
+    comentarios: ${HELPDESK_RATE_LIMIT_COMENTARIOS:60}
+    anexos: ${HELPDESK_RATE_LIMIT_ANEXOS:30}
+    max-keys: ${HELPDESK_RATE_LIMIT_MAX_KEYS:10000}
   anexos:
     tipos-permitidos: ${HELPDESK_ATTACHMENT_TYPES:pdf,png,jpg,jpeg,txt,gif,webp,csv,log,docx,xlsx,zip}
   storage:

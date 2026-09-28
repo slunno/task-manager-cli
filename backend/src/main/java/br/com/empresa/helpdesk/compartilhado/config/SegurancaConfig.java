@@ -1,9 +1,13 @@
 package br.com.empresa.helpdesk.compartilhado.config;
 
 import br.com.empresa.helpdesk.compartilhado.seguranca.ProblemaSeguranca;
+import br.com.empresa.helpdesk.compartilhado.seguranca.RateLimitFilter;
+import br.com.empresa.helpdesk.compartilhado.seguranca.RateLimitProperties;
 import br.com.empresa.helpdesk.compartilhado.seguranca.UsuarioSessaoFilter;
 import br.com.empresa.helpdesk.usuarios.application.CorporateOidcUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -16,10 +20,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
 
 @Configuration
 @EnableMethodSecurity
+@EnableConfigurationProperties(RateLimitProperties.class)
 public class SegurancaConfig {
+  private final RateLimitProperties rateLimit;
+  private final Clock clock;
+
+  public SegurancaConfig(RateLimitProperties rateLimit, Clock clock) {
+    this.rateLimit = rateLimit;
+    this.clock = clock;
+  }
+
   @Bean
   SecurityContextRepository securityContextRepository() {
     return new HttpSessionSecurityContextRepository();
@@ -112,6 +126,7 @@ public class SegurancaConfig {
                     csp -> csp.policyDirectives("default-src 'self'; frame-ancestors 'none'")))
         .formLogin(form -> form.disable())
         .httpBasic(basic -> basic.disable())
-        .addFilterBefore(usuarioFilter, AuthorizationFilter.class);
+        .addFilterBefore(usuarioFilter, AuthorizationFilter.class)
+        .addFilterAfter(new RateLimitFilter(rateLimit, clock, mapper), CsrfFilter.class);
   }
 }

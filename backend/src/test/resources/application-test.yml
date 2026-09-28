@@ -17,6 +17,8 @@ spring:
     host: localhost
 
 helpdesk:
+  rate-limit:
+    enabled: false
   storage:
     local-directory: ./target/test-anexos
 

@@ -136,3 +136,8 @@ Confirmados nginx root e ausência de healthchecks dos serviços da aplicação.
 ## R3 — CSP
 
 Confirmado `unsafe-inline` somente para estilos. Sem usos de estilos inline no código atual, removida a exceção e documentado o CSS estático de Tailwind. E2E verifica a política e erros de CSP no atendimento. Build e testes do frontend permanecem obrigatórios; evidência no navegador real depende do job Compose da CI. Não foram alteradas as regras de scripts ou relaxados os demais cabeçalhos.
+
+## R4 — Limitação de taxa
+
+Confirmada ausência de limites. Adicionado filtro em memória com janela fixa e chaves limitadas, após CSRF e antes dos handlers de login OIDC. Login usa IP; mutações sensíveis usam usuário autenticado. Recusa 429 Problem Details/Retry-After, parâmetros configuráveis e perfil test desligado. Testes dedicados verificam cotas, usuários distintos, expiração, capacidade e concorrência. Substituído tratamento genérico de forwarded headers pela confiança explícita do Tomcat, vazia por padrão; nginx não preserva X-Forwarded-For recebido do visitante. Não foram criadas dependências, endpoints ou mudanças de contratos OpenAPI. O limite por instância e as fronteiras da janela ficam documentados.
+
