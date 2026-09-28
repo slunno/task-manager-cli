@@ -121,3 +121,8 @@ Nenhuma funcionalidade da seção “fora de escopo” foi acrescentada: e-mail 
 Em 28/09/2026, a revisão de código e3c6459 passou na execução CI 36420445251: backend **80 testes, zero falhas/erros/skips**, gate e Spotless aprovados; frontend **19 testes**, lint, contrato gerado, build e audit aprovados; **4 E2E aprovados em 32,2 s** no Compose real. Relatórios JaCoCo e Playwright publicados. Os testes de desempenho mantiveram o p95 de fila/dashboard abaixo de 300 ms com 100 mil chamados no runner; isso não garante a mesma latência em produção.
 
 O fechamento C8 altera documentação, preservando o código validado na C7. README, API, runbook, segurança, matriz de autorização, qualidade e este relatório foram revisados; links locais e diff verificados. Os commits C0–C7 e os ajustes de verificação permanecem no histórico normal. O commit C8 registra a conclusão e os passos manuais acima.
+# Segunda rodada
+
+## R1 — Superfície do proxy
+
+Confirmado o encaminhamento público de Actuator e Swagger. O nginx agora publica somente `/actuator/health` e seus subcaminhos; demais rotas Actuator, API docs e Swagger retornam 404 sem encaminhamento nem fallback da SPA. Um cenário Playwright verifica health e os bloqueios usando o nginx real do Compose. A execução local do E2E depende de Docker; os testes e o build de referência são registrados junto às evidências desta rodada. A branch `codex/c7-validacao` não foi mesclada.
