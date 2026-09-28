@@ -30,6 +30,8 @@ C1 higiene; C2 configurações de produção e nginx; C3 notificações/SLA; C4 
 
 A inspeção de `.idea/dataSources.xml` encontrou uma URL de conexão externa, sem usuário/senha ou credencial embutida identificável no arquivo. Nenhum valor da conexão é reproduzido aqui. Os arquivos da IDE permanecem no disco do dono e serão removidos somente do índice; o histórico Git será preservado. Caso exista credencial associada em armazenamento externo da IDE ou que tenha sido commitada antes, cabe ao dono rotacioná-la. A inspeção deste arquivo atual não demonstrou exposição de senha.
 
+Validação C1: `git ls-files .idea` vazio; `git ls-files '.env*'` retorna apenas `.env.example`; `Test-Path .idea/dataSources.xml` permanece verdadeiro. Código e dependências intactos; a linha de base C0 continua válida.
+
 ## Etapas seguintes
 
 Resultados, decisões, limitações e passos manuais serão registrados nas seções seguintes conforme cada etapa for validada.
