@@ -15,6 +15,10 @@ A revisão C0–C8 está registrada no [relatório de auditoria](docs/auditoria-
 
 Consulte [o runbook](docs/runbook.md) para variáveis de ambiente, Compose, SSO e comandos de build. Há um `.env.example` sem credenciais. O `.env` existente no workspace foi preservado e não é versionado.
 
+## Banco Supabase
+
+O **Projeto de chamados** foi preparado com schema privado `helpdesk` e as tabelas das migrations V1–V10. Coloque a senha do banco em `SUPABASE_DB_PASSWORD` no arquivo local `.env.supabase`, ignorado pelo Git. Use `scripts/iniciar-supabase.ps1` no Windows. Consulte [o guia Supabase](docs/supabase.md) para inicializacao, tabelas, IPv6/Session pooler e isolamento.
+
 ## Entregas
 
 - **E0:** monorepo, migration base, Compose, CI, ADRs e documentação.

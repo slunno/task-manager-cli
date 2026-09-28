@@ -63,6 +63,14 @@ Substitua o e-mail de exemplo pelo usuário aprovado. Após a primeira promoçã
 
 ## Banco de dados
 
+### Supabase
+
+O perfil adicional `supabase` usa o schema privado `helpdesk`, SSL e pool limitado. Combine com `dev` localmente ou `prod` em producao. A senha fica em `.env.supabase` na raiz, variavel `SUPABASE_DB_PASSWORD`; o arquivo e ignorado pelo Git e carregado pelo script `scripts/iniciar-supabase.ps1`. O `.env` anterior permanece separado. O Compose padrao continua usando o PostgreSQL local; ele nao carrega o arquivo Supabase.
+
+Veja [o guia Supabase](supabase.md) para as vinte tabelas, bootstrap Flyway, IPv6/Session pooler, execucao e validacao. Ao executar SQL manualmente nesse banco, qualifique as tabelas com `helpdesk.` (por exemplo, `helpdesk.usuarios` na promocao do primeiro administrador). A retencao fica suspensa no exemplo Supabase ate aprovacao operacional. Em prod, forneca as variaveis pelo ambiente/secret manager e mantenha os requisitos existentes de OIDC, S3, SMTP e HTTPS.
+
+### PostgreSQL local e backups
+
 O volume `postgres_data` guarda dados locais. Para backup em ambiente real, execute `pg_dump` em formato customizado e salve-o em destino protegido. Teste a restauração periodicamente em banco isolado com `pg_restore` antes de liberar escrita. Não use `docker compose down -v` em ambiente com dados a preservar.
 
 ## Saúde e diagnóstico
