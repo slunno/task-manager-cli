@@ -76,6 +76,33 @@ class ConfiguracaoProducaoTest {
         .run(context -> assertThat(context).hasFailed());
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {"SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY"})
+  void prodComSupabaseAuthExigeConfiguracaoDeLogin(String variavel) {
+    runner
+        .withPropertyValues(
+            "spring.profiles.active=prod,supabase-auth",
+            "SUPABASE_URL=https://auth.example",
+            "SUPABASE_PUBLISHABLE_KEY=sb_publishable_test",
+            variavel + "=")
+        .run(
+            context -> {
+              assertThat(context).hasFailed();
+              assertThat(context.getStartupFailure())
+                  .hasRootCauseMessage("Configuração de produção obrigatória: " + variavel);
+            });
+  }
+
+  @Test
+  void prodComSupabaseAuthAceitaConfiguracaoCompleta() {
+    runner
+        .withPropertyValues(
+            "spring.profiles.active=prod,supabase-auth",
+            "SUPABASE_URL=https://auth.example",
+            "SUPABASE_PUBLISHABLE_KEY=sb_publishable_test")
+        .run(context -> assertThat(context).hasNotFailed());
+  }
+
   @Test
   void devMantemStorageLocalSemCredenciais() {
     runner

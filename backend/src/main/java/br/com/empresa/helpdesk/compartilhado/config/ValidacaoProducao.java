@@ -1,6 +1,7 @@
 package br.com.empresa.helpdesk.compartilhado.config;
 
 import jakarta.annotation.PostConstruct;
+import java.util.Arrays;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,10 @@ public class ValidacaoProducao {
     exigir("helpdesk.storage.s3.bucket", "HELPDESK_S3_BUCKET");
     exigir("spring.mail.username", "SMTP_USERNAME");
     exigir("spring.mail.password", "SMTP_PASSWORD");
+    if (Arrays.asList(ambiente.getActiveProfiles()).contains("supabase-auth")) {
+      exigir("helpdesk.auth.supabase.url", "SUPABASE_URL");
+      exigir("helpdesk.auth.supabase.publishable-key", "SUPABASE_PUBLISHABLE_KEY");
+    }
     for (String chave :
         new String[] {
           "mail.smtp.auth", "mail.smtp.starttls.enable", "mail.smtp.starttls.required"
