@@ -1,0 +1,57 @@
+# Portal público de demonstração: banco remoto, login real e anexos S3.
+# Docker Compose >= 2.30. Não publicar o Compose de desenvolvimento.
+name: lumeo-vm
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: .env.virtualbox
+        format: raw
+    environment:
+      SPRING_PROFILES_ACTIVE: prod,supabase,supabase-auth
+      PORT: "8080"
+      HELPDESK_RETENTION_ENABLED: "false"
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx768m"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 4s
+      retries: 30
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3000:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/actuator/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
